@@ -1,39 +1,80 @@
+from enum import Enum
+
 import ply.lex as lex
 import re
 
+
 # List of token names.   This is always required
-reserved_words = {"por" : 'POR',
-                  "kun" : 'DELIM',
-                  "sur" : 'DELIM',
-                  "kaj" : 'DELIM',
-                  "de" : 'DE',
-                  "en" : 'EN',
-                  "el" : 'DELIM',
-                  "al" : 'DELIM',
-                  "inter" : 'DELIM',
-                  "exter" : 'DELIM',
-                  "trans" : 'DELIM',
-                  "estas" : 'ASSIGN'}
+def idList(tokenEnum):
+    return [elm.value for elm in list(tokenEnum)]
+
+
+class UnalphabeticTerminal(Enum):
+    DELIM = 'DELIM'
+    ASSIGN = 'ASSIGN'
+    NUMBER = 'NUMBER'
+    PLUS = 'PLUS'
+    MINUS = 'MINUS'
+    TIMES = 'TIMES'
+    DIVIDE = 'DIVIDE'
+    L_PAREN = 'LPAREN'
+    R_PAREN = 'RPAREN'
+    PERIOD = 'PERIOD'
+    COMMENT = 'COMMENT'
+
+
+class ReservedWord(Enum):
+    WORD = 'WORD'
+    FOR = 'FOR'
+    DE = 'DE'
+    EN = 'EN'
+
+
+class PartOfSpeech(Enum):
+    NOUN = 'NOUN'
+    ADJECTIVE = 'ADJECTIVE'
+    ADVERB = 'ADVERB'
+    V_INF = 'V_INF'
+    V_PRES = 'V_PRES'
+    V_IMP = 'V_IMP'
+    ACCUSATIVE = "ACCUSATIVE"
+    PLURAL = "PLURAL"
+    OTHER = "OTHER"
+
+
+reserved_words = {
+    "de": ReservedWord.DE.value,
+    "en": ReservedWord.EN.value,
+    "el": UnalphabeticTerminal.DELIM.value,
+    "al": UnalphabeticTerminal.DELIM.value,
+    "por": ReservedWord.FOR.value,
+    "kun": UnalphabeticTerminal.DELIM.value,
+    "sur": UnalphabeticTerminal.DELIM.value,
+    "kaj": UnalphabeticTerminal.DELIM.value,
+    "inter": UnalphabeticTerminal.DELIM.value,
+    "exter": UnalphabeticTerminal.DELIM.value,
+    "trans": UnalphabeticTerminal.DELIM.value,
+    "estas": UnalphabeticTerminal.ASSIGN.value}
 
 tokens = [
-   'NUMBER', 'WORD', 'COMMENT',
-   'NOUN', 'ADJECTIVE', 'ADVERB',
-   'V_INF', 'V_PRES', 'V_IMP',
-   'ACCUSATIVE', 'PLURAL', 'OTHER', #????
-   'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
-   'LPAREN', 'RPAREN', 'PERIOD'
-] + list(set(reserved_words.values()))
+             # 'NUMBER', 'WORD', 'COMMENT',
+             # 'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
+             # 'LPAREN', 'RPAREN', 'PERIOD'
+         ] + idList(ReservedWord) \
+         + idList(PartOfSpeech) \
+         + idList(UnalphabeticTerminal)
 
 # Regular expression rules for simple tokens
-t_PLUS    = r'\+'
-t_MINUS   = r'-'
-t_TIMES   = r'\*'
-t_DIVIDE  = r'/'
-t_ASSIGN  = r'='
-t_LPAREN  = r'\('
-t_RPAREN  = r'\)'
-t_PERIOD  = r'\.'
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_TIMES = r'\*'
+t_DIVIDE = r'/'
+t_ASSIGN = r'='
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
+t_PERIOD = r'\.'
 t_ignore_COMMENT = r'\#.*'
+
 
 # t_DELIM   = r'((sur)|(de)|(kun)|(kaj)|(en)|(el)|(al)|(inter)|(trans))\s+'
 
@@ -42,6 +83,7 @@ def t_NUMBER(t):
     r'\d+'
     t.value = int(t.value)
     return t
+
 
 def t_WORD(t):
     r'[a-z]+'
@@ -60,13 +102,13 @@ def t_WORD(t):
 
 
 t_ADVERB = r'[a-z]+e'
-    # 'ADJECTIVE'
+# 'ADJECTIVE'
 t_V_INF = r'[a-z]+i'
-t_V_PRES= r'[a-z]+as'
+t_V_PRES = r'[a-z]+as'
 t_V_IMP = r'[a-z]+u'
 
 # A string containing ignored characters (spaces and tabs)
-t_ignore  = ' \t'
+t_ignore = ' \t'
 
 
 # Error handling rule
@@ -74,10 +116,12 @@ def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
+
 def build():
     return lex.lex()
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     lexer = build()
     lexer.input(input())
 
