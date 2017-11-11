@@ -4,6 +4,10 @@ import ply.lex as lex
 import re
 
 
+class SemanticError(Exception):
+    pass
+
+
 # List of token names.   This is always required
 def idList(tokenEnum):
     return [elm.value for elm in list(tokenEnum)]
@@ -28,6 +32,9 @@ class ReservedWord(Enum):
     FOR = 'FOR'
     DE = 'DE'
     EN = 'EN'
+    LA = 'LA'
+    TRUE = 'TRUE'
+    FALSE = 'FALSE'
 
 
 class PartOfSpeech(Enum):
@@ -47,20 +54,19 @@ reserved_words = {
     "en": ReservedWord.EN.value,
     "el": UnalphabeticTerminal.DELIM.value,
     "al": UnalphabeticTerminal.DELIM.value,
+    "la": ReservedWord.LA.value,
     "por": ReservedWord.FOR.value,
     "kun": UnalphabeticTerminal.DELIM.value,
     "sur": UnalphabeticTerminal.DELIM.value,
     "kaj": UnalphabeticTerminal.DELIM.value,
+    "vero": ReservedWord.TRUE.value,
     "inter": UnalphabeticTerminal.DELIM.value,
     "exter": UnalphabeticTerminal.DELIM.value,
     "trans": UnalphabeticTerminal.DELIM.value,
-    "estas": UnalphabeticTerminal.ASSIGN.value}
+    "estas": UnalphabeticTerminal.ASSIGN.value,
+    "malvero": ReservedWord.FALSE.value}
 
-tokens = [
-             # 'NUMBER', 'WORD', 'COMMENT',
-             # 'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
-             # 'LPAREN', 'RPAREN', 'PERIOD'
-         ] + idList(ReservedWord) \
+tokens = [ ] + idList(ReservedWord) \
          + idList(PartOfSpeech) \
          + idList(UnalphabeticTerminal)
 
@@ -76,8 +82,6 @@ t_PERIOD = r'\.'
 t_ignore_COMMENT = r'\#.*'
 
 
-# t_DELIM   = r'((sur)|(de)|(kun)|(kaj)|(en)|(el)|(al)|(inter)|(trans))\s+'
-
 # A regular expression rule with some action code
 def t_NUMBER(t):
     r'\d+'
@@ -92,12 +96,16 @@ def t_WORD(t):
         t.type = reserved_words[t.value]
     else:
         t.value = re.sub(r'n$', "", t.value)
-        if re.search(r'(o)|(oj)$', t.value):
-            t.type = 'NOUN'
-        elif re.search(r'(a)|(aj)$', t.value):
-            t.type = 'ADJECTIVE'
+        if re.search(r'((o)|(oj))$', t.value):
+            t.type = PartOfSpeech.NOUN.value
+        elif re.search(r'((a)|(aj))$', t.value):
+            t.type = PartOfSpeech.ADJECTIVE.value
+        elif re.search(r'i$', t.value):
+            t.type = PartOfSpeech.V_INF.value
+        elif re.search(r'u$', t.value):
+            t.type = PartOfSpeech.V_IMP.value
         elif re.search(r'as$', t.value):
-            t.type = 'V_INF'
+            t.type = PartOfSpeech.V_PRES.value
     return t
 
 
@@ -111,9 +119,14 @@ t_V_IMP = r'[a-z]+u'
 t_ignore = ' \t'
 
 
+def t_foo_newline(t):
+    r'\n'
+    t.lexer.lineno += 1
+
+
 # Error handling rule
 def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
+    raise SemanticError("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
 
