@@ -61,8 +61,13 @@ class TestAstStatements(object):
         ast.parse("la kato = 9")
         assert 9 == ast.variable_table["kato"]
 
+    def test_definiteDescribedNounAlsoBecomesIndefinite(self, ast):
+        ast.parse("la dika kato = 99")
+        assert 99 == ast.variable_table["dika kato"]
+
     # def test_capableOfIfStatement(self, ast):
     #     ast.parse("se vero: kato = 1")
+    #     assert 1 == ast.variable_table["kato"]
 
 
 class TestAstPrograms(object):

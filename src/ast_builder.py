@@ -25,6 +25,11 @@ def build(start=None):
     def p_program_separatedStatements(p):
         pass
 
+    # @RULE('statement : ' + ResWord.IF.value + ' expression ' + UaTer.COLON.value + ' statement')
+    # def p_statement_ifCondition(p):
+    #     if p[2]:
+    #
+
     @RULE('statement : expression')
     def p_statement_expr(p):
         p[0] = None
@@ -36,13 +41,21 @@ def build(start=None):
     @RULE('''name : ''' + POS.NOUN.value + '''
                 | partialName ''' + POS.NOUN.value)
     def p_name_partialNameAndNoun(p):
-        p[0] = p[1] + (" " + p[2] if len(p) == 3 else "")
+        p[0] = p[1] + (p[2] if len(p) == 3 else "")
         # p[0] = p[1] + p[2]
 
     @RULE('''partialName : partialName ''' + POS.ADJECTIVE.value + '''
                         | ''' + POS.ADJECTIVE.value)
     def p_partialName_partialNameAndAdjective(p):
-        p[0] = p[1] + (" " + p[2] if len(p) == 3 else "")
+        if len(p) == 3:
+            p[0] = p[1] + p[2] + " "
+        else:
+            p[0] = p[1] + " "
+        # p[0] = p[1] + (p[2] + " " if len(p) == 3 else "")
+
+    @RULE('partialName : ' + ResWord.LA.value)
+    def p_partialName_la(p):
+        p[0] = ""
 
     @RULE('expression : expression ' + UaTer.PLUS.value + ' term')
     def p_expression_plus(p):

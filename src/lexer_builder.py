@@ -14,25 +14,28 @@ def idList(tokenEnum):
 
 
 class UnalphabeticTerminal(Enum):
-    DELIM = 'DELIM'
-    ASSIGN = 'ASSIGN'
-    NUMBER = 'NUMBER'
     PLUS = 'PLUS'
     MINUS = 'MINUS'
+    DELIM = 'DELIM'
+    COLON = 'COLON'
     TIMES = 'TIMES'
     DIVIDE = 'DIVIDE'
+    PERIOD = 'PERIOD'
+    ASSIGN = 'ASSIGN'
+    NUMBER = 'NUMBER'
     L_PAREN = 'LPAREN'
     R_PAREN = 'RPAREN'
-    PERIOD = 'PERIOD'
     COMMENT = 'COMMENT'
 
 
+
 class ReservedWord(Enum):
-    WORD = 'WORD'
-    FOR = 'FOR'
     DE = 'DE'
     EN = 'EN'
     LA = 'LA'
+    IF = 'IF'
+    FOR = 'FOR'
+    WORD = 'WORD'
     TRUE = 'TRUE'
     FALSE = 'FALSE'
 
@@ -73,6 +76,7 @@ tokens = [ ] + idList(ReservedWord) \
 # Regular expression rules for simple tokens
 t_PLUS = r'\+'
 t_MINUS = r'-'
+t_COLON = r':'
 t_TIMES = r'\*'
 t_DIVIDE = r'/'
 t_ASSIGN = r'='
