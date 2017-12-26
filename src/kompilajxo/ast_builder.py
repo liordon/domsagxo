@@ -1,8 +1,8 @@
 import ply.yacc as yacc
-from lexer_builder import tokens
-from lexer_builder import UnalphabeticTerminal as UaTer
-from lexer_builder import PartOfSpeech as POS
-from lexer_builder import ReservedWord as ResWord
+from kompilajxo.lexer_builder import UnalphabeticTerminal as UaTer
+from kompilajxo.lexer_builder import PartOfSpeech as POS
+from kompilajxo.lexer_builder import ReservedWord as ResWord
+from kompilajxo.lexer_builder import tokens
 
 
 class SyntaxError(Exception):
@@ -18,6 +18,7 @@ def RULE(ruleString):
 
 
 def build(start=None):
+    allTokenTypes = tokens # just so the import will be considered meaningful.
     variable_table = {}
 
     @RULE('''program : statement ''' + UaTer.PERIOD.value + '''

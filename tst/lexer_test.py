@@ -1,6 +1,6 @@
 import pytest
-import src.lexer_builder as lxr
-from src.lexer_builder import PartOfSpeech, UnalphabeticTerminal, ReservedWord
+import kompilajxo.lexer_builder as lxr
+from kompilajxo.lexer_builder import PartOfSpeech, UnalphabeticTerminal, ReservedWord
 
 
 class TestLexer(object):
@@ -105,3 +105,76 @@ class TestMultipleTokenSequences(object):
         lexer.input("1+1")
         tokens = self.getTokenList(lexer)
         print(tokens)
+
+
+class TestVerbalNumbers(object):
+    @pytest.fixture
+    def lexer(self):
+        return lxr.build()
+
+    @staticmethod
+    def assertVerbalNumberValue(numericalValue, token):
+        assert UnalphabeticTerminal.VERBAL_DIGIT.value == token.type
+        assert numericalValue == token.value
+
+    def test_canParseDigit0(self, lexer):
+        lexer.input("nul")
+        self.assertVerbalNumberValue(0, lexer.token())
+
+    def test_canParseDigit1(self, lexer):
+        lexer.input("unu")
+        self.assertVerbalNumberValue(1, lexer.token())
+
+    def test_canParseDigit2(self, lexer):
+        lexer.input("du")
+        self.assertVerbalNumberValue(2, lexer.token())
+
+    def test_canParseDigit3(self, lexer):
+        lexer.input("tri")
+        self.assertVerbalNumberValue(3, lexer.token())
+
+    def test_canParseDigit4(self, lexer):
+        lexer.input("kvar")
+        self.assertVerbalNumberValue(4, lexer.token())
+
+    def test_canParseDigit5(self, lexer):
+        lexer.input("kvin")
+        self.assertVerbalNumberValue(5, lexer.token())
+
+    def test_canParseDigit6(self, lexer):
+        lexer.input("ses")
+        self.assertVerbalNumberValue(6, lexer.token())
+
+    def test_canParseDigit7(self, lexer):
+        lexer.input("sep")
+        self.assertVerbalNumberValue(7, lexer.token())
+
+    def test_canParseDigit8(self, lexer):
+        lexer.input("ok")
+        self.assertVerbalNumberValue(8, lexer.token())
+
+    def test_canParseDigit9(self, lexer):
+        lexer.input("naux")
+        self.assertVerbalNumberValue(9, lexer.token())
+
+    def test_canParseNumber10(self, lexer):
+        lexer.input("dek")
+        self.assertVerbalNumberValue(10, lexer.token())
+
+    def test_canParseNumber20(self, lexer):
+        lexer.input("dudek")
+        self.assertVerbalNumberValue(20, lexer.token())
+
+    def test_canParseNumber100(self, lexer):
+        lexer.input("cent")
+        self.assertVerbalNumberValue(100, lexer.token())
+
+    def test_canParseNumber248(self, lexer):
+        lexer.input("ducent kvardek ok")
+        self.assertVerbalNumberValue(200, lexer.token())
+        self.assertVerbalNumberValue(40, lexer.token())
+        self.assertVerbalNumberValue(8, lexer.token())
+
+    def test_cantParseIllegalDigitCombination(self, lexer):
+        lexer.input("dudu")
+        assert UnalphabeticTerminal.VERBAL_DIGIT.value != lexer.token().type

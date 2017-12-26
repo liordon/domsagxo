@@ -1,5 +1,5 @@
-import src.lexer_builder as lxr
-import src.ast_builder as ast_bld
+import kompilajxo.lexer_builder as lxr
+import kompilajxo.ast_builder as ast_bld
 import pytest
 
 
@@ -33,6 +33,7 @@ class TestAstMathExpressions(object):
         assert not ast.parse("malvero")
 
 
+# noinspection PyStatementEffect
 class TestAstStatements(object):
 
     @pytest.fixture

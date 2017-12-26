@@ -26,7 +26,7 @@ class UnalphabeticTerminal(Enum):
     L_PAREN = 'LPAREN'
     R_PAREN = 'RPAREN'
     COMMENT = 'COMMENT'
-
+    VERBAL_DIGIT = 'VERBAL_DIGIT'
 
 
 class ReservedWord(Enum):
@@ -69,7 +69,7 @@ reserved_words = {
     "estas": UnalphabeticTerminal.ASSIGN.value,
     "malvero": ReservedWord.FALSE.value}
 
-tokens = [ ] + idList(ReservedWord) \
+tokens = [] + idList(ReservedWord) \
          + idList(PartOfSpeech) \
          + idList(UnalphabeticTerminal)
 
@@ -92,12 +92,40 @@ def t_NUMBER(t):
     t.value = int(t.value)
     return t
 
+digitNames = {
+    "nul": 0,
+    "unu": 1,
+    "du": 2,
+    "tri": 3,
+    "kvar": 4,
+    "kvin": 5,
+    "ses": 6,
+    "sep": 7,
+    "ok": 8,
+    "naux": 9,
+    "": 1
+}
+
+
+def parseDigit(name):
+    mult = 1
+    if name[-3:] == "dek":
+        name = name[:-3]
+        mult = 10
+    elif name[-4:] == "cent":
+        name = name[:-4]
+        mult = 100
+    return digitNames[name] * mult
+
 
 def t_WORD(t):
     r'[a-z]+'
-    # t.value = re.sub(r'n?\s+',"_",t.value)
+    digitRe = re.compile("^(nul|(unu)?|du|tri|kvar|kvin|ses|sep|ok|naux)(dek|cent)?$") #|mil|miliono|miliardo|biliono  #|()+|du|)(dek|cent)+
     if reserved_words.keys().__contains__(t.value):
         t.type = reserved_words[t.value]
+    elif digitRe.match(t.value):
+        t.type = UnalphabeticTerminal.VERBAL_DIGIT.value
+        t.value = parseDigit(t.value)
     else:
         t.value = re.sub(r'n$', "", t.value)
         if re.search(r'((o)|(oj))$', t.value):
