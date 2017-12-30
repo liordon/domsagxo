@@ -3,7 +3,7 @@ import kompilajxo.lexer_builder as lxr
 from kompilajxo.lexer_builder import PartOfSpeech, UnalphabeticTerminal, ReservedWord
 
 
-class TestLexer(object):
+class TestPartsOfSpeech(object):
 
     @pytest.fixture
     def lexer(self):
@@ -12,15 +12,6 @@ class TestLexer(object):
     @staticmethod
     def assertPartOfSpeech(token, partOfSpeech):
         assert partOfSpeech.value == token.type
-
-    @staticmethod
-    def getTokenList(lexer):
-        res = []
-        tok = lexer.token()
-        while tok:
-            res += [tok]
-            tok = lexer.token()
-        return res
 
     def test_adjectivesAreNotCategorizedAsWords(self, lexer):
         lexer.input("granda")
@@ -40,11 +31,27 @@ class TestLexer(object):
         self.assertPartOfSpeech(token, PartOfSpeech.V_PRES)
         assert token.value == "presas"
 
-    def test_InfinitiveVerbsAreNotCategorizedAsWords(self, lexer):
-        lexer.input("presi")
-        token = lexer.token()
-        self.assertPartOfSpeech(token, PartOfSpeech.V_INF)
-        assert token.value == "presi"
+    # def test_InfinitiveVerbsAreNotCategorizedAsWords(self, lexer):
+    #     lexer.input("presi")
+    #     token = lexer.token()
+    #     self.assertPartOfSpeech(token, PartOfSpeech.V_INF)
+    #     assert token.value == "presi"
+
+    def test_accusativeNounsAreEvaluatedWithoutTheAccusativeCase(self, lexer):
+        lexer.input("muson musojn")
+        assert lexer.token().value == 'muso'
+        assert lexer.token().value == 'musoj'
+
+
+class TestReservedWords(object):
+
+    @pytest.fixture
+    def lexer(self):
+        return lxr.build()
+
+    @staticmethod
+    def assertPartOfSpeech(token, partOfSpeech):
+        assert partOfSpeech.value == token.type
 
     def test_theWordEstasIsEquivalentToEqualsSign(self, lexer):
         estasAssignment = "estas"
@@ -54,14 +61,9 @@ class TestLexer(object):
         lexer.input(equalsAssignment)
         self.assertPartOfSpeech(lexer.token(), UnalphabeticTerminal.ASSIGN)
 
-    def test_accusativeNounsAreEvaluatedWithoutTheAccusativeCase(self, lexer):
-        lexer.input("muson musojn")
-        assert lexer.token().value == 'muso'
-        assert lexer.token().value == 'musoj'
-
-    def test_kajIsADelimiterAndNotAnAdjective(self, lexer):
+    def test_kajIsAReservedWordAndNotAnAdjective(self, lexer):
         lexer.input("kaj")
-        self.assertPartOfSpeech(lexer.token(), UnalphabeticTerminal.DELIM)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.KAJ)
 
     def test_kunIsADelimAndNotAnAccusativeImperativeVerb(self, lexer):
         lexer.input("kun")
@@ -82,6 +84,14 @@ class TestLexer(object):
     def test_reservedWordLa(self, lexer):
         lexer.input("la")
         self.assertPartOfSpeech(lexer.token(), ReservedWord.LA)
+
+    def test_reservedWordHoro(self, lexer):
+        lexer.input("horo")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.HORO)
+
+    def test_reservedWordMinutoj(self, lexer):
+        lexer.input("minutoj")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.MINUTOJ)
 
 
 class TestMultipleTokenSequences(object):
@@ -178,3 +188,7 @@ class TestVerbalNumbers(object):
     def test_cantParseIllegalDigitCombination(self, lexer):
         lexer.input("dudu")
         assert UnalphabeticTerminal.VERBAL_DIGIT.value != lexer.token().type
+
+    def test_numberWithAdjectiveEndingIsNumerator(self, lexer):
+        lexer.input("unua")
+        assert PartOfSpeech.NUMERATOR.value == lexer.token().type

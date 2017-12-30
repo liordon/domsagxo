@@ -1,3 +1,4 @@
+import kompilajxo.atomic_types as type
 import kompilajxo.lexer_builder as lxr
 import kompilajxo.ast_builder as ast_bld
 import pytest
@@ -22,6 +23,18 @@ class TestAstMathExpressions(object):
     def test_capableOfMultiplication(self, ast):
         assert 42 == ast.parse("7*6")
 
+    def test_unaryMinusDoesNotNeedParentheses(self, ast):
+        assert -42 == ast.parse("7*-6")
+        assert 1 == ast.parse("7+-6")
+
+    def test_capableVerbalNumberParsing(self, ast):
+        assert 926 == ast.parse("nauxcent dudek ses")
+        assert 102 == ast.parse("cent du")
+
+    def test_sameDigitCannotBeSpecifiedTwice(self, ast):
+        with pytest.raises(ast_bld.EsperantoSyntaxError):
+            ast.parse("naux ses")
+
     def test_capableUsingAssignedVariable(self, ast):
         ast.variable_table["muso"] = 69
         assert 69 == ast.parse("muso")
@@ -31,6 +44,25 @@ class TestAstMathExpressions(object):
 
     def test_valueOfReservedWordForFalseIsFalse(self, ast):
         assert not ast.parse("malvero")
+
+
+class TestAstTimes(object):
+    @pytest.fixture
+    def ast(self):
+        lxr.build()
+        return ast_bld.build(start="timePoint")
+
+    def test_canFormatFormalRoundHour(self, ast):
+        assert isinstance(ast.parse("la sesa horo"), type.TimePoint)
+
+    def test_canFormatColloquialRoundHour(self, ast):
+        assert isinstance(ast.parse("la sesa"), type.TimePoint)
+
+    # def test_canFormatFormalFracturedHour(self, ast):
+    #     assert isinstance(ast.parse("la sesa horo kaj kvardek ses minutoj"), type.TimePoint)
+    #
+    # def test_canFormatColloquialFracturedHour(self, ast):
+    #     assert isinstance(ast.parse("la sesakaj kvardek ses"), type.TimePoint)
 
 
 # noinspection PyStatementEffect
@@ -79,7 +111,7 @@ class TestAstPrograms(object):
         return ast_bld.build(start="program")
 
     def test_unterminatedCommandIsNotAProgram(self, ast):
-        with pytest.raises(ast_bld.SyntaxError):
+        with pytest.raises(ast_bld.EsperantoSyntaxError):
             ast.parse("12")
 
     def test_canParseASingleCommandAsProgram(self, ast):

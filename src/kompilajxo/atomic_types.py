@@ -1,0 +1,2 @@
+class TimePoint(object):
+    pass

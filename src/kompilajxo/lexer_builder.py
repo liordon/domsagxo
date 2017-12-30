@@ -9,8 +9,8 @@ class SemanticError(Exception):
 
 
 # List of token names.   This is always required
-def idList(tokenEnum):
-    return [elm.value for elm in list(tokenEnum)]
+def idList(token_enum):
+    return [elm.value for elm in list(token_enum)]
 
 
 class UnalphabeticTerminal(Enum):
@@ -34,10 +34,13 @@ class ReservedWord(Enum):
     EN = 'EN'
     LA = 'LA'
     IF = 'IF'
+    KAJ = 'KAJ'
     FOR = 'FOR'
     WORD = 'WORD'
     TRUE = 'TRUE'
+    HORO = 'HORO'
     FALSE = 'FALSE'
+    MINUTOJ = 'MINUTOJ'
 
 
 class PartOfSpeech(Enum):
@@ -48,7 +51,7 @@ class PartOfSpeech(Enum):
     V_PRES = 'V_PRES'
     V_IMP = 'V_IMP'
     ACCUSATIVE = "ACCUSATIVE"
-    PLURAL = "PLURAL"
+    NUMERATOR = "NUMERATOR"
     OTHER = "OTHER"
 
 
@@ -61,12 +64,14 @@ reserved_words = {
     "por": ReservedWord.FOR.value,
     "kun": UnalphabeticTerminal.DELIM.value,
     "sur": UnalphabeticTerminal.DELIM.value,
-    "kaj": UnalphabeticTerminal.DELIM.value,
+    "kaj": ReservedWord.KAJ.value,
     "vero": ReservedWord.TRUE.value,
+    "horo": ReservedWord.HORO.value,
     "inter": UnalphabeticTerminal.DELIM.value,
     "exter": UnalphabeticTerminal.DELIM.value,
     "trans": UnalphabeticTerminal.DELIM.value,
     "estas": UnalphabeticTerminal.ASSIGN.value,
+    "minutoj": ReservedWord.MINUTOJ.value,
     "malvero": ReservedWord.FALSE.value}
 
 tokens = [] + idList(ReservedWord) \
@@ -91,6 +96,7 @@ def t_NUMBER(t):
     r'\d+'
     t.value = int(t.value)
     return t
+
 
 digitNames = {
     "nul": 0,
@@ -120,10 +126,11 @@ def parseDigit(name):
 
 def t_WORD(t):
     r'[a-z]+'
-    digitRe = re.compile("^(nul|(unu)?|du|tri|kvar|kvin|ses|sep|ok|naux)(dek|cent)?$") #|mil|miliono|miliardo|biliono  #|()+|du|)(dek|cent)+
+    digitRe = re.compile(
+        "(nul|(unu)?|du|tri|kvar|kvin|ses|sep|ok|naux)(dek|cent)?")
     if reserved_words.keys().__contains__(t.value):
         t.type = reserved_words[t.value]
-    elif digitRe.match(t.value):
+    elif digitRe.fullmatch(t.value):
         t.type = UnalphabeticTerminal.VERBAL_DIGIT.value
         t.value = parseDigit(t.value)
     else:
@@ -131,9 +138,12 @@ def t_WORD(t):
         if re.search(r'((o)|(oj))$', t.value):
             t.type = PartOfSpeech.NOUN.value
         elif re.search(r'((a)|(aj))$', t.value):
-            t.type = PartOfSpeech.ADJECTIVE.value
-        elif re.search(r'i$', t.value):
-            t.type = PartOfSpeech.V_INF.value
+            if digitRe.fullmatch(t.value[0:-1]) and t.value[-1] == 'a':
+                t.type = PartOfSpeech.NUMERATOR.value
+            else:
+                t.type = PartOfSpeech.ADJECTIVE.value
+        # elif re.search(r'i$', t.value):
+        #     t.type = PartOfSpeech.V_INF.value
         elif re.search(r'u$', t.value):
             t.type = PartOfSpeech.V_IMP.value
         elif re.search(r'as$', t.value):
@@ -151,15 +161,15 @@ t_V_IMP = r'[a-z]+u'
 t_ignore = ' \t'
 
 
-def t_foo_newline(t):
-    r'\n'
-    t.lexer.lineno += 1
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
 
 
 # Error handling rule
 def t_error(t):
     raise SemanticError("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
+    # t.lexer.skip(1) # this line is unreachable because I raised an exception instead of skipping it.
 
 
 def build():
