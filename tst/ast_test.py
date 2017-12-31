@@ -53,16 +53,51 @@ class TestAstTimes(object):
         return ast_bld.build(start="timePoint")
 
     def test_canFormatFormalRoundHour(self, ast):
-        assert isinstance(ast.parse("la sesa horo"), type.TimePoint)
+        parse_result = ast.parse("la sesa horo")
+        assert isinstance(parse_result, type.TimePoint)
+        assert 6 == parse_result.hour
+        assert 0 == parse_result.minutes
 
     def test_canFormatColloquialRoundHour(self, ast):
-        assert isinstance(ast.parse("la sesa"), type.TimePoint)
+        parse_result = ast.parse("la sepa")
+        assert isinstance(parse_result, type.TimePoint)
+        assert 7 == parse_result.hour
+        assert 0 == parse_result.minutes
 
-    # def test_canFormatFormalFracturedHour(self, ast):
-    #     assert isinstance(ast.parse("la sesa horo kaj kvardek ses minutoj"), type.TimePoint)
-    #
-    # def test_canFormatColloquialFracturedHour(self, ast):
-    #     assert isinstance(ast.parse("la sesakaj kvardek ses"), type.TimePoint)
+    def test_canFormatFormalFracturedHour(self, ast):
+        parse_result = ast.parse("la deka horo kaj kvardek ses minutoj")
+        assert isinstance(parse_result, type.TimePoint)
+        assert 10 == parse_result.hour
+        assert 46 == parse_result.minutes
+
+    def test_canFormatColloquialFracturedHour(self, ast):
+        parse_result = ast.parse("la dek dua kaj kvindek ses")
+        assert isinstance(parse_result, type.TimePoint)
+        assert 12 == parse_result.hour
+        assert 56 == parse_result.minutes
+
+    def test_canFormatColloquialQuarteredHour(self, ast):
+        parse_result = ast.parse("la kvara kaj kvarono")
+        assert isinstance(parse_result, type.TimePoint)
+        assert 4 == parse_result.hour
+        assert 15 == parse_result.minutes
+
+    def test_canFormatColloquial24BasedHour(self, ast):
+        parse_result = ast.parse("la dudek tria")
+        assert isinstance(parse_result, type.TimePoint)
+        assert 23 == parse_result.hour
+
+    def test_cannotFormatMoreThan24thHour(self, ast):
+        with pytest.raises(ast_bld.EsperantoSyntaxError):
+            ast.parse("la kvardek sesa horo")
+
+    def test_cannotFormatMoreThan24thHourInOneDigit(self, ast):
+        with pytest.raises(ast_bld.EsperantoSyntaxError):
+            ast.parse("la nauxdeka horo")
+
+    def test_cannotFormatMoreThan60Minutes(self, ast):
+        with pytest.raises(ast_bld.EsperantoSyntaxError):
+            ast.parse("la kvina kaj cent")
 
 
 # noinspection PyStatementEffect

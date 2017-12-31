@@ -112,8 +112,14 @@ digitNames = {
     "": 1
 }
 
+digitRe = re.compile(
+        "(nul|(unu)?|du|tri|kvar|kvin|ses|sep|ok|naux)(dek|cent|ono?)?")
 
 def parseDigit(name):
+    if name[-3:] == "ono":
+        name = name[:-3]
+        return 1/digitNames[name]
+
     mult = 1
     if name[-3:] == "dek":
         name = name[:-3]
@@ -121,13 +127,12 @@ def parseDigit(name):
     elif name[-4:] == "cent":
         name = name[:-4]
         mult = 100
+
     return digitNames[name] * mult
 
 
 def t_WORD(t):
     r'[a-z]+'
-    digitRe = re.compile(
-        "(nul|(unu)?|du|tri|kvar|kvin|ses|sep|ok|naux)(dek|cent)?")
     if reserved_words.keys().__contains__(t.value):
         t.type = reserved_words[t.value]
     elif digitRe.fullmatch(t.value):
@@ -140,10 +145,11 @@ def t_WORD(t):
         elif re.search(r'((a)|(aj))$', t.value):
             if digitRe.fullmatch(t.value[0:-1]) and t.value[-1] == 'a':
                 t.type = PartOfSpeech.NUMERATOR.value
+                t.value = parseDigit(t.value[:-1])
             else:
                 t.type = PartOfSpeech.ADJECTIVE.value
-        # elif re.search(r'i$', t.value):
-        #     t.type = PartOfSpeech.V_INF.value
+        elif re.search(r'i$', t.value):
+            t.type = PartOfSpeech.V_INF.value
         elif re.search(r'u$', t.value):
             t.type = PartOfSpeech.V_IMP.value
         elif re.search(r'as$', t.value):

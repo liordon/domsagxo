@@ -132,19 +132,38 @@ def build(start=None):
     def p_expression_false(p):
         p[0] = False
 
-    @RULE('timePoint : ', ResWord.LA, POS.NUMERATOR, '''
-                    | ''', ResWord.LA, POS.NUMERATOR, ResWord.HORO)
-              # '''
-              #       | ''', ResWord.LA, POS.NUMERATOR, ResWord.KAJ )
+    @RULE('''timePoint : hourDescriptor
+                    | hourDescriptor ''', ResWord.KAJ, '''verbalNumber
+                    | hourDescriptor ''', ResWord.KAJ, '''verbalNumber ''', ResWord.MINUTOJ )
     def p_time_point(p):
-        p[0] = Atypes.TimePoint()
+        p[0] = p[1]
+        if len(p) > 2:
+            if p[3] < 1:
+                p[3] *= 60
+            if p[3] >= 60:
+                raise EsperantoSyntaxError("Illegal number of minutes entered: " + str(p[3]))
+            p[0].minutes = p[3]
+
+    @RULE('''hourDescriptor : ''', ResWord.LA, '''hourNumerator
+                    | ''', ResWord.LA, '''hourNumerator ''', ResWord.HORO)
+    def p_hour_descriptor(p):
+        p[0] = Atypes.TimePoint(0, p[2])
+
+    @RULE('''hourNumerator : ''', POS.NUMERATOR, '''
+                    | verbalNumber ''',  POS.NUMERATOR)
+    def p_hour_numerator(p):
+        p[0] = p[1]
+        if len(p) > 2:
+            p[0] += p[2]
+        if p[0] > 24:
+            raise EsperantoSyntaxError("Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
 
     # Error rule for syntax errors
     def p_error(p):
         raise EsperantoSyntaxError("Syntax error in input: " + str(p))
 
-    astBuilder = yacc.yacc(tabmodule="my_parsetab", start=start, debug=False)
-    astBuilder.variable_table = variable_table
-    return astBuilder
+    ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, debug=False)
+    ast_builder.variable_table = variable_table
+    return ast_builder
 
 

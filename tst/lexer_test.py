@@ -31,11 +31,11 @@ class TestPartsOfSpeech(object):
         self.assertPartOfSpeech(token, PartOfSpeech.V_PRES)
         assert token.value == "presas"
 
-    # def test_InfinitiveVerbsAreNotCategorizedAsWords(self, lexer):
-    #     lexer.input("presi")
-    #     token = lexer.token()
-    #     self.assertPartOfSpeech(token, PartOfSpeech.V_INF)
-    #     assert token.value == "presi"
+    def test_InfinitiveVerbsAreNotCategorizedAsWords(self, lexer):
+        lexer.input("presi")
+        token = lexer.token()
+        self.assertPartOfSpeech(token, PartOfSpeech.V_INF)
+        assert token.value == "presi"
 
     def test_accusativeNounsAreEvaluatedWithoutTheAccusativeCase(self, lexer):
         lexer.input("muson musojn")
@@ -189,6 +189,16 @@ class TestVerbalNumbers(object):
         lexer.input("dudu")
         assert UnalphabeticTerminal.VERBAL_DIGIT.value != lexer.token().type
 
+    def test_canParseFractionHalf(self, lexer):
+        lexer.input("duono")
+        self.assertVerbalNumberValue(1/2, lexer.token())
+
+    def test_canParseFractionQuarter(self, lexer):
+        lexer.input("kvarono")
+        self.assertVerbalNumberValue(1/4, lexer.token())
+
     def test_numberWithAdjectiveEndingIsNumerator(self, lexer):
         lexer.input("unua")
-        assert PartOfSpeech.NUMERATOR.value == lexer.token().type
+        token = lexer.token()
+        assert PartOfSpeech.NUMERATOR.value == token.type
+        assert 1 == token.value
