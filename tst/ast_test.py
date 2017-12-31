@@ -1,14 +1,16 @@
-import kompilajxo.atomic_types as type
+import biblioteko.atomic_types as type
 import kompilajxo.lexer_builder as lxr
 import kompilajxo.ast_builder as ast_bld
 import pytest
+
+
+lxr.build()
 
 
 class TestAstMathExpressions(object):
 
     @pytest.fixture
     def ast(self):
-        lxr.build()
         return ast_bld.build(start="expression")
 
     def test_capableOfAddition(self, ast):
@@ -49,7 +51,6 @@ class TestAstMathExpressions(object):
 class TestAstTimeSpans(object):
     @pytest.fixture
     def ast(self):
-        lxr.build()
         return ast_bld.build(start="timeSpan")
 
     @staticmethod
@@ -103,7 +104,6 @@ class TestAstTimeSpans(object):
 class TestAstTimePoints(object):
     @pytest.fixture
     def ast(self):
-        lxr.build()
         return ast_bld.build(start="timePoint")
 
     @staticmethod
@@ -158,10 +158,8 @@ class TestAstTimePoints(object):
 
 
 class TestAstStatements(object):
-
     @pytest.fixture
     def ast(self):
-        lxr.build()
         return ast_bld.build(start="statement")
 
     def test_anExpressionIsAlsoAStatement(self, ast):
@@ -190,11 +188,27 @@ class TestAstStatements(object):
         assert 99 == ast.variable_table["dika kato"]
 
 
+class TestAstRandomGeneration(object):
+    @pytest.fixture
+    def ast(self):
+        return ast_bld.build(start="functionCall")
+
+    def test_canGenerateRandomNumber(self, ast):
+        ast.parse("hazardu nombro")
+
+    def test_canGenerateRandomNumberWithinBounds(self, ast):
+        parse_result = ast.parse("hazardu nombro inter kvar kaj dek")
+        assert 4 <= parse_result
+        assert 10 > parse_result
+
+    def test_randomNumberBoundedBetween2AdjacentNumbersIsAlwaysLowerNumber(self, ast):
+        assert 1 == ast.parse("hazardu nombro inter unu kaj du")
+
+
 class TestAstPrograms(object):
 
     @pytest.fixture
     def ast(self):
-        lxr.build()
         return ast_bld.build(start="program")
 
     def test_unterminatedCommandIsNotAProgram(self, ast):

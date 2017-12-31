@@ -7,7 +7,9 @@ from kompilajxo.lexer_builder import UnalphabeticTerminal as UaTer
 from kompilajxo.lexer_builder import PartOfSpeech as POS
 from kompilajxo.lexer_builder import ReservedWord as ResWord
 from kompilajxo.lexer_builder import tokens
-import kompilajxo.atomic_types as Atypes
+import biblioteko.atomic_types as Atypes
+import biblioteko.predefined_functions as Pfuncs
+
 
 class EsperantoSyntaxError(Exception):
     pass
@@ -30,9 +32,10 @@ def RULE(*rule_list):
 def get_digit(number, digit):
     return number // 10**digit %10
 
+
 def build(start=None):
     allTokenTypes = tokens # just so the import will be considered meaningful.
-    variable_table = {}
+    variable_table = {"nombro" : "nombro"}
 
     @RULE('''program : statement ''', UaTer.PERIOD, '''
                     | program statement ''', UaTer.PERIOD)
@@ -161,7 +164,7 @@ def build(start=None):
             raise EsperantoSyntaxError("Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
 
     @RULE('''timeSpan : timeSpan ''', ResWord.KAJ, '''timeSpan
-                    | timeSpan ''', UaTer.DELIM, '''timeSpan''')
+                   | timeSpan ''', UaTer.DELIM, '''timeSpan''')
     def p_time_spans(p):
         p[0] = Atypes.TimeSpan.unite(p[1], p[3])
 
@@ -188,12 +191,35 @@ def build(start=None):
         else:
             p[0] = Atypes.TimeSpan(seconds=amount)
 
+    @RULE('''functionCall : ''', POS.V_IMP, '''functionArgs''')
+    def p_function_call(p):
+        p[0] = Pfuncs.method_dict[p[1]](p[2])
+
+    @RULE('''functionArgs : expression
+                    | functionArgs ''', ResWord.KAJ, '''expression
+                    | functionArgs ''', UaTer.DELIM, '''expression''')
+    def p_function_arguments(p):
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = p[1] + [p[3]]
+
     # Error rule for syntax errors
     def p_error(p):
         raise EsperantoSyntaxError("Syntax error in input: " + str(p))
 
-    ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, debug=False)
+    ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, errorlog=yacc.NullLogger())
     ast_builder.variable_table = variable_table
     return ast_builder
 
 
+if __name__ == "__main__":
+    import kompilajxo.lexer_builder as lxr
+    lxr.build()
+    ast = build(start="statement")
+
+    while True:
+        txt = input(">")
+        if txt == "":
+            break
+        print(ast.parse(txt))

@@ -12,6 +12,9 @@ class TimePoint(object):
         self.minutes = minutes
         self.hour = hour
 
+    def __str__(self):
+        return "TimePoint(%02d,%02d)" % (self.hour, self.minutes, )
+
 
 class TimeSpan(object):
     def __init__(self, hours=0, minutes=0, seconds=0):
@@ -28,6 +31,17 @@ class TimeSpan(object):
             res = TimeSpan(0, 60 * frac, 0)
 
         return self.unite(self, res)
+
+    def __str__(self):
+        components = []
+        if self.hours > 0:
+            components += [self.hours, " hours "]
+        if self.minutes > 0:
+            components += [self.minutes, " minutes "]
+        if self.seconds > 0:
+            components += [self.seconds, " hours "]
+
+        return "TimeSpan(%02d,%02d,%02d)" % (self.hours, self.minutes, self.seconds,)
 
     @classmethod
     def unite(cls, span1, span2):

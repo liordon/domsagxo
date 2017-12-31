@@ -8,7 +8,6 @@ class SemanticError(Exception):
     pass
 
 
-# List of token names.   This is always required
 def idList(token_enum):
     return [elm.value for elm in list(token_enum)]
 
@@ -46,9 +45,9 @@ class PartOfSpeech(Enum):
     NOUN = 'NOUN'
     ADJECTIVE = 'ADJECTIVE'
     ADVERB = 'ADVERB'
-    V_INF = 'V_INF'
-    V_PRES = 'V_PRES'
-    V_IMP = 'V_IMP'
+    V_INF = 'VINF'
+    V_PRES = 'VPRES'
+    V_IMP = 'VIMP'
     ACCUSATIVE = "ACCUSATIVE"
     NUMERATOR = "NUMERATOR"
     OTHER = "OTHER"
@@ -158,12 +157,6 @@ def t_WORD(t):
             t.type = PartOfSpeech.V_PRES.value
     return t
 
-
-t_ADVERB = r'[a-z]+e'
-# 'ADJECTIVE'
-t_V_INF = r'[a-z]+i'
-t_V_PRES = r'[a-z]+as'
-t_V_IMP = r'[a-z]+u'
 
 # A string containing ignored characters (spaces and tabs)
 t_ignore = ' \t'
