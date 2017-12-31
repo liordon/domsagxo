@@ -104,8 +104,8 @@ def build(start=None):
         else:
             p[0] = -p[2]
 
-    @RULE('verbalNumber : ', UaTer.VERBAL_DIGIT, '''
-                    |  verbalNumber ''', UaTer.VERBAL_DIGIT)
+    @RULE('verbalNumber : ', ResWord.VERBAL_DIGIT, '''
+                    |  verbalNumber ''', ResWord.VERBAL_DIGIT)
     def p_verbal_number(p):
         if len(p) == 2:
             p[0] = p[1]
@@ -134,7 +134,7 @@ def build(start=None):
 
     @RULE('''timePoint : hourDescriptor
                     | hourDescriptor ''', ResWord.KAJ, '''verbalNumber
-                    | hourDescriptor ''', ResWord.KAJ, '''verbalNumber ''', ResWord.MINUTOJ )
+                    | hourDescriptor ''', ResWord.KAJ, '''verbalNumber ''', ResWord.TIME_INDICATION )
     def p_time_point(p):
         p[0] = p[1]
         if len(p) > 2:
@@ -145,8 +145,10 @@ def build(start=None):
             p[0].minutes = p[3]
 
     @RULE('''hourDescriptor : ''', ResWord.LA, '''hourNumerator
-                    | ''', ResWord.LA, '''hourNumerator ''', ResWord.HORO)
+                    | ''', ResWord.LA, '''hourNumerator ''', ResWord.TIME_INDICATION)
     def p_hour_descriptor(p):
+        if len(p) > 3 and p[3] != "horo":
+            raise EsperantoSyntaxError("wrong hour format. expected hour descriptor, then minute number.")
         p[0] = Atypes.TimePoint(0, p[2])
 
     @RULE('''hourNumerator : ''', POS.NUMERATOR, '''
@@ -157,6 +159,34 @@ def build(start=None):
             p[0] += p[2]
         if p[0] > 24:
             raise EsperantoSyntaxError("Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
+
+    @RULE('''timeSpan : timeSpan ''', ResWord.KAJ, '''timeSpan
+                    | timeSpan ''', UaTer.DELIM, '''timeSpan''')
+    def p_time_spans(p):
+        p[0] = Atypes.TimeSpan.unite(p[1], p[3])
+
+    @RULE('''timeSpan : timeSpan ''', ResWord.KAJ, '''verbalNumber''')
+    def p_time_fractions(p):
+        if p[3] >= 1:
+            raise EsperantoSyntaxError("Illegal time span format, recieved: " + str(p[3]) + " when expected fraction")
+        p[0] = p[1].addFraction(p[3])
+
+    @RULE('''timeSpan : ''', ResWord.TIME_INDICATION, '''
+                    | verbalNumber ''', ResWord.TIME_INDICATION)
+    def p_time_span(p):
+        if len(p) > 2:
+            time_unit = p[2]
+            amount = p[1]
+        else:
+            time_unit = p[1]
+            amount = 1
+
+        if time_unit.startswith("horo"):
+            p[0] = Atypes.TimeSpan(hours=math.floor(amount), minutes=60*(amount - math.floor(amount)))
+        elif time_unit.startswith("minuto"):
+            p[0] = Atypes.TimeSpan(minutes=math.floor(amount), seconds=60*(amount - math.floor(amount)))
+        else:
+            p[0] = Atypes.TimeSpan(seconds=amount)
 
     # Error rule for syntax errors
     def p_error(p):

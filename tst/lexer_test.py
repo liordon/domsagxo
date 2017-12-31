@@ -85,13 +85,33 @@ class TestReservedWords(object):
         lexer.input("la")
         self.assertPartOfSpeech(lexer.token(), ReservedWord.LA)
 
-    def test_reservedWordHoro(self, lexer):
-        lexer.input("horo")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.HORO)
+    def test_YearIsTimeIndicationAndNotNoun(self, lexer):
+        lexer.input("jaro")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.TIME_INDICATION)
 
-    def test_reservedWordMinutoj(self, lexer):
+    def test_MonthIsTimeIndicationAndNotNoun(self, lexer):
+        lexer.input("monato")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.TIME_INDICATION)
+
+    def test_WeekIsTimeIndicationAndNotNoun(self, lexer):
+        lexer.input("semajno")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.TIME_INDICATION)
+
+    def test_DayIsTimeIndicationAndNotNoun(self, lexer):
+        lexer.input("tago")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.TIME_INDICATION)
+
+    def test_HourIsTimeIndicationAndNotNoun(self, lexer):
+        lexer.input("horo")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.TIME_INDICATION)
+
+    def test_MinutesAreTimeIndicationAndNotNoun(self, lexer):
         lexer.input("minutoj")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.MINUTOJ)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.TIME_INDICATION)
+
+    def test_secondsAreTimeIndicationAndNotNoun(self, lexer):
+        lexer.input("sekundoj")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.TIME_INDICATION)
 
 
 class TestMultipleTokenSequences(object):
@@ -123,9 +143,9 @@ class TestVerbalNumbers(object):
         return lxr.build()
 
     @staticmethod
-    def assertVerbalNumberValue(numericalValue, token):
-        assert UnalphabeticTerminal.VERBAL_DIGIT.value == token.type
-        assert numericalValue == token.value
+    def assertVerbalNumberValue(numerical_value, token):
+        assert ReservedWord.VERBAL_DIGIT.value == token.type
+        assert numerical_value == token.value
 
     def test_canParseDigit0(self, lexer):
         lexer.input("nul")
@@ -187,7 +207,7 @@ class TestVerbalNumbers(object):
 
     def test_cantParseIllegalDigitCombination(self, lexer):
         lexer.input("dudu")
-        assert UnalphabeticTerminal.VERBAL_DIGIT.value != lexer.token().type
+        assert ReservedWord.VERBAL_DIGIT.value != lexer.token().type
 
     def test_canParseFractionHalf(self, lexer):
         lexer.input("duono")

@@ -26,7 +26,6 @@ class UnalphabeticTerminal(Enum):
     L_PAREN = 'LPAREN'
     R_PAREN = 'RPAREN'
     COMMENT = 'COMMENT'
-    VERBAL_DIGIT = 'VERBAL_DIGIT'
 
 
 class ReservedWord(Enum):
@@ -38,9 +37,9 @@ class ReservedWord(Enum):
     FOR = 'FOR'
     WORD = 'WORD'
     TRUE = 'TRUE'
-    HORO = 'HORO'
     FALSE = 'FALSE'
-    MINUTOJ = 'MINUTOJ'
+    VERBAL_DIGIT = 'VERBAL_DIGIT'
+    TIME_INDICATION = 'TIME_INDICATION'
 
 
 class PartOfSpeech(Enum):
@@ -66,12 +65,10 @@ reserved_words = {
     "sur": UnalphabeticTerminal.DELIM.value,
     "kaj": ReservedWord.KAJ.value,
     "vero": ReservedWord.TRUE.value,
-    "horo": ReservedWord.HORO.value,
     "inter": UnalphabeticTerminal.DELIM.value,
     "exter": UnalphabeticTerminal.DELIM.value,
     "trans": UnalphabeticTerminal.DELIM.value,
     "estas": UnalphabeticTerminal.ASSIGN.value,
-    "minutoj": ReservedWord.MINUTOJ.value,
     "malvero": ReservedWord.FALSE.value}
 
 tokens = [] + idList(ReservedWord) \
@@ -88,10 +85,10 @@ t_ASSIGN = r'='
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_PERIOD = r'\.'
+t_DELIM = r','
 t_ignore_COMMENT = r'\#.*'
 
 
-# A regular expression rule with some action code
 def t_NUMBER(t):
     r'\d+'
     t.value = int(t.value)
@@ -115,20 +112,23 @@ digitNames = {
 digitRe = re.compile(
         "(nul|(unu)?|du|tri|kvar|kvin|ses|sep|ok|naux)(dek|cent|ono?)?")
 
+timeUnitRe = re.compile("(jaro|monato|semajno|tago|horo|minuto|sekundo)j?")
+
+
 def parseDigit(name):
     if name[-3:] == "ono":
         name = name[:-3]
         return 1/digitNames[name]
 
-    mult = 1
+    multiplier = 1
     if name[-3:] == "dek":
         name = name[:-3]
-        mult = 10
+        multiplier = 10
     elif name[-4:] == "cent":
         name = name[:-4]
-        mult = 100
+        multiplier = 100
 
-    return digitNames[name] * mult
+    return digitNames[name] * multiplier
 
 
 def t_WORD(t):
@@ -136,8 +136,10 @@ def t_WORD(t):
     if reserved_words.keys().__contains__(t.value):
         t.type = reserved_words[t.value]
     elif digitRe.fullmatch(t.value):
-        t.type = UnalphabeticTerminal.VERBAL_DIGIT.value
+        t.type = ReservedWord.VERBAL_DIGIT.value
         t.value = parseDigit(t.value)
+    elif timeUnitRe.fullmatch(t.value):
+        t.type = ReservedWord.TIME_INDICATION.value
     else:
         t.value = re.sub(r'n$', "", t.value)
         if re.search(r'((o)|(oj))$', t.value):

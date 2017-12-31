@@ -46,46 +46,95 @@ class TestAstMathExpressions(object):
         assert not ast.parse("malvero")
 
 
-class TestAstTimes(object):
+class TestAstTimeSpans(object):
+    @pytest.fixture
+    def ast(self):
+        lxr.build()
+        return ast_bld.build(start="timeSpan")
+
+    @staticmethod
+    def assertTimeSpan(parse_result, hours=0, minutes=0, seconds=0):
+        assert isinstance(parse_result, type.TimeSpan)
+        assert hours == parse_result.hours
+        assert minutes == parse_result.minutes
+        assert seconds == parse_result.seconds
+
+    def test_canFormatSingleHour(self, ast):
+        parse_result = ast.parse("horo")
+        self.assertTimeSpan(parse_result, hours=1)
+
+    def test_canFormatTwoHours(self, ast):
+        parse_result = ast.parse("du horoj")
+        self.assertTimeSpan(parse_result, hours=2)
+
+    def test_canFormatSingleMinute(self, ast):
+        parse_result = ast.parse("minuto")
+        self.assertTimeSpan(parse_result, minutes=1)
+
+    def test_canFormatSingleSecond(self, ast):
+        parse_result = ast.parse("sekundo")
+        self.assertTimeSpan(parse_result, seconds=1)
+
+    def test_canFormatAnHourAndAMinute(self, ast):
+        parse_result = ast.parse("horo kaj minuto")
+        self.assertTimeSpan(parse_result, hours=1, minutes=1)
+
+    def test_canFormat2HoursAnd10Minutes(self, ast):
+        parse_result = ast.parse("du horoj kaj dek minutoj")
+        self.assertTimeSpan(parse_result, hours=2, minutes=10)
+
+    def test_canFormat10Hours10MinutesAnd10Seconds(self, ast):
+        parse_result = ast.parse("dek horoj, dek minutoj kaj dek sekundoj")
+        self.assertTimeSpan(parse_result, hours=10, minutes=10, seconds=10)
+
+    def test_canFormatAnHourAndAHalf(self, ast):
+        parse_result = ast.parse("horo kaj duono")
+        self.assertTimeSpan(parse_result, hours=1, minutes=30)
+
+    def test_cannotFormatAnHourAndAnHour(self, ast):
+        with pytest.raises(ast_bld.EsperantoSyntaxError):
+            ast.parse("horo kaj unu")
+
+    def test_canFormatHalfAMinute(self, ast):
+        parse_result = ast.parse("duono minuto")
+        self.assertTimeSpan(parse_result, seconds=30)
+
+
+class TestAstTimePoints(object):
     @pytest.fixture
     def ast(self):
         lxr.build()
         return ast_bld.build(start="timePoint")
 
+    @staticmethod
+    def assertTimePointValues(parse_result, hour, minutes=0):
+        assert isinstance(parse_result, type.TimePoint)
+        assert hour == parse_result.hour
+        assert minutes == parse_result.minutes
+
     def test_canFormatFormalRoundHour(self, ast):
         parse_result = ast.parse("la sesa horo")
-        assert isinstance(parse_result, type.TimePoint)
-        assert 6 == parse_result.hour
-        assert 0 == parse_result.minutes
+        self.assertTimePointValues(parse_result, 6)
 
     def test_canFormatColloquialRoundHour(self, ast):
         parse_result = ast.parse("la sepa")
-        assert isinstance(parse_result, type.TimePoint)
-        assert 7 == parse_result.hour
-        assert 0 == parse_result.minutes
+        self.assertTimePointValues(parse_result, 7)
 
     def test_canFormatFormalFracturedHour(self, ast):
         parse_result = ast.parse("la deka horo kaj kvardek ses minutoj")
-        assert isinstance(parse_result, type.TimePoint)
-        assert 10 == parse_result.hour
-        assert 46 == parse_result.minutes
+        self.assertTimePointValues(parse_result, 10, 46)
 
     def test_canFormatColloquialFracturedHour(self, ast):
         parse_result = ast.parse("la dek dua kaj kvindek ses")
-        assert isinstance(parse_result, type.TimePoint)
-        assert 12 == parse_result.hour
-        assert 56 == parse_result.minutes
+        self.assertTimePointValues(parse_result, 12, 56)
 
     def test_canFormatColloquialQuarteredHour(self, ast):
         parse_result = ast.parse("la kvara kaj kvarono")
-        assert isinstance(parse_result, type.TimePoint)
-        assert 4 == parse_result.hour
-        assert 15 == parse_result.minutes
+        self.assertTimePointValues(parse_result, 4, 15)
 
     def test_canFormatColloquial24BasedHour(self, ast):
         parse_result = ast.parse("la dudek tria")
-        assert isinstance(parse_result, type.TimePoint)
-        assert 23 == parse_result.hour
+        self.assertTimePointValues(parse_result, 23)
 
     def test_cannotFormatMoreThan24thHour(self, ast):
         with pytest.raises(ast_bld.EsperantoSyntaxError):
@@ -99,8 +148,15 @@ class TestAstTimes(object):
         with pytest.raises(ast_bld.EsperantoSyntaxError):
             ast.parse("la kvina kaj cent")
 
+    def test_cannotFormatTimeWithoutHour(self, ast):
+        with pytest.raises(ast_bld.EsperantoSyntaxError):
+            ast.parse("la kvina minuto")
 
-# noinspection PyStatementEffect
+    def test_cannotFormatReverseOrderTime(self, ast):
+        with pytest.raises(ast_bld.EsperantoSyntaxError):
+            ast.parse("la kvina minuto kaj dek horoj")
+
+
 class TestAstStatements(object):
 
     @pytest.fixture
@@ -132,10 +188,6 @@ class TestAstStatements(object):
     def test_definiteDescribedNounAlsoBecomesIndefinite(self, ast):
         ast.parse("la dika kato = 99")
         assert 99 == ast.variable_table["dika kato"]
-
-    # def test_capableOfIfStatement(self, ast):
-    #     ast.parse("se vero: kato = 1")
-    #     assert 1 == ast.variable_table["kato"]
 
 
 class TestAstPrograms(object):
