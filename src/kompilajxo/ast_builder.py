@@ -35,7 +35,7 @@ def get_digit(number, digit):
 
 def build(start=None):
     allTokenTypes = tokens # just so the import will be considered meaningful.
-    variable_table = {"nombro" : "nombro"}
+    variable_table = {}
 
     @RULE('''program : statement ''', UaTer.PERIOD, '''
                     | program statement ''', UaTer.PERIOD)
@@ -82,7 +82,9 @@ def build(start=None):
     def p_expression_minus(p):
         p[0] = p[1] - p[3]
 
-    @RULE('expression : term')
+    @RULE('''expression : term
+                        | timePoint
+                        | timeSpan''')
     def p_expression_term(p):
         p[0] = p[1]
 
@@ -100,7 +102,7 @@ def build(start=None):
 
     @RULE('factor : ', UaTer.NUMBER, '''
                 | verbalNumber
-                | ''', UaTer.MINUS, 'factor')
+                | ''', UaTer.MINUS, '''factor''')
     def p_factor_num(p):
         if len(p) == 2:
             p[0] = p[1]
@@ -119,9 +121,12 @@ def build(start=None):
                                                + str(p[1]) + " and " + str(p[2]))
             p[0] = p[1] + p[2]
 
-    @RULE('factor : ', POS.NOUN)
+    @RULE('''factor : name''')
     def p_factor_noun(p):
-        p[0] = variable_table[p[1]]
+        if p[1] in variable_table.keys():
+            p[0] = variable_table[p[1]]
+        else:
+            p[0] = p[1]
 
     @RULE('factor : ', UaTer.L_PAREN, ' expression ', UaTer.R_PAREN)
     def p_factor_expr(p):
@@ -135,31 +140,27 @@ def build(start=None):
     def p_expression_false(p):
         p[0] = False
 
-    @RULE('''timePoint : hourDescriptor
-                    | hourDescriptor ''', ResWord.KAJ, '''verbalNumber
-                    | hourDescriptor ''', ResWord.KAJ, '''verbalNumber ''', ResWord.TIME_INDICATION )
+    @RULE('''timePoint : hourNumerator ''', ResWord.KAJ, '''verbalNumber''')
     def p_time_point(p):
         p[0] = p[1]
-        if len(p) > 2:
-            if p[3] < 1:
-                p[3] *= 60
-            if p[3] >= 60:
-                raise EsperantoSyntaxError("Illegal number of minutes entered: " + str(p[3]))
-            p[0].minutes = p[3]
+        if p[3] < 1:
+            p[3] *= 60
+        if p[3] >= 60:
+            raise EsperantoSyntaxError("Illegal number of minutes entered: " + str(p[3]))
+        p[0] = Atypes.TimePoint(p[3], p[1])
 
-    @RULE('''hourDescriptor : ''', ResWord.LA, '''hourNumerator
-                    | ''', ResWord.LA, '''hourNumerator ''', ResWord.TIME_INDICATION)
-    def p_hour_descriptor(p):
-        if len(p) > 3 and p[3] != "horo":
+    @RULE('''timePoint :  hourNumerator ''', ResWord.TIME_INDICATION)
+    def p_round_time_point(p):
+        if len(p) > 2 and p[2] != "horo":
             raise EsperantoSyntaxError("wrong hour format. expected hour descriptor, then minute number.")
-        p[0] = Atypes.TimePoint(0, p[2])
+        p[0] = Atypes.TimePoint(0, p[1])
 
-    @RULE('''hourNumerator : ''', POS.NUMERATOR, '''
-                    | verbalNumber ''',  POS.NUMERATOR)
+    @RULE('''hourNumerator : ''', ResWord.LA, POS.NUMERATOR, '''
+                    | ''', ResWord.LA, '''verbalNumber ''',  POS.NUMERATOR)
     def p_hour_numerator(p):
-        p[0] = p[1]
-        if len(p) > 2:
-            p[0] += p[2]
+        p[0] = p[2]
+        if len(p) > 3:
+            p[0] += p[3]
         if p[0] > 24:
             raise EsperantoSyntaxError("Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
 
