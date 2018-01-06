@@ -1,5 +1,5 @@
 from random import randrange
-from biblioteko.atomic_types import *
+from biblioteko.atomaj_tipoj import *
 
 
 def generateRandom(argList):

@@ -1,6 +1,6 @@
-import biblioteko.atomic_types as EsperanType
-import kompilajxo.lexer_builder as lxr
-import kompilajxo.ast_builder as ast_bld
+import biblioteko.atomaj_tipoj as tipo
+import kompilajxo.leksisto as lxr
+import kompilajxo.abstrakta_sintaksarbo as ast_bld
 import pytest
 
 
@@ -55,7 +55,7 @@ class TestAstTimeSpans(object):
 
     @staticmethod
     def assertTimeSpan(parse_result, hours=0, minutes=0, seconds=0):
-        assert isinstance(parse_result, EsperanType.TimeSpan)
+        assert isinstance(parse_result, tipo.TimeSpan)
         assert hours == parse_result.hours
         assert minutes == parse_result.minutes
         assert seconds == parse_result.seconds
@@ -108,7 +108,7 @@ class TestAstTimePoints(object):
 
     @staticmethod
     def assertTimePointValues(parse_result, hour, minutes=0):
-        assert isinstance(parse_result, EsperanType.TimePoint)
+        assert isinstance(parse_result, tipo.TimePoint)
         assert hour == parse_result.hour
         assert minutes == parse_result.minutes
 
@@ -206,22 +206,22 @@ class TestAstRandomGeneration(object):
 
     def test_canGenerateRandomTimePoint(self, ast):
         parse_result = ast.parse("hazardu horon")
-        assert isinstance(parse_result, EsperanType.TimePoint)
+        assert isinstance(parse_result, tipo.TimePoint)
 
     def test_canGenerateRandomTimePointWithinTwoRoundHours(self, ast):
         parse_result = ast.parse("hazardu horon inter la oka horo kaj la nauxa horo")
-        assert isinstance(parse_result, EsperanType.TimePoint)
+        assert isinstance(parse_result, tipo.TimePoint)
         assert 9 > parse_result.hour
 
     def test_canGenerateRandomTimePointWithinASingleHour(self, ast):
         parse_result = ast.parse("hazardu horon inter la oka horo kaj la oka kaj dek")
-        assert isinstance(parse_result, EsperanType.TimePoint)
+        assert isinstance(parse_result, tipo.TimePoint)
         assert 8 == parse_result.hour
         assert 10 > parse_result.minutes
 
     def test_canGenerateRandomTimePointWithOverflowIntoNextHour(self, ast):
         parse_result = ast.parse("hazardu horon inter la oka kaj kvindek naux kaj la nauxa kaj dek")
-        assert isinstance(parse_result, EsperanType.TimePoint)
+        assert isinstance(parse_result, tipo.TimePoint)
         assert 9 == parse_result.hour
         assert 10 > parse_result.minutes
 

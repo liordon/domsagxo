@@ -3,12 +3,12 @@ from enum import Enum
 import math
 
 import ply.yacc as yacc
-from kompilajxo.lexer_builder import UnalphabeticTerminal as UaTer
-from kompilajxo.lexer_builder import PartOfSpeech as POS
-from kompilajxo.lexer_builder import ReservedWord as ResWord
-from kompilajxo.lexer_builder import tokens
-import biblioteko.atomic_types as Atypes
-import biblioteko.predefined_functions as Pfuncs
+from kompilajxo.leksisto import UnalphabeticTerminal as UaTer
+from kompilajxo.leksisto import PartOfSpeech as POS
+from kompilajxo.leksisto import ReservedWord as ResWord
+from kompilajxo.leksisto import tokens
+import biblioteko.atomaj_tipoj as Atypes
+import biblioteko.antauxdifinitaj_funkcioj as Pfuncs
 
 
 class EsperantoSyntaxError(Exception):
@@ -84,7 +84,8 @@ def build(start=None):
 
     @RULE('''expression : term
                         | timePoint
-                        | timeSpan''')
+                        | timeSpan
+                        | functionCall''')
     def p_expression_term(p):
         p[0] = p[1]
 
@@ -215,7 +216,7 @@ def build(start=None):
 
 
 if __name__ == "__main__":
-    import kompilajxo.lexer_builder as lxr
+    import kompilajxo.leksisto as lxr
     lxr.build()
     ast = build(start="statement")
 

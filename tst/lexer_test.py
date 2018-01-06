@@ -1,6 +1,6 @@
 import pytest
-import kompilajxo.lexer_builder as lxr
-from kompilajxo.lexer_builder import PartOfSpeech, UnalphabeticTerminal, ReservedWord
+import kompilajxo.leksisto as lxr
+from kompilajxo.leksisto import PartOfSpeech, UnalphabeticTerminal, ReservedWord
 
 
 class TestPartsOfSpeech(object):
