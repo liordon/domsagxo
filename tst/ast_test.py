@@ -3,7 +3,6 @@ import kompilajxo.leksisto as lxr
 import kompilajxo.abstrakta_sintaksarbo as ast_bld
 import pytest
 
-
 lxr.build()
 
 
@@ -85,7 +84,7 @@ class TestAstTimeSpans(object):
         self.assertTimeSpan(parse_result, hours=2, minutes=10)
 
     def test_canFormat10Hours10MinutesAnd10Seconds(self, ast):
-        parse_result = ast.parse("dek horoj, dek minutoj kaj dek sekundoj")
+        parse_result = ast.parse("dek horoj dek minutoj kaj dek sekundoj")
         self.assertTimeSpan(parse_result, hours=10, minutes=10, seconds=10)
 
     def test_canFormatAnHourAndAHalf(self, ast):
@@ -219,11 +218,13 @@ class TestAstRandomGeneration(object):
         assert 8 == parse_result.hour
         assert 10 > parse_result.minutes
 
-    def test_canGenerateRandomTimePointWithOverflowIntoNextHour(self, ast):
-        parse_result = ast.parse("hazardu horon inter la oka kaj kvindek naux kaj la nauxa kaj dek")
-        assert isinstance(parse_result, tipo.TimePoint)
-        assert 9 == parse_result.hour
-        assert 10 > parse_result.minutes
+    def test_canGenerateRandomTimeSpanWithConstraints(self, ast):
+        parse_result = ast.parse("hazardu tempon inter du minutoj gxis tri minutoj")
+        assert isinstance(parse_result, tipo.TimeSpan)
+        assert 2 >= parse_result.minutes
+        assert 1 <= parse_result.minutes
+        assert 60 > parse_result.seconds
+        assert 0 <= parse_result.seconds
 
 
 class TestAstPrograms(object):

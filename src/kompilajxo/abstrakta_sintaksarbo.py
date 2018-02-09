@@ -36,6 +36,10 @@ def get_digit(number, digit):
 def build(start=None):
     allTokenTypes = tokens # just so the import will be considered meaningful.
     variable_table = {}
+    # precedence = (
+    #     ('left', 'KAJ', 'DELIM'),
+    #     ('left', 'PLUS', 'MINUS'),
+    # )
 
     @RULE('''program : statement ''', UaTer.PERIOD, '''
                     | program statement ''', UaTer.PERIOD)
@@ -148,13 +152,13 @@ def build(start=None):
             p[3] *= 60
         if p[3] >= 60:
             raise EsperantoSyntaxError("Illegal number of minutes entered: " + str(p[3]))
-        p[0] = Atypes.TimePoint(p[3], p[1])
+        p[0] = Atypes.TimePoint(p[1], p[3])
 
     @RULE('''timePoint :  hourNumerator ''', ResWord.TIME_INDICATION)
     def p_round_time_point(p):
         if len(p) > 2 and p[2] != "horo":
             raise EsperantoSyntaxError("wrong hour format. expected hour descriptor, then minute number.")
-        p[0] = Atypes.TimePoint(0, p[1])
+        p[0] = Atypes.TimePoint(p[1], 0)
 
     @RULE('''hourNumerator : ''', ResWord.LA, POS.NUMERATOR, '''
                     | ''', ResWord.LA, '''verbalNumber ''',  POS.NUMERATOR)
@@ -165,9 +169,8 @@ def build(start=None):
         if p[0] > 24:
             raise EsperantoSyntaxError("Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
 
-    @RULE('''timeSpan : timeSpan ''', ResWord.KAJ, '''timeSpan
-                   | timeSpan ''', UaTer.DELIM, '''timeSpan''')
-    def p_time_spans(p):
+    @RULE('''timeSpan : timeSpan ''', ResWord.KAJ, '''partTimeSpan''')
+    def p_time_span_kaj_time_span(p):
         p[0] = Atypes.TimeSpan.unite(p[1], p[3])
 
     @RULE('''timeSpan : timeSpan ''', ResWord.KAJ, '''verbalNumber''')
@@ -176,7 +179,15 @@ def build(start=None):
             raise EsperantoSyntaxError("Illegal time span format, recieved: " + str(p[3]) + " when expected fraction")
         p[0] = p[1].addFraction(p[3])
 
-    @RULE('''timeSpan : ''', ResWord.TIME_INDICATION, '''
+    @RULE('''timeSpan : partTimeSpan''')
+    def p_time_spans_escalation(p):
+        p[0] = p[1]
+
+    @RULE('''timeSpan : timeSpan partTimeSpan''')
+    def p_time_spans_consequtive(p):
+        p[0] = Atypes.TimeSpan.unite(p[1], p[2])
+
+    @RULE('''partTimeSpan : ''', ResWord.TIME_INDICATION, '''
                     | verbalNumber ''', ResWord.TIME_INDICATION)
     def p_time_span(p):
         if len(p) > 2:
@@ -197,14 +208,18 @@ def build(start=None):
     def p_function_call(p):
         p[0] = Pfuncs.method_dict[p[1]](p[2])
 
-    @RULE('''functionArgs : expression
-                    | functionArgs ''', ResWord.KAJ, '''expression
-                    | functionArgs ''', UaTer.DELIM, '''expression''')
+    @RULE('''functionArgs : functionArg
+                    | functionArgs ''', ResWord.KAJ, '''functionArg
+                    | functionArgs ''', UaTer.DELIM, '''functionArg''')
     def p_function_arguments(p):
         if len(p) == 2:
             p[0] = [p[1]]
         else:
             p[0] = p[1] + [p[3]]
+
+    @RULE('''functionArg : expression''')
+    def p_first_function_argument(p):
+        p[0] = p[1]
 
     # Error rule for syntax errors
     def p_error(p):

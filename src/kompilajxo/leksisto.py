@@ -48,27 +48,65 @@ class PartOfSpeech(Enum):
     V_INF = 'VINF'
     V_PRES = 'VPRES'
     V_IMP = 'VIMP'
-    ACCUSATIVE = "ACCUSATIVE"
+    PREPOSITION = "PREPOSITION"
     NUMERATOR = "NUMERATOR"
     OTHER = "OTHER"
 
 
 reserved_words = {
-    "de": ReservedWord.DE.value,
-    "en": ReservedWord.EN.value,
-    "el": UnalphabeticTerminal.DELIM.value,
-    "al": UnalphabeticTerminal.DELIM.value,
     "la": ReservedWord.LA.value,
     "por": ReservedWord.FOR.value,
-    "kun": UnalphabeticTerminal.DELIM.value,
-    "sur": UnalphabeticTerminal.DELIM.value,
     "kaj": ReservedWord.KAJ.value,
     "vero": ReservedWord.TRUE.value,
-    "inter": UnalphabeticTerminal.DELIM.value,
-    "exter": UnalphabeticTerminal.DELIM.value,
-    "trans": UnalphabeticTerminal.DELIM.value,
     "estas": UnalphabeticTerminal.ASSIGN.value,
     "malvero": ReservedWord.FALSE.value}
+
+
+prepositions = [
+"al",
+"anstataux",
+"antaux",
+"apud",
+"cxe",
+"cxirkaux",
+"de",
+"dum",
+"ekde",
+"ekster",
+"eksteren",
+"el",
+"en",
+"gxis",
+"inter",
+"kiel",
+"kontraux",
+"krom",
+"kun",
+"laux",
+"mala",
+"malgraux",
+"malkiel",
+"malsupren",
+"ol",
+"per",
+"plus",
+"po",
+"por",
+"post",
+"preter",
+"pri",
+"pro",
+"sed",
+"sekva",
+"sen",
+"sub",
+"suben",
+"super",
+"supren",
+"sur",
+"tra",
+"trans"
+]
 
 tokens = [] + idList(ReservedWord) \
          + idList(PartOfSpeech) \
@@ -139,6 +177,8 @@ def t_WORD(t):
         t.value = parseDigit(t.value)
     elif timeUnitRe.fullmatch(t.value):
         t.type = ReservedWord.TIME_INDICATION.value
+    elif t.value in prepositions:
+        t.type = UnalphabeticTerminal.DELIM.value
     else:
         t.value = re.sub(r'n$', "", t.value)
         if re.search(r'((o)|(oj))$', t.value):

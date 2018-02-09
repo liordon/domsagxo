@@ -8,7 +8,7 @@ class TimeUnits(Enum):
 
 
 class TimePoint(object):
-    def __init__(self, minutes, hour):
+    def __init__(self, hour, minutes):
         self.minutes = minutes
         self.hour = hour
 
@@ -54,3 +54,31 @@ class TimeSpan(object):
         return (tuple1[0] + tuple2[0],
                 tuple1[1] + tuple2[1],
                 tuple1[2] + tuple2[2])
+
+
+class ApplianceTypes(Enum):
+    # MOST BASIC - TURN ON OR OFF
+    SWITCH = 'SWITCH'
+    # A DIMMER WITH A RANGE OF VALUES
+    KNOB = 'KNOB'
+    # LIKE A KNOB BUT ALSO WITH COLOR
+    LIGHT = 'LIGHT'
+    # A SENSOR FOR TEMPERATURE AND HUMIDITY
+    THERMOSTAT = 'THERMOSTAT'
+    # A SENSOR FOR VISUAL FOOTAGE
+    CAMERA = 'CAMERA'
+
+
+class Appliance(object):
+    ''' the most basic parameter of any appliance is it's name.
+    beyond that, an appliance should have many other functions determined
+    by the components it includes.'''
+    def __init__(self, name):
+        self.type = name
+        self.components = {}
+
+
+class Switch(object):
+    ''' a switch holds a boolean of being turned on or off.
+    This boolean can be changed and querried. '''
+    pass
