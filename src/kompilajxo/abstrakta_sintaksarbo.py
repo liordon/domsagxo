@@ -1,13 +1,13 @@
-from enum import Enum
-
 import math
 
 import ply.yacc as yacc
+
+from biblioteko.rega_komponantoj import Domsagxo
 from kompilajxo.leksisto import UnalphabeticTerminal as UaTer
 from kompilajxo.leksisto import PartOfSpeech as POS
 from kompilajxo.leksisto import ReservedWord as ResWord
 from kompilajxo.leksisto import tokens
-import biblioteko.atomaj_tipoj as Atypes
+from biblioteko.atomaj_tipoj import *
 import biblioteko.antauxdifinitaj_funkcioj as Pfuncs
 
 
@@ -35,6 +35,7 @@ def get_digit(number, digit):
 
 def build(start=None):
     allTokenTypes = tokens # just so the import will be considered meaningful.
+    smart_home_manager = Domsagxo()
     variable_table = {}
     # precedence = (
     #     ('left', 'KAJ', 'DELIM'),
@@ -128,7 +129,9 @@ def build(start=None):
 
     @RULE('''factor : name''')
     def p_factor_noun(p):
-        if p[1] in variable_table.keys():
+        if smart_home_manager.recognizes(p[1]):
+            p[0] = smart_home_manager.getApplianceOrGroup(p[1])
+        elif p[1] in variable_table.keys():
             p[0] = variable_table[p[1]]
         else:
             p[0] = p[1]
@@ -152,13 +155,13 @@ def build(start=None):
             p[3] *= 60
         if p[3] >= 60:
             raise EsperantoSyntaxError("Illegal number of minutes entered: " + str(p[3]))
-        p[0] = Atypes.TimePoint(p[1], p[3])
+        p[0] = TimePoint(p[1], p[3])
 
     @RULE('''timePoint :  hourNumerator ''', ResWord.TIME_INDICATION)
     def p_round_time_point(p):
         if len(p) > 2 and p[2] != "horo":
             raise EsperantoSyntaxError("wrong hour format. expected hour descriptor, then minute number.")
-        p[0] = Atypes.TimePoint(p[1], 0)
+        p[0] = TimePoint(p[1], 0)
 
     @RULE('''hourNumerator : ''', ResWord.LA, POS.NUMERATOR, '''
                     | ''', ResWord.LA, '''verbalNumber ''',  POS.NUMERATOR)
@@ -171,7 +174,7 @@ def build(start=None):
 
     @RULE('''timeSpan : timeSpan ''', ResWord.KAJ, '''partTimeSpan''')
     def p_time_span_kaj_time_span(p):
-        p[0] = Atypes.TimeSpan.unite(p[1], p[3])
+        p[0] = TimeSpan.unite(p[1], p[3])
 
     @RULE('''timeSpan : timeSpan ''', ResWord.KAJ, '''verbalNumber''')
     def p_time_fractions(p):
@@ -185,7 +188,7 @@ def build(start=None):
 
     @RULE('''timeSpan : timeSpan partTimeSpan''')
     def p_time_spans_consequtive(p):
-        p[0] = Atypes.TimeSpan.unite(p[1], p[2])
+        p[0] = TimeSpan.unite(p[1], p[2])
 
     @RULE('''partTimeSpan : ''', ResWord.TIME_INDICATION, '''
                     | verbalNumber ''', ResWord.TIME_INDICATION)
@@ -198,15 +201,15 @@ def build(start=None):
             amount = 1
 
         if time_unit.startswith("horo"):
-            p[0] = Atypes.TimeSpan(hours=math.floor(amount), minutes=60*(amount - math.floor(amount)))
+            p[0] = TimeSpan(hours=math.floor(amount), minutes=60*(amount - math.floor(amount)))
         elif time_unit.startswith("minuto"):
-            p[0] = Atypes.TimeSpan(minutes=math.floor(amount), seconds=60*(amount - math.floor(amount)))
+            p[0] = TimeSpan(minutes=math.floor(amount), seconds=60*(amount - math.floor(amount)))
         else:
-            p[0] = Atypes.TimeSpan(seconds=amount)
+            p[0] = TimeSpan(seconds=amount)
 
     @RULE('''functionCall : ''', POS.V_IMP, '''functionArgs''')
     def p_function_call(p):
-        p[0] = Pfuncs.method_dict[p[1]](p[2])
+        p[0] = Pfuncs.method_dict[p[1]](p[2], smart_home_manager)
 
     @RULE('''functionArgs : functionArg
                     | functionArgs ''', ResWord.KAJ, '''functionArg
@@ -227,6 +230,7 @@ def build(start=None):
 
     ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, errorlog=yacc.NullLogger())
     ast_builder.variable_table = variable_table
+    ast_builder.smart_home_manager = smart_home_manager
     return ast_builder
 
 

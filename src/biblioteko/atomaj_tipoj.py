@@ -58,23 +58,25 @@ class TimeSpan(object):
 
 class ApplianceTypes(Enum):
     # MOST BASIC - TURN ON OR OFF
-    SWITCH = 'SWITCH'
+    SWITCH = 'sxalto'
     # A DIMMER WITH A RANGE OF VALUES
-    KNOB = 'KNOB'
+    KNOB = 'agordo'
     # LIKE A KNOB BUT ALSO WITH COLOR
-    LIGHT = 'LIGHT'
+    LIGHT = 'lumo'
     # A SENSOR FOR TEMPERATURE AND HUMIDITY
-    THERMOSTAT = 'THERMOSTAT'
+    THERMOSTAT = 'termostato'
     # A SENSOR FOR VISUAL FOOTAGE
-    CAMERA = 'CAMERA'
+    CAMERA = 'fotilo'
 
 
 class Appliance(object):
     ''' the most basic parameter of any appliance is it's name.
     beyond that, an appliance should have many other functions determined
     by the components it includes.'''
-    def __init__(self, name):
-        self.type = name
+    def __init__(self, app_type, name):
+        self.name = name
+        self.type = app_type
+        self.isTurnedOn = False
         self.components = {}
 
 
