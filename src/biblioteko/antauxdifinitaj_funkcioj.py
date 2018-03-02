@@ -7,6 +7,19 @@ class Generate(Enum):
     TIME_SPAN = 'tempo'
 
 
+digitNames = {
+    1: "unu",
+    2: "du",
+    3: "tri",
+    4: "kvar",
+    5: "kvin",
+    6: "ses",
+    7: "sep",
+    8: "ok",
+    9: "naux"
+}
+
+
 def generateRandom(argList, smart_house_manager=None):
     if argList[0] == Generate.TIME_POINT.value:
         if len(argList) > 1:
@@ -54,20 +67,55 @@ def addAppliance(device_parameters, smart_house_manager):
     if len(device_parameters) > 1:
         appliance_name = device_parameters[1]
     else:
-        appliance_name = appliance_type.value
+        for numerator in range(1, 9):
+            appliance_name = digitNames[numerator] + "a " + appliance_type.value
+            if not smart_house_manager.recognizes(appliance_name):
+                break
     if smart_house_manager.recognizes(appliance_name):
-        raise ValueError("appliance " + appliance_name + " already exists.")
+        raise KeyError("appliance " + appliance_name + " already exists.")
     appliance = Appliance(appliance_type, appliance_name)
     smart_house_manager.addAppliance(appliance)
 
 
-def turnOnDevices(devices, smart_house_manager=None):
-    for device in devices:
-        if type(device) is list:
+def renameAppliance(names, smart_house_manager):
+    if smart_house_manager.recognizes(names[1]):
+        raise KeyError("name " + names[1] + " is already taken")
+    appliance = smart_house_manager.appliances[names[0]]
+    appliance.name = names[1]
+    smart_house_manager.appliances[names[1]] = appliance
+    smart_house_manager.appliances.pop(names[0])
+
+
+def turnOnDevices(devices, smart_house_manager):
+    for d in devices:
+        if smart_house_manager.isApplianceName(d):
+            device = smart_house_manager.getApplianceOrGroup(d)
+            device.isTurnedOn = True
+        elif smart_house_manager.isGroupName(d):
+            device = smart_house_manager.getApplianceOrGroup(d)
             for d in device:
                 d.isTurnedOn = True
-        else:
-            device.isTurnedOn = True
+
+
+def createGroup(group_name, smart_house_manager):
+    if group_name[0] in smart_house_manager.groups.keys():
+        raise KeyError("group name " + group_name[0] + " is already taken")
+    smart_house_manager.groups[group_name[0]] = []
+
+
+def removeGroup(group_name, smart_house_manager):
+    smart_house_manager.groups.pop(group_name[0])
+
+
+def putApplianceInGroup(appliance_and_group, smart_house_manager):
+    appliance = smart_house_manager.appliances[appliance_and_group[0]]
+    smart_house_manager.groups[appliance_and_group[1]].append(appliance)
+
+
+def moveAppliance(appliance_and_groups, smart_house_manager):
+    appliance = smart_house_manager.appliances[appliance_and_groups[0]]
+    smart_house_manager.groups[appliance_and_groups[1]].remove(appliance)
+    smart_house_manager.groups[appliance_and_groups[2]].append(appliance)
 
 
 method_dict = {"hazardu": generateRandom,

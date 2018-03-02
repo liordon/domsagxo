@@ -2,7 +2,7 @@ import math
 
 import ply.yacc as yacc
 
-from biblioteko.rega_komponantoj import Domsagxo
+from biblioteko.estra_komponantoj import Domsagxo
 from kompilajxo.leksisto import UnalphabeticTerminal as UaTer
 from kompilajxo.leksisto import PartOfSpeech as POS
 from kompilajxo.leksisto import ReservedWord as ResWord
@@ -129,9 +129,7 @@ def build(start=None):
 
     @RULE('''factor : name''')
     def p_factor_noun(p):
-        if smart_home_manager.recognizes(p[1]):
-            p[0] = smart_home_manager.getApplianceOrGroup(p[1])
-        elif p[1] in variable_table.keys():
+        if p[1] in variable_table.keys():
             p[0] = variable_table[p[1]]
         else:
             p[0] = p[1]

@@ -184,8 +184,17 @@ class TestAstApplianceManagement(object):
             elif appliance.type is not tipo.ApplianceTypes.LIGHT:
                 assert not appliance.isTurnedOn
 
-    def test_canAddApplianceToSmartHomeViaSpeech(self, ast):
+    def test_canAddAnonymousApplianceToSmartHomeViaSpeech(self, ast):
         ast.parse("aldonu lumon")
-        assert len(ast.smart_home_manager.appliances) > 0
-        assert ast.smart_home_manager.appliances["lumo"].type is tipo.ApplianceTypes.LIGHT
-        assert "lumo" in ast.smart_home_manager.appliances.keys()
+        assert 1 == len(ast.smart_home_manager.appliances)
+        assert "lumo" not in ast.smart_home_manager.appliances.keys()
+        assert "unua lumo" in ast.smart_home_manager.appliances.keys()
+        assert ast.smart_home_manager.appliances["unua lumo"].type is tipo.ApplianceTypes.LIGHT
+
+    def test_whenAddingTwoAnonymousAppliancesOneReceivesSerialNumber(self, ast):
+        ast.parse("aldonu lumon")
+        ast.parse("aldonu lumon")
+        assert 2 == len(ast.smart_home_manager.appliances)
+        assert "unua lumo" in ast.smart_home_manager.appliances.keys()
+        assert "dua lumo" in ast.smart_home_manager.appliances.keys()
+        assert ast.smart_home_manager.appliances["dua lumo"].type is tipo.ApplianceTypes.LIGHT

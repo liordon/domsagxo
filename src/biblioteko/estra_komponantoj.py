@@ -20,6 +20,8 @@ class Domsagxo(object):
         self.appliances = {}
 
     def addAppliance(self, appliance):
+        if appliance.name in self.appliances:
+            raise ValueError("appliance named " + appliance.name + " already exists in this home.")
         self.appliances[appliance.name] = appliance
         if appliance.type in Domsagxo.appliance_type_group:
             self.groups[Domsagxo.appliance_type_group[appliance.type]].append(appliance)
@@ -27,6 +29,12 @@ class Domsagxo(object):
     def recognizes(self, appliance_or_group_name):
         return (appliance_or_group_name in self.appliances) or \
                (appliance_or_group_name in self.groups)
+
+    def isApplianceName(self, appliance_name):
+        return appliance_name in self.appliances
+
+    def isGroupName(self, group_name):
+        return group_name in self.groups.keys()
 
     def getApplianceOrGroup(self, appliance_or_group_name):
         if appliance_or_group_name in self.groups:
