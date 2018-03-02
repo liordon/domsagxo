@@ -3,11 +3,13 @@ import kompilajxo.leksisto as lxr
 from kompilajxo.leksisto import PartOfSpeech, UnalphabeticTerminal, ReservedWord
 
 
-class TestPartsOfSpeech(object):
-
+class LexerProvided(object):
     @pytest.fixture
     def lexer(self):
         return lxr.build()
+
+
+class TestPartsOfSpeech(LexerProvided):
 
     @staticmethod
     def assertPartOfSpeech(token, partOfSpeech):
@@ -43,11 +45,7 @@ class TestPartsOfSpeech(object):
         assert lexer.token().value == 'musoj'
 
 
-class TestReservedWords(object):
-
-    @pytest.fixture
-    def lexer(self):
-        return lxr.build()
+class TestReservedWords(LexerProvided):
 
     @staticmethod
     def assertPartOfSpeech(token, partOfSpeech):
@@ -114,10 +112,7 @@ class TestReservedWords(object):
         self.assertPartOfSpeech(lexer.token(), ReservedWord.TIME_INDICATION)
 
 
-class TestMultipleTokenSequences(object):
-    @pytest.fixture
-    def lexer(self):
-        return lxr.build()
+class TestMultipleTokenSequences(LexerProvided):
 
     def getTokenList(self, lexer):
         res = []
@@ -137,11 +132,7 @@ class TestMultipleTokenSequences(object):
         print(tokens)
 
 
-class TestVerbalNumbers(object):
-    @pytest.fixture
-    def lexer(self):
-        return lxr.build()
-
+class TestVerbalNumbers(LexerProvided):
     @staticmethod
     def assertVerbalNumberValue(numerical_value, token):
         assert ReservedWord.VERBAL_DIGIT.value == token.type

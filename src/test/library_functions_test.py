@@ -4,6 +4,12 @@ from biblioteko.atomaj_tipoj import *
 from biblioteko.estra_komponantoj import *
 
 
+class SmartHomeManagerProvided(object):
+    @pytest.fixture
+    def shm(self):
+        return Domsagxo()
+
+
 class TestTimePointGeneration(object):
 
     def test_canGenerateTotallyRandomTimePoint(self):
@@ -69,11 +75,8 @@ class TestTimeSpanGeneration(object):
         assert 0 <= time_span.seconds
 
 
-class TestApplianceManagement(object):
-    @pytest.fixture
-    def shm(self):
-        return Domsagxo()
-    
+class TestApplianceManagement(SmartHomeManagerProvided):
+
     def test_managerStartsEmpty(self, shm):
         assert 0 == len(shm.appliances)
 
@@ -164,7 +167,7 @@ class TestApplianceManagement(object):
         assert 1 == len(shm.groups[group_name])
         assert appliance in shm.groups[group_name]
 
-    def test_cannotMoveNonExistingApplianceIntoGroup(self, shm):
+    def test_cannotAddNonExistingApplianceToGroup(self, shm):
         group_name = "mia dormocxambro"
         shm.groups[group_name] = []
         appliance_name = "sxambalulo"
@@ -172,7 +175,7 @@ class TestApplianceManagement(object):
         with pytest.raises(KeyError):
             putApplianceInGroup([appliance_name, group_name], shm)
 
-    def test_cannotMoveApplianceIntoNonExistingGroup(self, shm):
+    def test_cannotPutApplianceInNonExistingGroup(self, shm):
         group_name = "mia dormocxambro"
         appliance_name = "sxambalulo"
         appliance = Appliance(ApplianceTypes.LIGHT, appliance_name)
@@ -193,3 +196,20 @@ class TestApplianceManagement(object):
         moveAppliance([appliance_name, old_group_name, new_group_name], shm)
         assert appliance not in shm.groups[old_group_name]
         assert appliance in shm.groups[new_group_name]
+
+    def test_cannotMoveApplianceWithoutDestination(self, shm):
+        old_group_name = "mia dormocxambro"
+        new_group_name = "infancxambro"
+        appliance_name = "sxambalulo"
+        appliance = Appliance(ApplianceTypes.LIGHT, appliance_name)
+        shm.addAppliance(appliance)
+        shm.groups[old_group_name] = [appliance]
+        shm.groups[new_group_name] = []
+
+        with pytest.raises(ValueError):
+            moveAppliance([appliance_name, old_group_name], shm)
+
+        assert appliance in shm.groups[old_group_name]
+        assert appliance not in shm.groups[new_group_name]
+
+

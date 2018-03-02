@@ -89,33 +89,31 @@ def renameAppliance(names, smart_house_manager):
 def turnOnDevices(devices, smart_house_manager):
     for d in devices:
         if smart_house_manager.isApplianceName(d):
-            device = smart_house_manager.getApplianceOrGroup(d)
+            device = smart_house_manager.getAppliance(d)
             device.isTurnedOn = True
         elif smart_house_manager.isGroupName(d):
-            device = smart_house_manager.getApplianceOrGroup(d)
+            device = smart_house_manager.getGroup(d)
             for d in device:
                 d.isTurnedOn = True
 
 
 def createGroup(group_name, smart_house_manager):
-    if group_name[0] in smart_house_manager.groups.keys():
-        raise KeyError("group name " + group_name[0] + " is already taken")
-    smart_house_manager.groups[group_name[0]] = []
+    smart_house_manager.addGroup(group_name[0])
 
 
 def removeGroup(group_name, smart_house_manager):
-    smart_house_manager.groups.pop(group_name[0])
+    smart_house_manager.removeGroup(group_name[0])
 
 
 def putApplianceInGroup(appliance_and_group, smart_house_manager):
-    appliance = smart_house_manager.appliances[appliance_and_group[0]]
-    smart_house_manager.groups[appliance_and_group[1]].append(appliance)
+    smart_house_manager.addApplianceToGroup(appliance_and_group[0], appliance_and_group[1])
 
 
 def moveAppliance(appliance_and_groups, smart_house_manager):
-    appliance = smart_house_manager.appliances[appliance_and_groups[0]]
-    smart_house_manager.groups[appliance_and_groups[1]].remove(appliance)
-    smart_house_manager.groups[appliance_and_groups[2]].append(appliance)
+    if len(appliance_and_groups) < 3:
+        raise ValueError("not enough arguments for moving appliance between groups")
+    smart_house_manager.removeApplianceFromGroup(appliance_and_groups[0], appliance_and_groups[1])
+    smart_house_manager.addApplianceToGroup(appliance_and_groups[0], appliance_and_groups[2])
 
 
 method_dict = {"hazardu": generateRandom,

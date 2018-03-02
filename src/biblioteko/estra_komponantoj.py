@@ -26,6 +26,14 @@ class Domsagxo(object):
         if appliance.type in Domsagxo.appliance_type_group:
             self.groups[Domsagxo.appliance_type_group[appliance.type]].append(appliance)
 
+    def addGroup(self, group_name):
+        if self.isGroupName(group_name):
+            raise KeyError("group name " + group_name + " is already taken")
+        self.groups[group_name] = []
+
+    def removeGroup(self, group_name):
+        self.groups.pop(group_name)
+
     def recognizes(self, appliance_or_group_name):
         return (appliance_or_group_name in self.appliances) or \
                (appliance_or_group_name in self.groups)
@@ -36,8 +44,16 @@ class Domsagxo(object):
     def isGroupName(self, group_name):
         return group_name in self.groups.keys()
 
-    def getApplianceOrGroup(self, appliance_or_group_name):
-        if appliance_or_group_name in self.groups:
-            return self.groups[appliance_or_group_name]
-        elif appliance_or_group_name in self.appliances:
-            return self.appliances[appliance_or_group_name]
+    def getAppliance(self, appliance_name):
+        return self.appliances[appliance_name]
+
+    def getGroup(self, group_name):
+        return self.groups[group_name]
+
+    def addApplianceToGroup(self, appliance_name, group):
+        appliance = self.appliances[appliance_name]
+        self.groups[group].append(appliance)
+
+    def removeApplianceFromGroup(self, appliance_name, group):
+        appliance = self.appliances[appliance_name]
+        self.groups[group].remove(appliance)
