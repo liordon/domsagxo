@@ -2,19 +2,20 @@ import os
 
 rooms = ["mia chambro", "la necesejo"]
 
+
 def outputMethod(output):
     print(output)
-    os.system('espeak -v eo+f3 "'+output+'"')
+    os.system('espeak -v eo+f3 "' + output + '"')
 
 
 outputMethod("mi trovis novan aparaton! mi nomigxis gin gxon doux, "
-      "cxu vi volas ke mi sxaltos gxi?")
+             "cxu vi volas ke mi sxaltos gxi?")
 answer = input("")
-if (answer == "jes" ):
+if answer == "jes":
     outputMethod("mi sxaltas gxin, en kiu cxambro gxi estas?")
 
     answer = input("")
-    while (answer not in rooms):
+    while answer not in rooms:
         outputMethod("pardonu min... mi ne sciis tio cxambro, bonvolu provu denove")
         answer = input("")
 
@@ -26,7 +27,7 @@ if (answer == "jes" ):
         answer = answer[5:]
         if answer.startswith("nomigxu gxin"):
             answer = answer[12:]
-        while (len(answer) == 0):
+        while len(answer) == 0:
             outputMethod("kiel vi volas nomigxi gxin?")
             answer = input("")
         name = answer

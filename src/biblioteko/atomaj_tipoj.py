@@ -1,6 +1,7 @@
 from enum import Enum
 
 
+# noinspection SpellCheckingInspection
 class TimeUnits(Enum):
     HOUR = "horo"
     MINUTE = "minuto"
@@ -22,13 +23,13 @@ class TimeSpan(object):
         self.minutes = minutes
         self.hours = hours
 
-    def addFraction(self, frac):
+    def addFraction(self, fraction):
         if self.seconds > 0:
-            res = TimeSpan(0, 0, frac)
+            res = TimeSpan(0, 0, fraction)
         elif self.minutes > 0:
-            res = TimeSpan(0, 0, 60 * frac)
+            res = TimeSpan(0, 0, 60 * fraction)
         else:
-            res = TimeSpan(0, 60 * frac, 0)
+            res = TimeSpan(0, 60 * fraction, 0)
 
         return self.unite(self, res)
 
@@ -56,6 +57,7 @@ class TimeSpan(object):
                 tuple1[2] + tuple2[2])
 
 
+# noinspection SpellCheckingInspection
 class ApplianceTypes(Enum):
     # MOST BASIC - TURN ON OR OFF
     SWITCH = 'sxalto'
@@ -77,10 +79,4 @@ class Appliance(object):
         self.name = name
         self.type = app_type
         self.isTurnedOn = False
-        self.components = {}
-
-
-class Switch(object):
-    ''' a switch holds a boolean of being turned on or off.
-    This boolean can be changed and querried. '''
-    pass
+        self.state_components = {}
