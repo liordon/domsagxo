@@ -230,3 +230,29 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         assert shm.getAppliance(app_nm1).isTurnedOn
         assert shm.getAppliance(app_nm2).isTurnedOn
         assert shm.getAppliance(app_nm3).isTurnedOn
+
+    def test_canQueryLightForItsBrightness(self, shm):
+        shm.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
+
+        brightness = getApplianceProperty([app_nm1, ApplianceProperties.BRIGHTNESS.value], shm)
+
+        assert 1 == brightness
+
+    def test_canAlterLightBrightness(self, shm):
+        shm.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
+
+        setApplianceProperty([app_nm1, ApplianceProperties.BRIGHTNESS.value, .15], shm)
+
+        assert .15 == shm.getPropertyOfAppliance(app_nm1, ApplianceProperties.BRIGHTNESS.value)
+
+    def test_canAlterLightBrightnessForEntireGroup(self, shm):
+        shm.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
+        shm.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm2))
+        shm.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm3))
+
+        group_of_all_lights = ApplianceTypes.LIGHT.value + "j"
+        setApplianceProperty([group_of_all_lights, ApplianceProperties.BRIGHTNESS.value, .15], shm)
+
+        assert .15 == shm.getPropertyOfAppliance(app_nm1, ApplianceProperties.BRIGHTNESS.value)
+        assert .15 == shm.getPropertyOfAppliance(app_nm2, ApplianceProperties.BRIGHTNESS.value)
+        assert .15 == shm.getPropertyOfAppliance(app_nm3, ApplianceProperties.BRIGHTNESS.value)

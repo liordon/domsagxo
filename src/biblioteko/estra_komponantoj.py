@@ -57,3 +57,11 @@ class Domsagxo(object):
     def removeApplianceFromGroup(self, appliance_name, group):
         appliance = self.appliances[appliance_name]
         self.groups[group].remove(appliance)
+
+    def getPropertyOfAppliance(self, appliance_name, property_name):
+        appliance = self.appliances[appliance_name]
+        return appliance.state_components[property_name]
+
+    def setPropertyOfAppliance(self, appliance_name, property_name, value):
+        appliance = self.appliances[appliance_name]
+        appliance.state_components[property_name] = value

@@ -87,14 +87,21 @@ def renameAppliance(names, smart_house_manager):
 
 
 def turnOnDevices(devices, smart_house_manager):
+    def turnOnDevice(device):
+        device.isTurnedOn = True
+
+    performActionOnAllDevices(devices, smart_house_manager, turnOnDevice)
+
+
+def performActionOnAllDevices(devices, smart_house_manager, action):
     for d in devices:
         if smart_house_manager.isApplianceName(d):
             device = smart_house_manager.getAppliance(d)
-            device.isTurnedOn = True
+            action(device)
         elif smart_house_manager.isGroupName(d):
-            device = smart_house_manager.getGroup(d)
-            for d in device:
-                d.isTurnedOn = True
+            device_group = smart_house_manager.getGroup(d)
+            for device in device_group:
+                action(device)
 
 
 def createGroup(group_name, smart_house_manager):
@@ -114,6 +121,23 @@ def moveAppliance(appliance_and_groups, smart_house_manager):
         raise ValueError("not enough arguments for moving appliance between groups")
     smart_house_manager.removeApplianceFromGroup(appliance_and_groups[0], appliance_and_groups[1])
     smart_house_manager.addApplianceToGroup(appliance_and_groups[0], appliance_and_groups[2])
+
+
+def getApplianceProperty(appliance_and_property, smart_house_manager):
+    return smart_house_manager \
+        .getPropertyOfAppliance(appliance_and_property[0], appliance_and_property[1])
+
+
+def setApplianceProperty(appliance_property_and_value, smart_house_manager):
+    def setStateComponentAction(device):
+        device.setStateComponent(appliance_property_and_value[1],
+                                 appliance_property_and_value[2])
+    performActionOnAllDevices([appliance_property_and_value[0]],
+                              smart_house_manager, setStateComponentAction)
+    # return smart_house_manager\
+    #     .setPropertyOfAppliance(appliance_property_and_value[0],
+    #                             appliance_property_and_value[1],
+    #                             appliance_property_and_value[2])
 
 
 method_dict = {"hazardu": generateRandom,
