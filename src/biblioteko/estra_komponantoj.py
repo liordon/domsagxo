@@ -1,4 +1,5 @@
-from biblioteko.atomaj_tipoj import ApplianceTypes
+from biblioteko.atomaj_tipoj import *
+import sched
 
 
 class Domsagxo(object):
@@ -65,3 +66,33 @@ class Domsagxo(object):
     def setPropertyOfAppliance(self, appliance_name, property_name, value):
         appliance = self.appliances[appliance_name]
         appliance.state_components[property_name] = value
+
+
+class Horaro(object):
+
+    def __init__(self, timefunc, delayfunc):
+        self.scheduler = sched.scheduler(timefunc, delayfunc)
+
+    def enter(self, delay, action, argument=(), kwargs={}):
+        self.scheduler.enter(delay, 1, action, argument, kwargs)
+
+    def run(self, blocking=True):
+        self.scheduler.run(blocking)
+
+    def runSetTime(self, amountOfTime, time_unit=TimeUnits.SECOND ):
+        target_time = self.scheduler.timefunc() + amountOfTime * time_unit.in_seconds()
+        while (not self.scheduler.empty()) and \
+                (self.scheduler.queue[0][0] <= target_time):
+            self.scheduler.delayfunc(self.scheduler.queue[0][0] - self.scheduler.timefunc())
+            self.scheduler.run(False)
+        self.scheduler.delayfunc(target_time - self.scheduler.timefunc())
+
+    def enterInTimeUnits(self, delay, time_unit,
+                         action, argument=(), kwargs={}):
+        self.scheduler.enter(delay*time_unit.in_seconds(), 1, action, argument, kwargs)
+
+    def repeat(self, delay, time_unit, action):
+        def repetition():
+            action()
+            self.scheduler.enter(delay * time_unit.in_seconds(), 1, repetition)
+        self.scheduler.enter(delay * time_unit.in_seconds(), 1, repetition)

@@ -3,9 +3,20 @@ from enum import Enum
 
 # noinspection SpellCheckingInspection
 class TimeUnits(Enum):
+    DAY = "tago"
     HOUR = "horo"
     MINUTE = "minuto"
     SECOND = "sekundo"
+
+    def in_seconds(self):
+        if self == TimeUnits.SECOND:
+            return 1
+        elif self == TimeUnits.MINUTE:
+            return 60
+        elif self == TimeUnits.HOUR:
+            return 3600
+        elif self == TimeUnits.DAY:
+            return 86400
 
 
 class TimePoint(object):
@@ -22,6 +33,8 @@ class TimeSpan(object):
         self.seconds = seconds
         self.minutes = minutes
         self.hours = hours
+
+
 
     def addFraction(self, fraction):
         if self.seconds > 0:

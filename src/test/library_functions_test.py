@@ -1,4 +1,5 @@
 import pytest
+
 from biblioteko.antauxdifinitaj_funkcioj import *
 from biblioteko.atomaj_tipoj import *
 from biblioteko.estra_komponantoj import *
@@ -47,7 +48,7 @@ class TestTimeSpanGeneration(object):
 
     def test_canGenerateTotallyRandomTimeSpan(self):
         time_span = generateRandom([Generate.TIME_SPAN.value])
-        assert isinstance(time_span, TimeSpan) #TODO: infinite loop? kial?!
+        assert isinstance(time_span, TimeSpan)
 
     def test_canGenerateConstrainedRandomTimeSpan(self):
         time_span = generateRandom([Generate.TIME_SPAN.value,
