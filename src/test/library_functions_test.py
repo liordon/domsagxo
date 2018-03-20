@@ -52,8 +52,8 @@ class TestTimeSpanGeneration(object):
 
     def test_canGenerateConstrainedRandomTimeSpan(self):
         time_span = generateRandom([Generate.TIME_SPAN.value,
-                                    TimeSpan(0, 0, 1),
-                                    TimeSpan(0, 1, 0)])
+                                    TimeSpan(seconds=1),
+                                    TimeSpan(minutes=1)])
         assert isinstance(time_span, TimeSpan)
         assert 0 == time_span.hours
         assert 1 >= time_span.minutes
@@ -62,8 +62,8 @@ class TestTimeSpanGeneration(object):
 
     def test_canGenerateLargeConstrainedRandomTimeSpan(self):
         time_span = generateRandom([Generate.TIME_SPAN.value,
-                                    TimeSpan(1, 0, 0),
-                                    TimeSpan(2, 0, 0)])
+                                    TimeSpan(hours=1),
+                                    TimeSpan(hours=2)])
         assert isinstance(time_span, TimeSpan)
         assert 1 == time_span.hours
         assert 0 <= time_span.minutes
@@ -73,8 +73,8 @@ class TestTimeSpanGeneration(object):
 
     def test_canGenerateRandomTimeSpanWithOverflow(self):
         time_span = generateRandom([Generate.TIME_SPAN.value,
-                                    TimeSpan(0, 59, 0),
-                                    TimeSpan(2, 0, 0)])
+                                    TimeSpan(minutes=59),
+                                    TimeSpan(hours=2)])
         assert isinstance(time_span, TimeSpan)
         assert 1 >= time_span.hours
         assert 0 <= time_span.minutes

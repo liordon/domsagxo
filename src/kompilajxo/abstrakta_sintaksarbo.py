@@ -198,7 +198,9 @@ def build(start=None):
             time_unit = p[1]
             amount = 1
 
-        if time_unit.startswith("horo"):
+        if time_unit.startswith("tago"):
+            p[0] = TimeSpan(days=math.floor(amount), hours=24*(amount - math.floor(amount)))
+        elif time_unit.startswith("horo"):
             p[0] = TimeSpan(hours=math.floor(amount), minutes=60*(amount - math.floor(amount)))
         elif time_unit.startswith("minuto"):
             p[0] = TimeSpan(minutes=math.floor(amount), seconds=60*(amount - math.floor(amount)))

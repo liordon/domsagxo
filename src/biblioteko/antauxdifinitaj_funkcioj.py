@@ -57,9 +57,9 @@ def generateConstrainedTimeSpan(lower_bound, upper_bound):
     random_hours = lower_bound.hours + random_total_seconds // 3600 \
                    + (1 if random_minutes >= 60 else 0)
 
-    return TimeSpan(random_hours,
-                    random_minutes % 60,
-                    random_seconds % 60)
+    return TimeSpan(hours=random_hours,
+                    minutes=random_minutes % 60,
+                    seconds=random_seconds % 60)
 
 
 def addAppliance(device_parameters, smart_house_manager):

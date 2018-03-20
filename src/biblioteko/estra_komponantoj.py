@@ -74,25 +74,25 @@ class Horaro(object):
         self.scheduler = sched.scheduler(timefunc, delayfunc)
 
     def enter(self, delay, action, argument=(), kwargs={}):
-        self.scheduler.enter(delay, 1, action, argument, kwargs)
+        self.scheduler.enter(delay.totalSeconds(), 1, action, argument, kwargs)
 
     def run(self, blocking=True):
         self.scheduler.run(blocking)
 
-    def runSetTime(self, amountOfTime, time_unit=TimeUnits.SECOND ):
-        target_time = self.scheduler.timefunc() + amountOfTime * time_unit.in_seconds()
+    def runSetTime(self, amountOfTime):
+        target_time = self.scheduler.timefunc() + amountOfTime.totalSeconds()
         while (not self.scheduler.empty()) and \
                 (self.scheduler.queue[0][0] <= target_time):
             self.scheduler.delayfunc(self.scheduler.queue[0][0] - self.scheduler.timefunc())
             self.scheduler.run(False)
         self.scheduler.delayfunc(target_time - self.scheduler.timefunc())
 
-    def enterInTimeUnits(self, delay, time_unit,
-                         action, argument=(), kwargs={}):
-        self.scheduler.enter(delay*time_unit.in_seconds(), 1, action, argument, kwargs)
+    # def enterInTimeUnits(self, delay, time_unit,
+    #                      action, argument=(), kwargs={}):
+    #     self.scheduler.enter(delay*time_unit.in_seconds(), 1, action, argument, kwargs)
 
-    def repeat(self, delay, time_unit, action):
+    def repeat(self, delay, action):
         def repetition():
             action()
-            self.scheduler.enter(delay * time_unit.in_seconds(), 1, repetition)
-        self.scheduler.enter(delay * time_unit.in_seconds(), 1, repetition)
+            self.scheduler.enter(delay.totalSeconds(), 1, repetition)
+        self.scheduler.enter(delay.totalSeconds(), 1, repetition)

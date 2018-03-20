@@ -29,45 +29,50 @@ class TimePoint(object):
 
 
 class TimeSpan(object):
-    def __init__(self, hours=0, minutes=0, seconds=0):
+    def __init__(self, days=0, hours=0, minutes=0, seconds=0):
+        self.days = days
         self.seconds = seconds
         self.minutes = minutes
         self.hours = hours
 
-
-
     def addFraction(self, fraction):
         if self.seconds > 0:
-            res = TimeSpan(0, 0, fraction)
+            res = TimeSpan(seconds=fraction)
         elif self.minutes > 0:
-            res = TimeSpan(0, 0, 60 * fraction)
+            res = TimeSpan(seconds=60 * fraction)
         else:
-            res = TimeSpan(0, 60 * fraction, 0)
+            res = TimeSpan(minutes=60 * fraction)
 
         return self.unite(self, res)
 
+    def totalSeconds(self):
+        hours = self.hours + self.days*24
+        minutes = self.minutes + hours*60
+        return self.seconds + minutes*60
+
+
     def __str__(self):
         components = []
+        if self.days > 0:
+            components += [self.days, "days"]
         if self.hours > 0:
-            components += [self.hours, " hours "]
+            components += [self.hours, "hours"]
         if self.minutes > 0:
-            components += [self.minutes, " minutes "]
+            components += [self.minutes, "minutes"]
         if self.seconds > 0:
-            components += [self.seconds, " hours "]
+            components += [self.seconds, "seconds"]
 
-        return "TimeSpan(%02d,%02d,%02d)" % (self.hours, self.minutes, self.seconds,)
+        if len(components) > 2:
+            components = components[:-2] + "and" + components[-2:]
+
 
     @classmethod
     def unite(cls, span1, span2):
-        return TimeSpan(span1.hours + span2.hours,
-                        span1.minutes + span2.minutes,
-                        span1.seconds + span2.seconds)
+        return TimeSpan(days=span1.days + span2.days,
+                        hours=span1.hours + span2.hours,
+                        minutes=span1.minutes + span2.minutes,
+                        seconds=span1.seconds + span2.seconds)
 
-    @classmethod
-    def uniteTuple(cls, tuple1, tuple2):
-        return (tuple1[0] + tuple2[0],
-                tuple1[1] + tuple2[1],
-                tuple1[2] + tuple2[2])
 
 
 # noinspection SpellCheckingInspection

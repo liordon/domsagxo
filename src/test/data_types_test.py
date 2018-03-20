@@ -12,8 +12,9 @@ class TestAstTimeSpans(object):
         return ast_bld.build(start="timeSpan")
 
     @staticmethod
-    def assertTimeSpan(parse_result, hours=0, minutes=0, seconds=0):
+    def assertTimeSpan(parse_result, days=0, hours=0, minutes=0, seconds=0):
         assert isinstance(parse_result, tipo.TimeSpan)
+        assert days == parse_result.days
         assert hours == parse_result.hours
         assert minutes == parse_result.minutes
         assert seconds == parse_result.seconds
@@ -57,6 +58,10 @@ class TestAstTimeSpans(object):
     def test_canFormatHalfAMinute(self, ast):
         parse_result = ast.parse("duono minuto")
         self.assertTimeSpan(parse_result, seconds=30)
+
+    def test_canFormat2Days(self, ast):
+        parse_result = ast.parse("du tagoj")
+        self.assertTimeSpan(parse_result, days=2)
 
 
 class TestAstTimePoints(object):
@@ -147,7 +152,7 @@ class TestAstRandomGeneration(object):
         assert 10 > parse_result.minutes
 
     def test_canGenerateRandomTimeSpanWithConstraints(self, ast):
-        parse_result = ast.parse("hazardu tempon inter du minutoj gxis tri minutoj")
+        parse_result = ast.parse("hazardu tempon el du minutoj gxis tri minutoj")
         assert isinstance(parse_result, tipo.TimeSpan)
         assert 2 >= parse_result.minutes
         assert 1 <= parse_result.minutes
