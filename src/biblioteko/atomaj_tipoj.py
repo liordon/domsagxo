@@ -19,15 +19,6 @@ class TimeUnits(Enum):
             return 86400
 
 
-class TimePoint(object):
-    def __init__(self, hour, minutes):
-        self.minutes = minutes
-        self.hour = hour
-
-    def __str__(self):
-        return "TimePoint(%02d,%02d)" % (self.hour, self.minutes, )
-
-
 class TimeSpan(object):
     def __init__(self, days=0, hours=0, minutes=0, seconds=0):
         self.days = days
@@ -49,7 +40,6 @@ class TimeSpan(object):
         hours = self.hours + self.days*24
         minutes = self.minutes + hours*60
         return self.seconds + minutes*60
-
 
     def __str__(self):
         components = []

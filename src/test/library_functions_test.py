@@ -3,6 +3,7 @@ import pytest
 from biblioteko.antauxdifinitaj_funkcioj import *
 from biblioteko.atomaj_tipoj import *
 from biblioteko.estra_komponantoj import *
+import datetime
 
 
 class SmartHomeManagerProvided(object):
@@ -22,26 +23,26 @@ class TestTimePointGeneration(object):
 
     def test_canGenerateTotallyRandomTimePoint(self):
         time_point = generateRandom([Generate.TIME_POINT.value])
-        assert isinstance(time_point, TimePoint)
+        assert isinstance(time_point, datetime.time)
         assert 24 > time_point.hour
-        assert 60 > time_point.minutes
+        assert 60 > time_point.minute
 
     def test_canGenerateConstrainedRandomTimePoint(self):
         time_point = generateRandom([Generate.TIME_POINT.value,
-                                     TimePoint(9, 20),
-                                     TimePoint(9, 50)])
-        assert isinstance(time_point, TimePoint)
+                                     datetime.time(9, 20),
+                                     datetime.time(9, 50)])
+        assert isinstance(time_point, datetime.time)
         assert 9 == time_point.hour
-        assert 50 > time_point.minutes
-        assert 20 <= time_point.minutes
+        assert 50 > time_point.minute
+        assert 20 <= time_point.minute
 
     def test_canGenerateRandomTimePointWithOverflowToNextHour(self):
         time_point = generateRandom([Generate.TIME_POINT.value,
-                                     TimePoint(12, 59),
-                                     TimePoint(13, 50)])
-        assert isinstance(time_point, TimePoint)
-        assert (59 == time_point.minutes) if time_point.hour == 12 \
-            else (13 == time_point.hour and 50 > time_point.minutes)
+                                     datetime.time(12, 59),
+                                     datetime.time(13, 50)])
+        assert isinstance(time_point, datetime.time)
+        assert (59 == time_point.minute) if time_point.hour == 12 \
+            else (13 == time_point.hour and 50 > time_point.minute)
 
 
 class TestTimeSpanGeneration(object):

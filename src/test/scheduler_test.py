@@ -2,7 +2,7 @@ import pytest
 from biblioteko.atomaj_tipoj import *
 import kompilajxo.leksisto as lxr
 import kompilajxo.abstrakta_sintaksarbo as ast_bld
-import sched
+import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from biblioteko.estra_komponantoj import Horaro
@@ -90,5 +90,34 @@ class TestTimedActions(TimeManagerProvided):
         scd.runSetTime(TimeSpan(minutes=3))
         assert 3 == self.counter
 
+    def test_mockSchedulerStartsAt0UnixTime(self, scd):
+        zero_day = scd.getDate()
+
+        assert 1970 == zero_day.year
+        assert 1 == zero_day.month
+        assert 1 == zero_day.day
+        assert 0 == zero_day.hour
+        assert 0 == zero_day.minute
+        assert 0 == zero_day.second
+
+    def test_mockSchedulerAdvancesAccordingToSpecifiedTime(self, scd, one_sec, one_min, one_day):
+        scd.runSetTime(one_sec)
+        scd.runSetTime(one_min)
+        scd.runSetTime(one_day)
+
+        current_day = scd.getDate()
+
+        assert 1970 == current_day.year
+        assert 1 == current_day.month
+        assert 2 == current_day.day
+        assert 0 == current_day.hour
+        assert 1 == current_day.minute
+        assert 1 == current_day.second
+
     # def test_eventCanBeScheduledToTimeOfDay(self, scd, increaser):
-    #     scd.enterAt(TimePoint(6,00))
+    #     scd.enterAt(TimePoint(6,00), increaser)
+    #     scd.runSetTime(TimeSpan(hours=5, minutes=59, seconds=59))
+    #
+    #     assert 0 == self.counter
+    #     scd.runSetTime(TimeSpan(seconds=1))
+    #     assert 1 == self.counter

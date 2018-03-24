@@ -1,5 +1,6 @@
 from random import randrange
 from biblioteko.atomaj_tipoj import *
+import datetime
 
 
 class Generate(Enum):
@@ -24,14 +25,15 @@ def generateRandom(argList, smart_house_manager=None):
     if argList[0] == Generate.TIME_POINT.value:
         if len(argList) > 1:
             hour_range = argList[2].hour - argList[1].hour
-            minute_range = argList[2].minutes - argList[1].minutes
+            minute_range = argList[2].minute - argList[1].minute
             random_total_minutes = randrange(hour_range * 60 + minute_range)
-            random_hour = (random_total_minutes + argList[1].minutes) // 60 + argList[1].hour
-            random_minute = (random_total_minutes + argList[1].minutes) % 60
+            random_hour = (random_total_minutes + argList[1].minute) // 60 + argList[1].hour
+            random_minute = (random_total_minutes + argList[1].minute) % 60
         else:
             random_hour = randrange(0, 24)
             random_minute = randrange(0, 60)
-        return TimePoint(random_hour, random_minute)
+        return datetime.time(hour=random_hour, minute=random_minute)
+            # TimePoint(random_hour, random_minute)
 
     elif argList[0] == Generate.TIME_SPAN.value:
         if len(argList) > 1:

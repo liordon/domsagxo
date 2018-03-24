@@ -9,6 +9,7 @@ from kompilajxo.leksisto import ReservedWord as ResWord
 from kompilajxo.leksisto import tokens
 from biblioteko.atomaj_tipoj import *
 import biblioteko.antauxdifinitaj_funkcioj as Pfuncs
+import datetime
 
 
 class EsperantoSyntaxError(Exception):
@@ -150,16 +151,16 @@ def build(start=None):
     def p_time_point(p):
         p[0] = p[1]
         if p[3] < 1:
-            p[3] *= 60
+            p[3] = int(60*p[3])
         if p[3] >= 60:
             raise EsperantoSyntaxError("Illegal number of minutes entered: " + str(p[3]))
-        p[0] = TimePoint(p[1], p[3])
+        p[0] = datetime.time(hour=p[1], minute=p[3]) #TimePoint(p[1], p[3])
 
     @RULE('''timePoint :  hourNumerator ''', ResWord.TIME_INDICATION)
     def p_round_time_point(p):
         if len(p) > 2 and p[2] != "horo":
             raise EsperantoSyntaxError("wrong hour format. expected hour descriptor, then minute number.")
-        p[0] = TimePoint(p[1], 0)
+        p[0] = datetime.time(hour=p[1]) #TimePoint(p[1], 0)
 
     @RULE('''hourNumerator : ''', ResWord.LA, POS.NUMERATOR, '''
                     | ''', ResWord.LA, '''verbalNumber ''',  POS.NUMERATOR)

@@ -1,5 +1,6 @@
 from biblioteko.atomaj_tipoj import *
 import sched
+from datetime import datetime
 
 
 class Domsagxo(object):
@@ -76,6 +77,9 @@ class Horaro(object):
     def enter(self, delay, action, argument=(), kwargs={}):
         self.scheduler.enter(delay.totalSeconds(), 1, action, argument, kwargs)
 
+    def enterAt(self, time_point, action, argument=(), kwargs={}):
+        pass
+
     def run(self, blocking=True):
         self.scheduler.run(blocking)
 
@@ -87,9 +91,8 @@ class Horaro(object):
             self.scheduler.run(False)
         self.scheduler.delayfunc(target_time - self.scheduler.timefunc())
 
-    # def enterInTimeUnits(self, delay, time_unit,
-    #                      action, argument=(), kwargs={}):
-    #     self.scheduler.enter(delay*time_unit.in_seconds(), 1, action, argument, kwargs)
+    def getDate(self):
+        return datetime.utcfromtimestamp(self.scheduler.timefunc())
 
     def repeat(self, delay, action):
         def repetition():

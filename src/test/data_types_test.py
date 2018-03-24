@@ -1,6 +1,7 @@
 import biblioteko.atomaj_tipoj as tipo
 import kompilajxo.leksisto as lxr
 import kompilajxo.abstrakta_sintaksarbo as ast_bld
+import datetime
 import pytest
 
 lxr.build()
@@ -71,9 +72,9 @@ class TestAstTimePoints(object):
 
     @staticmethod
     def assertTimePointValues(parse_result, hour, minutes=0):
-        assert isinstance(parse_result, tipo.TimePoint)
+        assert isinstance(parse_result, datetime.time)
         assert hour == parse_result.hour
-        assert minutes == parse_result.minutes
+        assert minutes == parse_result.minute
 
     def test_canFormatFormalRoundHour(self, ast):
         parse_result = ast.parse("la sesa horo")
@@ -138,18 +139,18 @@ class TestAstRandomGeneration(object):
 
     def test_canGenerateRandomTimePoint(self, ast):
         parse_result = ast.parse("hazardu horon")
-        assert isinstance(parse_result, tipo.TimePoint)
+        assert isinstance(parse_result, datetime.time)
 
     def test_canGenerateRandomTimePointWithinTwoRoundHours(self, ast):
         parse_result = ast.parse("hazardu horon inter la oka horo kaj la nauxa horo")
-        assert isinstance(parse_result, tipo.TimePoint)
+        assert isinstance(parse_result, datetime.time)
         assert 9 > parse_result.hour
 
     def test_canGenerateRandomTimePointWithinASingleHour(self, ast):
         parse_result = ast.parse("hazardu horon inter la oka horo kaj la oka kaj dek")
-        assert isinstance(parse_result, tipo.TimePoint)
+        assert isinstance(parse_result, datetime.time)
         assert 8 == parse_result.hour
-        assert 10 > parse_result.minutes
+        assert 10 > parse_result.minute
 
     def test_canGenerateRandomTimeSpanWithConstraints(self, ast):
         parse_result = ast.parse("hazardu tempon el du minutoj gxis tri minutoj")
