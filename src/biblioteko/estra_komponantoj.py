@@ -75,16 +75,28 @@ class Horaro(object):
         self.scheduler = sched.scheduler(timefunc, delayfunc)
 
     def enter(self, delay, action, argument=(), kwargs={}):
-        self.scheduler.enter(delay.totalSeconds(), 1, action, argument, kwargs)
+        seconds = delay.total_seconds()
+        if seconds > 0:
+            self.scheduler.enter(seconds, 1, action, argument, kwargs)
+        else:
+            raise ValueError("cannot schedule events for past time.")
 
     def enterAt(self, time_point, action, argument=(), kwargs={}):
-        pass
+        day_offset = 0
+        if time_point < self.getDate().time():
+            day_offset = 1
+        scheduled_time = datetime(self.getDate().year,
+                                  self.getDate().month,
+                                  self.getDate().day+day_offset,
+                                  time_point.hour,
+                                  time_point.minute)
+        self.enter(scheduled_time - self.getDate(), action, argument, kwargs)
 
     def run(self, blocking=True):
         self.scheduler.run(blocking)
 
     def runSetTime(self, amountOfTime):
-        target_time = self.scheduler.timefunc() + amountOfTime.totalSeconds()
+        target_time = self.scheduler.timefunc() + amountOfTime.total_seconds()
         while (not self.scheduler.empty()) and \
                 (self.scheduler.queue[0][0] <= target_time):
             self.scheduler.delayfunc(self.scheduler.queue[0][0] - self.scheduler.timefunc())
@@ -97,5 +109,11 @@ class Horaro(object):
     def repeat(self, delay, action):
         def repetition():
             action()
-            self.scheduler.enter(delay.totalSeconds(), 1, repetition)
-        self.scheduler.enter(delay.totalSeconds(), 1, repetition)
+            self.scheduler.enter(delay.total_seconds(), 1, repetition)
+        self.scheduler.enter(delay.total_seconds(), 1, repetition)
+
+    def repeatAt(self, time_point, action):
+        def repetition():
+            action()
+            self.scheduler.enter(24*60*60, 1, repetition)
+        self.enterAt(time_point, repetition)

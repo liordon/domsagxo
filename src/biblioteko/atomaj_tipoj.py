@@ -36,7 +36,7 @@ class TimeSpan(object):
 
         return self.unite(self, res)
 
-    def totalSeconds(self):
+    def total_seconds(self):
         hours = self.hours + self.days*24
         minutes = self.minutes + hours*60
         return self.seconds + minutes*60

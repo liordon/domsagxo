@@ -3,6 +3,7 @@ from biblioteko.atomaj_tipoj import *
 import kompilajxo.leksisto as lxr
 import kompilajxo.abstrakta_sintaksarbo as ast_bld
 import datetime
+import time
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from biblioteko.estra_komponantoj import Horaro
@@ -11,14 +12,15 @@ from biblioteko.estra_komponantoj import Horaro
 class TimeManagerProvided(object):
 
     def incTime(self, amount):
+        if amount < 0:
+            raise ValueError("sleep length must be non-negative")
         self.schedule_time += amount
 
     @pytest.fixture
     def scd(self):
+        self.strt = time.time()
         self.schedule_time = 0
-        scheduler = BackgroundScheduler()
-        return Horaro(timefunc=lambda: self.schedule_time,
-                      delayfunc=self.incTime)
+        return Horaro(timefunc=lambda: self.schedule_time, delayfunc=self.incTime)
 
     @pytest.fixture
     def increaser(self):
@@ -40,6 +42,10 @@ class TimeManagerProvided(object):
     @pytest.fixture
     def one_day(self):
         return TimeSpan(days=1)
+    
+    @pytest.fixture
+    def dawn_of_time(self):
+        return datetime.datetime.utcfromtimestamp(0)
 
 
 class TestTimedActions(TimeManagerProvided):
@@ -90,34 +96,67 @@ class TestTimedActions(TimeManagerProvided):
         scd.runSetTime(TimeSpan(minutes=3))
         assert 3 == self.counter
 
-    def test_mockSchedulerStartsAt0UnixTime(self, scd):
+    def test_mockSchedulerStartsAt0UnixTime(self, scd, dawn_of_time):
         zero_day = scd.getDate()
 
-        assert 1970 == zero_day.year
-        assert 1 == zero_day.month
-        assert 1 == zero_day.day
-        assert 0 == zero_day.hour
-        assert 0 == zero_day.minute
-        assert 0 == zero_day.second
+        assert dawn_of_time.year == zero_day.year
+        assert dawn_of_time.month == zero_day.month
+        assert dawn_of_time.day == zero_day.day
+        assert dawn_of_time.hour == zero_day.hour
+        assert dawn_of_time.minute == zero_day.minute
+        assert dawn_of_time.second == zero_day.second
 
-    def test_mockSchedulerAdvancesAccordingToSpecifiedTime(self, scd, one_sec, one_min, one_day):
+    def test_mockSchedulerAdvancesAccordingToSpecifiedTime(self, scd, dawn_of_time,
+                                                           one_sec, one_min, one_day):
         scd.runSetTime(one_sec)
         scd.runSetTime(one_min)
         scd.runSetTime(one_day)
 
         current_day = scd.getDate()
 
-        assert 1970 == current_day.year
-        assert 1 == current_day.month
-        assert 2 == current_day.day
-        assert 0 == current_day.hour
-        assert 1 == current_day.minute
-        assert 1 == current_day.second
+        assert dawn_of_time.year == current_day.year
+        assert dawn_of_time.month == current_day.month
+        assert dawn_of_time.day+1 == current_day.day
+        assert dawn_of_time.hour == current_day.hour
+        assert dawn_of_time.minute+1 == current_day.minute
+        assert dawn_of_time.second+1 == current_day.second
 
-    # def test_eventCanBeScheduledToTimeOfDay(self, scd, increaser):
-    #     scd.enterAt(TimePoint(6,00), increaser)
-    #     scd.runSetTime(TimeSpan(hours=5, minutes=59, seconds=59))
-    #
-    #     assert 0 == self.counter
-    #     scd.runSetTime(TimeSpan(seconds=1))
-    #     assert 1 == self.counter
+    def test_eventCanBeScheduledToTimeOfDay(self, scd, increaser):
+        scd.enterAt(datetime.time(6,00), increaser)
+        scd.runSetTime(TimeSpan(hours=5, minutes=59, seconds=59))
+
+        assert 0 == self.counter
+        scd.runSetTime(TimeSpan(seconds=1))
+        assert 1 == self.counter
+
+    def test_eventScheduledForPastTimeTodayIsOverflowedToTomorrow(self, scd, increaser):
+        scd.runSetTime(TimeSpan(hours=5))
+        scd.enterAt(datetime.time(4, 00), increaser)
+        # scd.runSetTime(TimeSpan(hours=1))
+
+        assert 0 == self.counter
+        scd.runSetTime(TimeSpan(hours=23))
+        assert 1 == self.counter
+
+    def test_repeatingTaskScheduledForPastTimeTodayIsOverflowedToTomorrow(self, scd, increaser):
+        scd.runSetTime(TimeSpan(hours=5))
+        scd.repeatAt(datetime.time(4, 00), increaser)
+        # scd.runSetTime(TimeSpan(hours=1))
+
+        assert 0 == self.counter
+        scd.runSetTime(TimeSpan(hours=23))
+        assert 1 == self.counter
+        scd.runSetTime(TimeSpan(hours=24))
+        assert 2 == self.counter
+
+    def test_taskCanBeScheduledForFutureDate(self, scd, dawn_of_time, increaser):
+
+        scd.enterAt(datetime.datetime(year=dawn_of_time.year,
+                                      month=dawn_of_time.month,
+                                      day=3, hour=4), increaser)
+        scd.runSetTime(TimeSpan(hours=4))
+
+        assert 0 == self.counter
+        scd.runSetTime(TimeSpan(days=3))
+        assert 1 == self.counter
+
