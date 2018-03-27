@@ -42,7 +42,7 @@ class TimeManagerProvided(object):
     @pytest.fixture
     def one_day(self):
         return TimeSpan(days=1)
-    
+
     @pytest.fixture
     def dawn_of_time(self):
         return datetime.datetime.utcfromtimestamp(0)
@@ -116,13 +116,13 @@ class TestTimedActions(TimeManagerProvided):
 
         assert dawn_of_time.year == current_day.year
         assert dawn_of_time.month == current_day.month
-        assert dawn_of_time.day+1 == current_day.day
+        assert dawn_of_time.day + 1 == current_day.day
         assert dawn_of_time.hour == current_day.hour
-        assert dawn_of_time.minute+1 == current_day.minute
-        assert dawn_of_time.second+1 == current_day.second
+        assert dawn_of_time.minute + 1 == current_day.minute
+        assert dawn_of_time.second + 1 == current_day.second
 
     def test_eventCanBeScheduledToTimeOfDay(self, scd, increaser):
-        scd.enterAt(datetime.time(6,00), increaser)
+        scd.enterAtTimeOfDay(datetime.time(6, 00), increaser)
         scd.runSetTime(TimeSpan(hours=5, minutes=59, seconds=59))
 
         assert 0 == self.counter
@@ -131,7 +131,7 @@ class TestTimedActions(TimeManagerProvided):
 
     def test_eventScheduledForPastTimeTodayIsOverflowedToTomorrow(self, scd, increaser):
         scd.runSetTime(TimeSpan(hours=5))
-        scd.enterAt(datetime.time(4, 00), increaser)
+        scd.enterAtTimeOfDay(datetime.time(4, 00), increaser)
         # scd.runSetTime(TimeSpan(hours=1))
 
         assert 0 == self.counter
@@ -150,13 +150,16 @@ class TestTimedActions(TimeManagerProvided):
         assert 2 == self.counter
 
     def test_taskCanBeScheduledForFutureDate(self, scd, dawn_of_time, increaser):
-
-        scd.enterAt(datetime.datetime(year=dawn_of_time.year,
-                                      month=dawn_of_time.month,
-                                      day=3, hour=4), increaser)
+        scd.enterAtFutureTime(datetime.datetime(year=dawn_of_time.year,
+                                                month=dawn_of_time.month,
+                                                day=3, hour=4), increaser)
         scd.runSetTime(TimeSpan(hours=4))
 
         assert 0 == self.counter
         scd.runSetTime(TimeSpan(days=3))
         assert 1 == self.counter
 
+    def test_taskScheduledToPastTimeWillThrowException(self, scd, increaser):
+        prehistory = datetime.datetime.utcfromtimestamp(-1)
+        with pytest.raises(ValueError):
+            scd.enterAtFutureTime(prehistory, increaser)

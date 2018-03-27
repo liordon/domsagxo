@@ -81,7 +81,7 @@ class Horaro(object):
         else:
             raise ValueError("cannot schedule events for past time.")
 
-    def enterAt(self, time_point, action, argument=(), kwargs={}):
+    def enterAtTimeOfDay(self, time_point, action, argument=(), kwargs={}):
         day_offset = 0
         if time_point < self.getDate().time():
             day_offset = 1
@@ -91,6 +91,9 @@ class Horaro(object):
                                   time_point.hour,
                                   time_point.minute)
         self.enter(scheduled_time - self.getDate(), action, argument, kwargs)
+
+    def enterAtFutureTime(self, date_time_point, action):
+        self.enter(date_time_point - self.getDate(), action)
 
     def run(self, blocking=True):
         self.scheduler.run(blocking)
@@ -116,4 +119,4 @@ class Horaro(object):
         def repetition():
             action()
             self.scheduler.enter(24*60*60, 1, repetition)
-        self.enterAt(time_point, repetition)
+        self.enterAtTimeOfDay(time_point, repetition)
