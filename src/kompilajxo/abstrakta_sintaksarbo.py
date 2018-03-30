@@ -8,6 +8,7 @@ from kompilajxo.leksisto import PartOfSpeech as POS
 from kompilajxo.leksisto import ReservedWord as ResWord
 from kompilajxo.leksisto import tokens
 from biblioteko.atomaj_tipoj import *
+import kompilajxo.nodo as Node
 import biblioteko.antauxdifinitaj_funkcioj as Pfuncs
 import datetime
 
@@ -29,7 +30,7 @@ def RULE(product, rule_list):
             doc = doc + ' '.join([rulePartToString(item) for item in rule])
             doc = doc + "\n | "
 
-        fun.__doc__ = doc[:-2]  # product + " : ".join([[rulePartToString(item) for item in rule] for rule in rule_list])
+        fun.__doc__ = doc[:-2]
         return fun
 
     return set_rule
@@ -50,9 +51,12 @@ def build(start=None):
     # )
 
     @RULE('program', [['statement', UaTer.PERIOD],
-                        ['program', 'statement', UaTer.PERIOD]])
+                      ['program', 'statement', UaTer.PERIOD]])
     def p_program_separatedStatements(p):
-        pass
+        if len(p) == 3:
+            p[0] = Node.Program(None, p[1])
+        else:
+            p[0] = Node.Program(p[1], p[2])
 
     # @RULE('statement : ' + ResWord.IF + ' expression ' + UaTer.COLON + ' statement')
     # def p_statement_ifCondition(p):
@@ -61,38 +65,33 @@ def build(start=None):
 
     @RULE('statement', [['expression']])
     def p_statement_expr(p):
-        p[0] = None
+        p[0] = p[1]
 
-    @RULE('statement', [['name ', UaTer.ASSIGN, ' expression']])
+    @RULE('statement', [['name ', UaTer.ASSIGN, 'expression']])
     def p_statement_assign(p):
-        variable_table[p[1]] = p[3]
+        p[0] = Node.VariableAssignment(p[1], p[3])
 
     @RULE('name', [[POS.NOUN],
-            ['partialName ', POS.NOUN]])
+                   ['partialName', POS.NOUN]])
     def p_name_partialNameAndNoun(p):
-        p[0] = p[1] + (p[2] if len(p) == 3 else "")
-        # p[0] = p[1] + p[2]
+        p[0] = Node.VariableName(p[1] + (p[2] if len(p) == 3 else ""))
 
     @RULE('partialName', [['partialName', POS.ADJECTIVE],
-            [POS.ADJECTIVE]])
+                          [POS.ADJECTIVE]])
     def p_partialName_partialNameAndAdjective(p):
         if len(p) == 3:
             p[0] = p[1] + p[2] + " "
         else:
             p[0] = p[1] + " "
-        # p[0] = p[1] + (p[2] + " " if len(p) == 3 else "")
 
     @RULE('partialName', [[ResWord.LA]])
     def p_partialName_la(p):
         p[0] = ""
 
-    @RULE('expression', [['expression', UaTer.PLUS, 'term']])
-    def p_expression_plus(p):
-        p[0] = p[1] + p[3]
-
-    @RULE('expression', [['expression', UaTer.MINUS, 'term']])
-    def p_expression_minus(p):
-        p[0] = p[1] - p[3]
+    @RULE('expression', [['expression', UaTer.PLUS, 'term'],
+                         ['expression', UaTer.MINUS, 'term']])
+    def p_expression_plus_minus(p):
+        p[0] = Node.MathOp(p[1], p[2], p[3])
 
     @RULE('expression', [['term'],
                          ['timePoint'],
@@ -101,13 +100,10 @@ def build(start=None):
     def p_expression_term(p):
         p[0] = p[1]
 
-    @RULE('term', [['term', UaTer.TIMES, 'factor']])
-    def p_term_times(p):
-        p[0] = p[1] * p[3]
-
-    @RULE('term', [['term', UaTer.DIVIDE, 'factor']])
-    def p_term_div(p):
-        p[0] = p[1] / p[3]
+    @RULE('term', [['term', UaTer.TIMES, 'factor'],
+                   ['term', UaTer.DIVIDE, 'factor']])
+    def p_term_mult_div(p):
+        p[0] = Node.MathOp(p[1], p[2], p[3])
 
     @RULE('term', [['factor']])
     def p_term_factor(p):
@@ -118,12 +114,12 @@ def build(start=None):
                      [UaTer.MINUS, 'factor']])
     def p_factor_num(p):
         if len(p) == 2:
-            p[0] = p[1]
+            p[0] = Node.Number(p[1])
         else:
-            p[0] = -p[2]
+            p[0] = Node.MathOp(Node.Number(0), p[1], p[2])
 
     @RULE('verbalNumber', [[ResWord.VERBAL_DIGIT],
-                           ['verbalNumber ', ResWord.VERBAL_DIGIT]])
+                           ['verbalNumber', ResWord.VERBAL_DIGIT]])
     def p_verbal_number(p):
         if len(p) == 2:
             p[0] = p[1]
@@ -141,17 +137,17 @@ def build(start=None):
         else:
             p[0] = p[1]
 
-    @RULE('factor', [[UaTer.L_PAREN, ' expression ', UaTer.R_PAREN]])
+    @RULE('factor', [[UaTer.L_PAREN, 'expression', UaTer.R_PAREN]])
     def p_factor_expr(p):
         p[0] = p[2]
 
     @RULE('expression', [[ResWord.TRUE]])
     def p_expression_true(p):
-        p[0] = True
+        p[0] = Node.Boolean(True)
 
     @RULE('expression', [[ResWord.FALSE]])
     def p_expression_false(p):
-        p[0] = False
+        p[0] = Node.Boolean(False)
 
     @RULE('timePoint', [['hourNumerator', ResWord.KAJ, 'verbalNumber']])
     def p_time_point(p):
@@ -160,32 +156,33 @@ def build(start=None):
             p[3] = int(60 * p[3])
         if p[3] >= 60:
             raise EsperantoSyntaxError("Illegal number of minutes entered: " + str(p[3]))
-        p[0] = datetime.time(hour=p[1], minute=p[3])  # TimePoint(p[1], p[3])
+        p[0] = Node.TimePoint(hour=p[1], minute=Node.Number(p[3]))
 
     @RULE('timePoint', [['hourNumerator', ResWord.TIME_INDICATION]])
     def p_round_time_point(p):
         if len(p) > 2 and p[2] != "horo":
             raise EsperantoSyntaxError("wrong hour format. expected hour descriptor, then minute number.")
-        p[0] = datetime.time(hour=p[1])  # TimePoint(p[1], 0)
+        p[0] = Node.TimePoint(hour=p[1])
 
     @RULE('hourNumerator', [[ResWord.LA, POS.NUMERATOR],
-                    [ResWord.LA, 'verbalNumber ', POS.NUMERATOR]])
+                            [ResWord.LA, 'verbalNumber', POS.NUMERATOR]])
     def p_hour_numerator(p):
         p[0] = p[2]
         if len(p) > 3:
             p[0] += p[3]
         if p[0] > 24:
             raise EsperantoSyntaxError("Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
+        p[0] = Node.Number(p[0])
 
-    @RULE('timeSpan', [['timeSpan ', ResWord.KAJ, 'partTimeSpan']])
+    @RULE('timeSpan', [['timeSpan', ResWord.KAJ, 'partTimeSpan']])
     def p_time_span_kaj_time_span(p):
-        p[0] = TimeSpan.unite(p[1], p[3])
+        p[0] = Node.TimeUnion(p[1], p[3])
 
     @RULE('timeSpan', [['timeSpan', ResWord.KAJ, 'verbalNumber']])
     def p_time_fractions(p):
         if p[3] >= 1:
             raise EsperantoSyntaxError("Illegal time span format, recieved: " + str(p[3]) + " when expected fraction")
-        p[0] = p[1].addFraction(p[3])
+        p[0] = Node.TimeFractionAddition(p[1], Node.Number(p[3]))
 
     @RULE('timeSpan', [['partTimeSpan']])
     def p_time_spans_escalation(p):
@@ -193,10 +190,10 @@ def build(start=None):
 
     @RULE('timeSpan', [['timeSpan', 'partTimeSpan']])
     def p_time_spans_consequtive(p):
-        p[0] = TimeSpan.unite(p[1], p[2])
+        p[0] = Node.TimeUnion(p[1], p[2])
 
     @RULE('partTimeSpan', [[ResWord.TIME_INDICATION],
-                    ['verbalNumber', ResWord.TIME_INDICATION]])
+                           ['verbalNumber', ResWord.TIME_INDICATION]])
     def p_time_span(p):
         if len(p) > 2:
             time_unit = p[2]
@@ -205,22 +202,34 @@ def build(start=None):
             time_unit = p[1]
             amount = 1
 
+        days = 0
+        hours = 0
+        minutes = 0
+        seconds = 0
         if time_unit.startswith("tago"):
-            p[0] = TimeSpan(days=math.floor(amount), hours=24 * (amount - math.floor(amount)))
+            days = math.floor(amount)
+            hours = 24 * (amount - math.floor(amount))
+            # p[0] = TimeSpan(days=math.floor(amount), hours=24 * (amount - math.floor(amount)))
         elif time_unit.startswith("horo"):
-            p[0] = TimeSpan(hours=math.floor(amount), minutes=60 * (amount - math.floor(amount)))
+            hours = math.floor(amount)
+            minutes = 60 * (amount - math.floor(amount))
         elif time_unit.startswith("minuto"):
-            p[0] = TimeSpan(minutes=math.floor(amount), seconds=60 * (amount - math.floor(amount)))
+            minutes = math.floor(amount)
+            seconds = 60 * (amount - math.floor(amount))
         else:
-            p[0] = TimeSpan(seconds=amount)
+            seconds = amount
+        p[0] = Node.TimeSpan(Node.Number(days),
+                             Node.Number(hours),
+                             Node.Number(minutes),
+                             Node.Number(seconds))
 
     @RULE('functionCall', [[POS.V_IMP, 'functionArgs']])
     def p_function_call(p):
         p[0] = Pfuncs.method_dict[p[1]](p[2], smart_home_manager)
 
     @RULE('functionArgs', [['functionArg'],
-                    ['functionArgs', ResWord.KAJ, 'functionArg'],
-                    ['functionArgs', UaTer.DELIM, 'functionArg']])
+                           ['functionArgs', ResWord.KAJ, 'functionArg'],
+                           ['functionArgs', UaTer.DELIM, 'functionArg']])
     def p_function_arguments(p):
         if len(p) == 2:
             p[0] = [p[1]]
