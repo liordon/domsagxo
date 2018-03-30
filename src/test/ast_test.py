@@ -1,4 +1,5 @@
 import biblioteko.atomaj_tipoj as tipo
+import biblioteko.estra_komponantoj as esk
 import kompilajxo.leksisto as lxr
 import kompilajxo.abstrakta_sintaksarbo as ast_bld
 import kompilajxo.nodo as Node
@@ -80,10 +81,6 @@ class TestAstMathExpressions(object):
         with pytest.raises(ast_bld.EsperantoSyntaxError):
             ast.parse("naux ses")
 
-    def test_capableUsingAssignedVariable(self, ast):
-        variable_table = {"muso": 69}
-        assert 69 == parsed_value_of(ast, "muso", variable_table)
-
     def test_valueOfReservedWordForTrueIsTrue(self, ast):
         assert parsed_value_of(ast, "vero")
 
@@ -91,11 +88,11 @@ class TestAstMathExpressions(object):
         assert not parsed_value_of(ast, "malvero")
 
 
-def evaluate_and_return_state(ast, statement, initial_state=None):
+def evaluate_and_return_state_variables(ast, statement, initial_state=None):
     if initial_state is None:
-        initial_state = {}  # so as not to put a mutable default
+        initial_state = esk.Domsagxo()  # so as not to put a mutable default
     state, nothing = ast.parse(statement).evaluate(initial_state)
-    return state
+    return state.variables
 
 
 class TestAstStatements(object):
@@ -107,21 +104,21 @@ class TestAstStatements(object):
         ast.parse("12")
 
     def test_capableOfNumberAssignment(self, ast):
-        assert {'kato': 10} == evaluate_and_return_state(ast, "kato = 10")
+        assert {'kato': 10} == evaluate_and_return_state_variables(ast, "kato = 10")
 
     def test_capableOfExpressionAssignment(self, ast):
-        assert {'kato': 42} == evaluate_and_return_state(ast, "kato=2+4*10")
+        assert {'kato': 42} == evaluate_and_return_state_variables(ast, "kato=2+4*10")
 
     def test_adjectivesJoinNounsToDefineVariableNames(self, ast):
-        new_state = evaluate_and_return_state(ast, "malgranda kato=7")
+        new_state = evaluate_and_return_state_variables(ast, "malgranda kato=7")
         assert {'malgranda kato': 7} == new_state
         assert 'kato' not in new_state
 
     def test_definiteNounsBecomeIndefinite(self, ast):
-        assert {'kato': 9} == evaluate_and_return_state(ast, "la kato = 9")
+        assert {'kato': 9} == evaluate_and_return_state_variables(ast, "la kato = 9")
 
     def test_definiteDescribedNounAlsoBecomesIndefinite(self, ast):
-        assert {"dika kato": 99} == evaluate_and_return_state(ast, "la dika kato = 99")
+        assert {"dika kato": 99} == evaluate_and_return_state_variables(ast, "la dika kato = 99")
 
 
 class TestAstPrograms(object):
@@ -138,6 +135,6 @@ class TestAstPrograms(object):
         ast.parse("12.")
 
     def test_consecutiveStatementsPropagateVariableValues(self, ast):
-        new_state = evaluate_and_return_state(ast, '''kato=2+4*10.
+        new_state = evaluate_and_return_state_variables(ast, '''kato=2+4*10.
                         hundo = kato/6.''')
         assert {'kato': 42, 'hundo': 7} == new_state

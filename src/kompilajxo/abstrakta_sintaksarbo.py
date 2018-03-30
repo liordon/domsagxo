@@ -9,8 +9,6 @@ from kompilajxo.leksisto import ReservedWord as ResWord
 from kompilajxo.leksisto import tokens
 from biblioteko.atomaj_tipoj import *
 import kompilajxo.nodo as Node
-import biblioteko.antauxdifinitaj_funkcioj as Pfuncs
-import datetime
 
 
 class EsperantoSyntaxError(Exception):
@@ -42,8 +40,6 @@ def get_digit(number, digit):
 
 def build(start=None):
     allTokenTypes = tokens  # just so the import will be considered meaningful.
-    smart_home_manager = Domsagxo()
-    variable_table = {}
 
     # precedence = (
     #     ('left', 'KAJ', 'DELIM'),
@@ -132,10 +128,7 @@ def build(start=None):
 
     @RULE('factor', [['name']])
     def p_factor_noun(p):
-        if p[1] in variable_table.keys():
-            p[0] = variable_table[p[1]]
-        else:
-            p[0] = p[1]
+        p[0] = p[1]
 
     @RULE('factor', [[UaTer.L_PAREN, 'expression', UaTer.R_PAREN]])
     def p_factor_expr(p):
@@ -181,7 +174,8 @@ def build(start=None):
     @RULE('timeSpan', [['timeSpan', ResWord.KAJ, 'verbalNumber']])
     def p_time_fractions(p):
         if p[3] >= 1:
-            raise EsperantoSyntaxError("Illegal time span format, recieved: " + str(p[3]) + " when expected fraction")
+            raise EsperantoSyntaxError("Illegal time span format, recieved: "
+                                       + str(p[3]) + " when expected fraction")
         p[0] = Node.TimeFractionAddition(p[1], Node.Number(p[3]))
 
     @RULE('timeSpan', [['partTimeSpan']])
@@ -209,7 +203,6 @@ def build(start=None):
         if time_unit.startswith("tago"):
             days = math.floor(amount)
             hours = 24 * (amount - math.floor(amount))
-            # p[0] = TimeSpan(days=math.floor(amount), hours=24 * (amount - math.floor(amount)))
         elif time_unit.startswith("horo"):
             hours = math.floor(amount)
             minutes = 60 * (amount - math.floor(amount))
@@ -225,7 +218,7 @@ def build(start=None):
 
     @RULE('functionCall', [[POS.V_IMP, 'functionArgs']])
     def p_function_call(p):
-        p[0] = Pfuncs.method_dict[p[1]](p[2], smart_home_manager)
+        p[0] = Node.FunctionInvocation(p[1], p[2])
 
     @RULE('functionArgs', [['functionArg'],
                            ['functionArgs', ResWord.KAJ, 'functionArg'],
@@ -240,14 +233,11 @@ def build(start=None):
     def p_first_function_argument(p):
         p[0] = p[1]
 
-
     # Error rule for syntax errors
     def p_error(p):
         raise EsperantoSyntaxError("Syntax error in input: " + str(p))
 
     ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, errorlog=yacc.NullLogger())
-    ast_builder.variable_table = variable_table
-    ast_builder.smart_home_manager = smart_home_manager
     return ast_builder
 
 

@@ -1,6 +1,7 @@
 import datetime
 
 import biblioteko.atomaj_tipoj as Types
+import biblioteko.antauxdifinitaj_funkcioj as Functions
 
 
 class AstNode(object):
@@ -9,15 +10,10 @@ class AstNode(object):
         self.kwargs = kwargs
 
     def evaluate(self, state):
-        if not self.isReady(state, *self.args, **self.kwargs):
-            raise ValueError("this AST is missing information int it's state.")
         return self._method(state, *self.args, **self.kwargs)
 
     def _method(self, *args, **kwargs):
         return None, None
-
-    def isReady(self, *args, **kwargs):
-        return True
 
 
 class Number(AstNode):
@@ -44,9 +40,6 @@ class MathOp(AstNode):
         elif op == '/':
             return state, value1 / value2
 
-    def isReady(self, state, arg1, op, arg2):
-        return True
-
 
 class Boolean(AstNode):
     def __init__(self, value):
@@ -61,13 +54,13 @@ class VariableName(AstNode):
         super(VariableName, self).__init__(variable_name)
 
     def _method(self, state, variable_name):
-        return state, state[variable_name]
+        if variable_name not in state.variables:
+            return state, variable_name
+        return state, state.variables[variable_name]
 
     def getContainedName(self):
         return self.args[0]
 
-    def isReady(self, state, variable_name):
-        return variable_name in state.keys()
 
 
 class VariableAssignment(AstNode):
@@ -76,7 +69,7 @@ class VariableAssignment(AstNode):
 
     def _method(self, state, variable_name, variable_value):
         state, value = variable_value.evaluate(state)
-        state[variable_name.getContainedName()] = value
+        state.variables[variable_name.getContainedName()] = value
         return state, None
 
 
@@ -130,3 +123,15 @@ class TimePoint(AstNode):
         for key, value in kwargs.items():
             state, evaluated_kwargs[key] = value.evaluate(state)
         return state, datetime.time(**evaluated_kwargs)
+
+
+class FunctionInvocation(AstNode):
+    def __init__(self, function_name, args):
+        super(FunctionInvocation, self).__init__(function_name, args)
+
+    def _method(self, state, function_name, args):
+        evaluated_args = []
+        for arg in args:
+            state, new_arg = arg.evaluate(state)
+            evaluated_args += [new_arg]
+        return state, Functions.method_dict[function_name](evaluated_args, state)

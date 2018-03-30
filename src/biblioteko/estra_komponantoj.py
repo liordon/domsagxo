@@ -16,6 +16,7 @@ class Domsagxo(object):
     }
 
     def __init__(self):
+        self.variables = {}
         self.groups = {}
         for appType in Domsagxo.appliance_type_group:
             self.groups[Domsagxo.appliance_type_group[appType]] = []
@@ -87,7 +88,7 @@ class Horaro(object):
             day_offset = 1
         scheduled_time = datetime(self.getDate().year,
                                   self.getDate().month,
-                                  self.getDate().day+day_offset,
+                                  self.getDate().day + day_offset,
                                   time_point.hour,
                                   time_point.minute)
         self.enter(scheduled_time - self.getDate(), action, argument, kwargs)
@@ -113,10 +114,12 @@ class Horaro(object):
         def repetition():
             action()
             self.scheduler.enter(delay.total_seconds(), 1, repetition)
+
         self.scheduler.enter(delay.total_seconds(), 1, repetition)
 
     def repeatAt(self, time_point, action):
         def repetition():
             action()
-            self.scheduler.enter(24*60*60, 1, repetition)
+            self.scheduler.enter(24 * 60 * 60, 1, repetition)
+
         self.enterAtTimeOfDay(time_point, repetition)
