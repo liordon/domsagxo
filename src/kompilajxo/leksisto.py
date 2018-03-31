@@ -35,8 +35,12 @@ class ReservedWord(Enum):
     KAJ = 'KAJ'
     FOR = 'FOR'
     WORD = 'WORD'
+    TIEL = 'TIEL'
+    FINU = 'FINU'
     TRUE = 'TRUE'
     FALSE = 'FALSE'
+    NENIO = 'NENIO'
+    REVENU = 'REVENU'
     VERBAL_DIGIT = 'VERBAL_DIGIT'
     TIME_INDICATION = 'TIME_INDICATION'
 
@@ -57,55 +61,58 @@ reserved_words = {
     "la": ReservedWord.LA.value,
     "por": ReservedWord.FOR.value,
     "kaj": ReservedWord.KAJ.value,
+    "finu": ReservedWord.FINU.value,
+    "tiel": ReservedWord.TIEL.value,
     "vero": ReservedWord.TRUE.value,
     "estas": UnalphabeticTerminal.ASSIGN.value,
+    "nenio": ReservedWord.NENIO.value,
+    "revenu": ReservedWord.REVENU.value,
     "malvero": ReservedWord.FALSE.value}
 
-
 prepositions = [
-"al",
-"anstataux",
-"antaux",
-"apud",
-"cxe",
-"cxirkaux",
-"de",
-"dum",
-"ekde",
-"ekster",
-"eksteren",
-"el",
-"en",
-"gxis",
-"inter",
-"kiel",
-"kontraux",
-"krom",
-"kun",
-"laux",
-"mala",
-"malgraux",
-"malkiel",
-"malsupren",
-"ol",
-"per",
-"plus",
-"po",
-"por",
-"post",
-"preter",
-"pri",
-"pro",
-"sed",
-"sekva",
-"sen",
-"sub",
-"suben",
-"super",
-"supren",
-"sur",
-"tra",
-"trans"
+    "al",
+    "anstataux",
+    "antaux",
+    "apud",
+    "cxe",
+    "cxirkaux",
+    "de",
+    "dum",
+    "ekde",
+    "ekster",
+    "eksteren",
+    "el",
+    "en",
+    "gxis",
+    "inter",
+    "kiel",
+    "kontraux",
+    "krom",
+    "kun",
+    "laux",
+    "mala",
+    "malgraux",
+    "malkiel",
+    "malsupren",
+    "ol",
+    "per",
+    "plus",
+    "po",
+    "por",
+    "post",
+    "preter",
+    "pri",
+    "pro",
+    "sed",
+    "sekva",
+    "sen",
+    "sub",
+    "suben",
+    "super",
+    "supren",
+    "sur",
+    "tra",
+    "trans"
 ]
 
 tokens = [] + idList(ReservedWord) \
@@ -147,7 +154,7 @@ digitNames = {
 }
 
 digitRe = re.compile(
-        "(nul|(unu)?|du|tri|kvar|kvin|ses|sep|ok|naux)(dek|cent|ono?)?")
+    "(nul|(unu)?|du|tri|kvar|kvin|ses|sep|ok|naux)(dek|cent|ono?)?")
 
 timeUnitRe = re.compile("(jaro|monato|semajno|tago|horo|minuto|sekundo)j?")
 
@@ -155,7 +162,7 @@ timeUnitRe = re.compile("(jaro|monato|semajno|tago|horo|minuto|sekundo)j?")
 def parseDigit(name):
     if name[-3:] == "ono":
         name = name[:-3]
-        return 1/digitNames[name]
+        return 1 / digitNames[name]
 
     multiplier = 1
     if name[-3:] == "dek":

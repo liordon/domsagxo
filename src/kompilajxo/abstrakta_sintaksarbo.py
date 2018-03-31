@@ -67,6 +67,10 @@ def build(start=None):
     def p_statement_assign(p):
         p[0] = Node.VariableAssignment(p[1], p[3])
 
+    @RULE('statement', [[ResWord.REVENU, 'expression']])
+    def p_statement_return(p):
+        p[0] = Node.ReturnValue(p[2])
+
     @RULE('name', [[POS.NOUN],
                    ['partialName', POS.NOUN]])
     def p_name_partialNameAndNoun(p):
@@ -129,6 +133,10 @@ def build(start=None):
     @RULE('factor', [['name']])
     def p_factor_noun(p):
         p[0] = p[1]
+
+    @RULE('factor', [[ResWord.NENIO]])
+    def p_factor_none(p):
+        p[0] = Node.NoneNode()
 
     @RULE('factor', [[UaTer.L_PAREN, 'expression', UaTer.R_PAREN]])
     def p_factor_expr(p):
@@ -232,6 +240,27 @@ def build(start=None):
     @RULE('functionArg', [['expression']])
     def p_first_function_argument(p):
         p[0] = p[1]
+
+    @RULE('defFuncName', [[POS.V_INF]])
+    def p_define_function_name(p):
+        p[0] = p[1]
+
+    @RULE('inputArgs', [['name'],
+                        ['inputArgs', ResWord.KAJ, 'name'],
+                        ['inputArgs', UaTer.DELIM, 'name']])
+    def p_inputArg_NOUN(p):
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = p[1] + p[3]
+
+    @RULE('inputArgs', [[]])
+    def p_inputArg_nothing(p):
+        p[0] = []
+
+    @RULE('funcDef', [['defFuncName', 'inputArgs', ResWord.TIEL, 'program', ResWord.FINU]])
+    def p_funcDef_nameAndArgs(p):
+        p[0] = Node.FunctionDefinition(p[1], p[2], p[4])
 
     # Error rule for syntax errors
     def p_error(p):

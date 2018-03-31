@@ -24,6 +24,14 @@ class Number(AstNode):
         return state, number
 
 
+class NoneNode(AstNode):
+    def __init__(self):
+        super(NoneNode, self).__init__()
+
+    def _method(self, state):
+        return state, None
+
+
 class MathOp(AstNode):
     def __init__(self, op, arg1, arg2):
         super(MathOp, self).__init__(op, arg1, arg2)
@@ -62,7 +70,6 @@ class VariableName(AstNode):
         return self.args[0]
 
 
-
 class VariableAssignment(AstNode):
     def __init__(self, variable_name, value):
         super(VariableAssignment, self).__init__(variable_name, value)
@@ -79,7 +86,9 @@ class Program(AstNode):
 
     def _method(self, state, previous_commands, next_command):
         if previous_commands is not None:
-            state, nothing = previous_commands.evaluate(state)
+            state, return_value = previous_commands.evaluate(state)
+            if return_value is not None:
+                return state, return_value
         return next_command.evaluate(state)
 
 
@@ -134,4 +143,34 @@ class FunctionInvocation(AstNode):
         for arg in args:
             state, new_arg = arg.evaluate(state)
             evaluated_args += [new_arg]
-        return state, Functions.method_dict[function_name](evaluated_args, state)
+        return state, state.method_dict[function_name](evaluated_args, state)
+
+
+class ReturnValue(AstNode):
+    def __init__(self, return_value):
+        super(ReturnValue, self).__init__(return_value)
+
+    def _method(self, state, return_value):
+        return return_value.evaluate(state)
+
+
+class FunctionDefinition(AstNode):
+    def __init__(self, function_name, argument_names, command_subtree):
+        super(FunctionDefinition, self).__init__(function_name, argument_names, command_subtree)
+
+    def turn_ast_into_function(self, closure, function_name, argument_names, abstract_syntax_tree):
+        def subtree_function(argument_list):
+            if len(argument_list) != len(argument_names):
+                raise TypeError(function_name, "() expects ", len(argument_names), "arguments:\n\t",
+                                argument_names, "\nbut ", len(argument_list), "were given.")
+            for i in range(len(argument_list)):
+                closure.variables[argument_names[i].getContainedName()] = argument_list[i]
+            return abstract_syntax_tree.evaluate(closure)[1]
+
+        return subtree_function
+
+    def _method(self, state, function_name, argument_names, command_subtree):
+        # state.method_dict[function_name]
+        state.method_dict['sxambalulu'] = self.turn_ast_into_function(
+            state, function_name, argument_names, command_subtree)
+        return state, None

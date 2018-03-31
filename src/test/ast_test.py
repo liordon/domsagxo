@@ -1,4 +1,3 @@
-import biblioteko.atomaj_tipoj as tipo
 import biblioteko.estra_komponantoj as esk
 import kompilajxo.leksisto as lxr
 import kompilajxo.abstrakta_sintaksarbo as ast_bld
@@ -138,3 +137,13 @@ class TestAstPrograms(object):
         new_state = evaluate_and_return_state_variables(ast, '''kato=2+4*10.
                         hundo = kato/6.''')
         assert {'kato': 42, 'hundo': 7} == new_state
+
+    def test_returnStatementReturnsItsDeclaredValue(self, ast):
+        value = parsed_value_of(ast, '''revenu ses.''')
+        assert 6 == value
+
+    def test_returnStopsProgramFromContinuing(self, ast):
+        state = esk.Domsagxo()
+        new_state, value = ast.parse('''revenu ses. kato = 10.''').evaluate(state)
+        assert 6 == value
+        assert {} == new_state.variables

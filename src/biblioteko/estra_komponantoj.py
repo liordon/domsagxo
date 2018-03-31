@@ -1,4 +1,5 @@
 from biblioteko.atomaj_tipoj import *
+from biblioteko.antauxdifinitaj_funkcioj import *
 import sched
 from datetime import datetime
 
@@ -17,6 +18,9 @@ class Domsagxo(object):
 
     def __init__(self):
         self.variables = {}
+        self.method_dict = {"hazardu": generateRandom,
+                            "sxaltu": turnOnDevices,
+                            "aldonu": addAppliance}
         self.groups = {}
         for appType in Domsagxo.appliance_type_group:
             self.groups[Domsagxo.appliance_type_group[appType]] = []

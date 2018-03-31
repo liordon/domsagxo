@@ -140,8 +140,3 @@ def setApplianceProperty(appliance_property_and_value, smart_house_manager):
     #     .setPropertyOfAppliance(appliance_property_and_value[0],
     #                             appliance_property_and_value[1],
     #                             appliance_property_and_value[2])
-
-
-method_dict = {"hazardu": generateRandom,
-               "sxaltu": turnOnDevices,
-               "aldonu": addAppliance}
