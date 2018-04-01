@@ -143,7 +143,7 @@ class FunctionInvocation(AstNode):
         for arg in args:
             state, new_arg = arg.evaluate(state)
             evaluated_args += [new_arg]
-        return state, state.method_dict[function_name](evaluated_args, state)
+        return state, state.method_dict[function_name](evaluated_args)
 
 
 class ReturnValue(AstNode):
@@ -171,6 +171,6 @@ class FunctionDefinition(AstNode):
 
     def _method(self, state, function_name, argument_names, command_subtree):
         # state.method_dict[function_name]
-        state.method_dict['sxambalulu'] = self.turn_ast_into_function(
+        state.method_dict[function_name] = self.turn_ast_into_function(
             state, function_name, argument_names, command_subtree)
         return state, None

@@ -33,11 +33,38 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
 
     def test_canDefineUnitFunctionReturningItsArgument(self, ast):
         new_state = self.evaluate_and_return_state(
-            ast, '''sxambaluli sxambalulo tiel revenu sxambalulo. finu''')
-        assert 1 == new_state.method_dict['sxambalulu']([1])
+            ast, '''diri sxambalulo tiel revenu sxambalulo. finu''')
+        assert 1 == new_state.method_dict['diru']([1])
 
     def test_cannotPassMoreArgumentsThanPlannedToUserDefinedFunction(self, ast):
+        new_state = self.evaluate_and_return_state(
+            ast, '''memori sxambalulo tiel revenu sxambalulo. finu''')
         with pytest.raises(TypeError):
-            new_state = self.evaluate_and_return_state(
-                ast, '''sxambaluli sxambalulo tiel revenu sxambalulo. finu''')
-            assert 1 == new_state.method_dict['sxambalulu']([1,2])
+            new_state.method_dict['memoru']([1, 2])
+
+    def test_canDefineConstantFunctionReturning1(self, ast):
+        new_state = self.evaluate_and_return_state(
+            ast, '''forgesi sxambalulo, hundo kaj kato tiel revenu sep. finu''')
+        assert 7 == new_state.method_dict['forgesu']([10, 809, 341])
+
+    def test_canDefineProjectionFunctionThatReceives2argumentsButReturnsTheFirst(self, ast):
+        new_state = self.evaluate_and_return_state(
+            ast, '''elekti hundo kaj kato tiel revenu hundo. finu''')
+        assert 1 == new_state.method_dict['elektu']([1, 2])
+
+    def test_canComposeA3InputFunctionOn3FunctionsWith2InputsAndReceiveA2InputFunction(self, ast):
+        new_state = self.evaluate_and_return_state(
+            ast, '''trienigi hundo kaj kato kaj muso tiel hundo*kato*muso. finu''')
+        new_state = self.evaluate_and_return_state(
+            ast, '''hundi unuo kaj duo tiel revenu unuo*duo. finu''', new_state)
+        new_state = self.evaluate_and_return_state(
+            ast, '''kati unuo kaj duo tiel revenu unuo+duo. finu''', new_state)
+        new_state = self.evaluate_and_return_state(
+            ast, '''musi unuo kaj duo tiel revenu unuo-duo. finu''', new_state)
+        new_state = self.evaluate_and_return_state(
+            ast, '''sxambaluli oro kaj argxento tiel
+            hundo estas hundu oro kaj cent.
+            kato estas katu argxento kaj kvin.
+            muso estas musu argxento kaj oro. 
+            revenu trienigu hundo, kato kaj muso. finu''', new_state)
+        assert (2*100)*(5+5)*(5-2) == new_state.method_dict['sxambalulu']([2, 5])

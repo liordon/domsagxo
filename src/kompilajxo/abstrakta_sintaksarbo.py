@@ -243,7 +243,7 @@ def build(start=None):
 
     @RULE('defFuncName', [[POS.V_INF]])
     def p_define_function_name(p):
-        p[0] = p[1]
+        p[0] = p[1][:-1]+"u"
 
     @RULE('inputArgs', [['name'],
                         ['inputArgs', ResWord.KAJ, 'name'],
@@ -252,7 +252,7 @@ def build(start=None):
         if len(p) == 2:
             p[0] = [p[1]]
         else:
-            p[0] = p[1] + p[3]
+            p[0] = p[1] + [p[3]]
 
     @RULE('inputArgs', [[]])
     def p_inputArg_nothing(p):
