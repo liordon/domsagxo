@@ -93,7 +93,7 @@ class TestApplianceManagement(SmartHomeManagerProvided):
         assert len(ApplianceTypes) == len(shm.groups)
 
     def test_canAddApplianceToSmartHouseManagerViaLibraryFunction(self, shm):
-        addAppliance([ApplianceTypes.SWITCH.value, app_nm1], shm)
+        shm.requestDeviceAddition([ApplianceTypes.SWITCH.value, app_nm1])
 
         assert 1 == len(shm.appliances)
         assert shm.appliances[app_nm1].type is ApplianceTypes.SWITCH
@@ -102,12 +102,12 @@ class TestApplianceManagement(SmartHomeManagerProvided):
         shm.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
 
         with pytest.raises(KeyError):
-            addAppliance([ApplianceTypes.SWITCH.value, app_nm1], shm)
+            shm.requestDeviceAddition([ApplianceTypes.SWITCH.value, app_nm1])
 
     def test_canRenameExistingAppliance(self, shm):
         shm.addAppliance(Appliance(ApplianceTypes.KNOB, app_nm1))
 
-        renameAppliance([app_nm1, app_nm2], shm)
+        shm.renameAppliance([app_nm1, app_nm2])
 
         assert 1 == len(shm.appliances)
         assert shm.appliances[app_nm2].type is ApplianceTypes.KNOB
@@ -115,17 +115,17 @@ class TestApplianceManagement(SmartHomeManagerProvided):
 
     def test_cannotRenameNonExistingAppliance(self, shm):
         with pytest.raises(KeyError):
-            renameAppliance([app_nm1, app_nm2], shm)
+            shm.renameAppliance([app_nm1, app_nm2])
 
     def test_cannotRenameApplianceIntoPreexistingName(self, shm):
         shm.addAppliance(Appliance(ApplianceTypes.KNOB, app_nm1))
         shm.addAppliance(Appliance(ApplianceTypes.KNOB, app_nm2))
 
         with pytest.raises(KeyError):
-            renameAppliance([app_nm1, app_nm2], shm)
+            shm.renameAppliance([app_nm1, app_nm2])
 
     def test_canCreateApplianceGroup(self, shm):
-        createGroup([group_nm1], shm)
+        shm.addGroup(group_nm1)
 
         assert group_nm1 in shm.groups.keys()
         assert 0 == len(shm.groups[group_nm1])
@@ -134,25 +134,25 @@ class TestApplianceManagement(SmartHomeManagerProvided):
         shm.groups[group_nm1] = []
 
         with pytest.raises(KeyError):
-            createGroup([group_nm1], shm)
+            shm.addGroup(group_nm1)
 
     def test_canRemoveApplianceGroup(self, shm):
         shm.groups[group_nm1] = []
 
-        removeGroup([group_nm1], shm)
+        shm.removeGroup(group_nm1)
 
         assert group_nm1 not in shm.groups.keys()
 
     def test_deletingAnApplianceGroupRaisesKeyErrorIfGroupDoesNotExist(self, shm):
         with pytest.raises(KeyError):
-            removeGroup([group_nm1], shm)
+            shm.removeGroup(group_nm1)
 
     def test_canMoveApplianceIntoGroup(self, shm):
         shm.groups[group_nm1] = []
         appliance = Appliance(ApplianceTypes.LIGHT, app_nm1)
         shm.addAppliance(appliance)
 
-        putApplianceInGroup([app_nm1, group_nm1], shm)
+        shm.addApplianceToGroup(app_nm1, group_nm1)
 
         assert 1 == len(shm.groups[group_nm1])
         assert appliance in shm.groups[group_nm1]
@@ -160,36 +160,24 @@ class TestApplianceManagement(SmartHomeManagerProvided):
     def test_cannotAddNonExistingApplianceToGroup(self, shm):
         shm.groups[group_nm1] = []
         with pytest.raises(KeyError):
-            putApplianceInGroup([app_nm1, group_nm1], shm)
+            shm.addApplianceToGroup(app_nm1, group_nm1)
 
     def test_cannotPutApplianceInNonExistingGroup(self, shm):
         appliance = Appliance(ApplianceTypes.LIGHT, app_nm1)
         shm.addAppliance(appliance)
 
         with pytest.raises(KeyError):
-            putApplianceInGroup([app_nm1, group_nm1], shm)
+            shm.addApplianceToGroup(app_nm1, group_nm1)
 
-    def test_canMoveApplianceFrom1GroupToAnother(self, shm):
-        appliance = Appliance(ApplianceTypes.LIGHT, app_nm1)
-        shm.addAppliance(appliance)
-        shm.groups[group_nm1] = [appliance]
-        shm.groups[group_nm2] = []
-
-        moveAppliance([app_nm1, group_nm1, group_nm2], shm)
-        assert appliance not in shm.groups[group_nm1]
-        assert appliance in shm.groups[group_nm2]
-
-    def test_cannotMoveApplianceWithoutDestination(self, shm):
-        appliance = Appliance(ApplianceTypes.LIGHT, app_nm1)
-        shm.addAppliance(appliance)
-        shm.groups[group_nm1] = [appliance]
-        shm.groups[group_nm2] = []
-
-        with pytest.raises(ValueError):
-            moveAppliance([app_nm1, group_nm1], shm)
-
-        assert appliance in shm.groups[group_nm1]
-        assert appliance not in shm.groups[group_nm2]
+    # def test_canMoveApplianceFrom1GroupToAnother(self, shm):
+    #     appliance = Appliance(ApplianceTypes.LIGHT, app_nm1)
+    #     shm.addAppliance(appliance)
+    #     shm.groups[group_nm1] = [appliance]
+    #     shm.groups[group_nm2] = []
+    #
+    #     moveAppliance([app_nm1, group_nm1, group_nm2], shm)
+    #     assert appliance not in shm.groups[group_nm1]
+    #     assert appliance in shm.groups[group_nm2]
 
 
 class TestApplianceCommands(SmartHomeManagerProvided):
@@ -202,7 +190,7 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         shm.addApplianceToGroup(app_nm1, group_nm1)
         shm.addApplianceToGroup(app_nm2, group_nm1)
 
-        turnOnDevices([group_nm1], shm)
+        shm.requestDeviceActivation([group_nm1])
 
         assert shm.getAppliance(app_nm1).isTurnedOn
         assert shm.getAppliance(app_nm2).isTurnedOn
@@ -213,7 +201,7 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         shm.addAppliance(Appliance(ApplianceTypes.KNOB, app_nm2))
         shm.addAppliance(Appliance(ApplianceTypes.CAMERA, app_nm3))
 
-        turnOnDevices([app_nm2, app_nm3], shm)
+        shm.requestDeviceActivation([app_nm2, app_nm3])
 
         assert not shm.getAppliance(app_nm1).isTurnedOn
         assert shm.getAppliance(app_nm2).isTurnedOn
@@ -227,7 +215,7 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         shm.addApplianceToGroup(app_nm1, group_nm1)
         shm.addApplianceToGroup(app_nm2, group_nm1)
 
-        turnOnDevices([group_nm1, app_nm3], shm)
+        shm.requestDeviceActivation([group_nm1, app_nm3])
 
         assert shm.getAppliance(app_nm1).isTurnedOn
         assert shm.getAppliance(app_nm2).isTurnedOn
@@ -236,14 +224,14 @@ class TestApplianceCommands(SmartHomeManagerProvided):
     def test_canQueryLightForItsBrightness(self, shm):
         shm.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
 
-        brightness = getApplianceProperty([app_nm1, ApplianceProperties.BRIGHTNESS.value], shm)
+        brightness = shm.getPropertyOfAppliance(app_nm1, ApplianceProperties.BRIGHTNESS.value)
 
         assert 1 == brightness
 
     def test_canAlterLightBrightness(self, shm):
         shm.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
 
-        setApplianceProperty([app_nm1, ApplianceProperties.BRIGHTNESS.value, .15], shm)
+        shm.setPropertyOfAppliance(app_nm1, ApplianceProperties.BRIGHTNESS.value, .15)
 
         assert .15 == shm.getPropertyOfAppliance(app_nm1, ApplianceProperties.BRIGHTNESS.value)
 
@@ -253,7 +241,8 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         shm.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm3))
 
         group_of_all_lights = ApplianceTypes.LIGHT.value + "j"
-        setApplianceProperty([group_of_all_lights, ApplianceProperties.BRIGHTNESS.value, .15], shm)
+        shm.requestChangeToDeviceProperty(
+            [group_of_all_lights, ApplianceProperties.BRIGHTNESS.value, .15])
 
         assert .15 == shm.getPropertyOfAppliance(app_nm1, ApplianceProperties.BRIGHTNESS.value)
         assert .15 == shm.getPropertyOfAppliance(app_nm2, ApplianceProperties.BRIGHTNESS.value)

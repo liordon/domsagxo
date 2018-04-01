@@ -19,8 +19,8 @@ class Domsagxo(object):
     def __init__(self):
         self.variables = {}
         self.method_dict = {"hazardu": generateRandom,
-                            "sxaltu": turnOnDevices,
-                            "aldonu": addAppliance}
+                            "sxaltu": self.requestDeviceActivation,
+                            "aldonu": self.requestDeviceAddition}
         self.groups = {}
         for appType in Domsagxo.appliance_type_group:
             self.groups[Domsagxo.appliance_type_group[appType]] = []
@@ -72,6 +72,50 @@ class Domsagxo(object):
     def setPropertyOfAppliance(self, appliance_name, property_name, value):
         appliance = self.appliances[appliance_name]
         appliance.state_components[property_name] = value
+
+    def requestDeviceAddition(self, device_parameters):
+        appliance_type = ApplianceTypes(device_parameters[0])
+        if len(device_parameters) > 1:
+            appliance_name = device_parameters[1]
+        else:
+            for numerator in range(1, 9):
+                appliance_name = digitNames[numerator] + "a " + appliance_type.value
+                if not self.recognizes(appliance_name):
+                    break
+        if self.recognizes(appliance_name):
+            raise KeyError("appliance " + appliance_name + " already exists.")
+        appliance = Appliance(appliance_type, appliance_name)
+        self.addAppliance(appliance)
+
+    def requestDeviceActivation(self, devices):
+        def turnOnDevice(device):
+            device.isTurnedOn = True
+
+        self.performActionOnAllDevices(devices, turnOnDevice)
+
+    def requestChangeToDeviceProperty(self, devices_property_value):
+        def setDeviceProperty(device):
+            device.state_components[devices_property_value[1]] = devices_property_value[2]
+
+        self.performActionOnAllDevices([devices_property_value[0]], setDeviceProperty)
+
+    def performActionOnAllDevices(self, devices, action):
+        for d in devices:
+            if self.isApplianceName(d):
+                device = self.getAppliance(d)
+                action(device)
+            elif self.isGroupName(d):
+                device_group = self.getGroup(d)
+                for device in device_group:
+                    action(device)
+
+    def renameAppliance(self, names):
+        if self.recognizes(names[1]):
+            raise KeyError("name " + names[1] + " is already taken")
+        appliance = self.appliances[names[0]]
+        appliance.name = names[1]
+        self.appliances[names[1]] = appliance
+        self.appliances.pop(names[0])
 
 
 class Horaro(object):
