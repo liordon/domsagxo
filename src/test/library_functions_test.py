@@ -1,9 +1,6 @@
 import pytest
 
-from biblioteko.antauxdifinitaj_funkcioj import *
-from biblioteko.atomaj_tipoj import *
 from biblioteko.estra_komponantoj import *
-import datetime
 
 
 class SmartHomeManagerProvided(object):

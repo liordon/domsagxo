@@ -37,9 +37,9 @@ class TimeSpan(object):
         return self.unite(self, res)
 
     def total_seconds(self):
-        hours = self.hours + self.days*24
-        minutes = self.minutes + hours*60
-        return self.seconds + minutes*60
+        hours = self.hours + self.days * 24
+        minutes = self.minutes + hours * 60
+        return self.seconds + minutes * 60
 
     def __str__(self):
         components = []
@@ -55,14 +55,12 @@ class TimeSpan(object):
         if len(components) > 2:
             components = components[:-2] + "and" + components[-2:]
 
-
     @classmethod
     def unite(cls, span1, span2):
         return TimeSpan(days=span1.days + span2.days,
                         hours=span1.hours + span2.hours,
                         minutes=span1.minutes + span2.minutes,
                         seconds=span1.seconds + span2.seconds)
-
 
 
 # noinspection SpellCheckingInspection
@@ -90,6 +88,7 @@ class Appliance(object):
     """ the most basic parameter of any appliance is it's name.
     beyond that, an appliance should have many other functions determined
     by the components it includes."""
+
     def __init__(self, app_type, name):
         self.name = name
         self.type = app_type

@@ -1,7 +1,7 @@
+import copy
 import datetime
 
 import biblioteko.atomaj_tipoj as Types
-import copy
 
 
 class AstNode(object):

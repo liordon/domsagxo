@@ -1,7 +1,7 @@
+import re
 from enum import Enum
 
 import ply.lex as lex
-import re
 
 
 class SemanticError(Exception):
@@ -60,19 +60,20 @@ class PartOfSpeech(Enum):
 
 
 reserved_words = {
-    "se": ReservedWord.IF.value,
-    "la": ReservedWord.LA.value,
-    "por": ReservedWord.FOR.value,
-    "kaj": ReservedWord.KAJ.value,
-    "finu": ReservedWord.FINU.value,
-    "tiel": ReservedWord.TIEL.value,
-    "tiam": ReservedWord.TIAM.value,
-    "alie": ReservedWord.ALIE.value,
-    "vero": ReservedWord.TRUE.value,
-    "estas": UnalphabeticTerminal.ASSIGN.value,
-    "nenio": ReservedWord.NENIO.value,
-    "revenu": ReservedWord.REVENU.value,
-    "malvero": ReservedWord.FALSE.value}
+    "se"     : ReservedWord.IF.value,
+    "la"     : ReservedWord.LA.value,
+    "por"    : ReservedWord.FOR.value,
+    "kaj"    : ReservedWord.KAJ.value,
+    "finu"   : ReservedWord.FINU.value,
+    "tiel"   : ReservedWord.TIEL.value,
+    "tiam"   : ReservedWord.TIAM.value,
+    "alie"   : ReservedWord.ALIE.value,
+    "vero"   : ReservedWord.TRUE.value,
+    "estas"  : UnalphabeticTerminal.ASSIGN.value,
+    "nenio"  : ReservedWord.NENIO.value,
+    "revenu" : ReservedWord.REVENU.value,
+    "malvero": ReservedWord.FALSE.value
+}
 
 prepositions = [
     "al",
@@ -145,17 +146,17 @@ def t_NUMBER(t):
 
 
 digitNames = {
-    "nul": 0,
-    "unu": 1,
-    "du": 2,
-    "tri": 3,
+    "nul" : 0,
+    "unu" : 1,
+    "du"  : 2,
+    "tri" : 3,
     "kvar": 4,
     "kvin": 5,
-    "ses": 6,
-    "sep": 7,
-    "ok": 8,
+    "ses" : 6,
+    "sep" : 7,
+    "ok"  : 8,
     "naux": 9,
-    "": 1
+    ""    : 1
 }
 
 digitRe = re.compile(

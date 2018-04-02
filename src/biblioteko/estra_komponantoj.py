@@ -1,7 +1,6 @@
-from biblioteko.atomaj_tipoj import *
-from biblioteko.antauxdifinitaj_funkcioj import *
 import sched
-from datetime import datetime
+
+from biblioteko.antauxdifinitaj_funkcioj import *
 
 
 class Domsagxo(object):
@@ -9,18 +8,20 @@ class Domsagxo(object):
     appliances and manages them."""
 
     appliance_type_group = {
-        ApplianceTypes.SWITCH: "sxaltoj",
-        ApplianceTypes.KNOB: "agordoj",
-        ApplianceTypes.LIGHT: "lumoj",
+        ApplianceTypes.SWITCH    : "sxaltoj",
+        ApplianceTypes.KNOB      : "agordoj",
+        ApplianceTypes.LIGHT     : "lumoj",
         ApplianceTypes.THERMOSTAT: "termostatoj",
-        ApplianceTypes.CAMERA: "bildiloj"
+        ApplianceTypes.CAMERA    : "bildiloj"
     }
 
     def __init__(self):
         self.variables = {}
-        self.method_dict = {"hazardu": generateRandom,
-                            "sxaltu": self.requestDeviceActivation,
-                            "aldonu": self.requestDeviceAddition}
+        self.method_dict = {
+            "hazardu": generateRandom,
+            "sxaltu" : self.requestDeviceActivation,
+            "aldonu" : self.requestDeviceAddition
+        }
         self.groups = {}
         for appType in Domsagxo.appliance_type_group:
             self.groups[Domsagxo.appliance_type_group[appType]] = []
@@ -134,11 +135,11 @@ class Horaro(object):
         day_offset = 0
         if time_point < self.getDate().time():
             day_offset = 1
-        scheduled_time = datetime(self.getDate().year,
-                                  self.getDate().month,
-                                  self.getDate().day + day_offset,
-                                  time_point.hour,
-                                  time_point.minute)
+        scheduled_time = datetime.datetime(self.getDate().year,
+                                           self.getDate().month,
+                                           self.getDate().day + day_offset,
+                                           time_point.hour,
+                                           time_point.minute)
         self.enter(scheduled_time - self.getDate(), action, argument, kwargs)
 
     def enterAtFutureTime(self, date_time_point, action):
@@ -156,7 +157,7 @@ class Horaro(object):
         self.scheduler.delayfunc(target_time - self.scheduler.timefunc())
 
     def getDate(self):
-        return datetime.utcfromtimestamp(self.scheduler.timefunc())
+        return datetime.datetime.utcfromtimestamp(self.scheduler.timefunc())
 
     def repeat(self, delay, action):
         def repetition():

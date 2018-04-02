@@ -1,14 +1,9 @@
 import math
-
 import ply.yacc as yacc
 
-from biblioteko.estra_komponantoj import Domsagxo
-from kompilajxo.leksisto import UnalphabeticTerminal as UaTer
-from kompilajxo.leksisto import PartOfSpeech as POS
-from kompilajxo.leksisto import ReservedWord as ResWord
-from kompilajxo.leksisto import tokens
-from biblioteko.atomaj_tipoj import *
 import kompilajxo.nodo as Node
+from biblioteko.atomaj_tipoj import *
+from kompilajxo.leksisto import UnalphabeticTerminal as UaTer, PartOfSpeech as POS, ReservedWord as ResWord, tokens
 
 
 class EsperantoSyntaxError(Exception):

@@ -1,8 +1,9 @@
-import biblioteko.estra_komponantoj as esk
-import kompilajxo.leksisto as lxr
-import kompilajxo.abstrakta_sintaksarbo as ast_bld
-import kompilajxo.nodo as Node
 import pytest
+
+import biblioteko.estra_komponantoj as esk
+import kompilajxo.abstrakta_sintaksarbo as ast_bld
+import kompilajxo.leksisto as lxr
+import kompilajxo.nodo as Node
 
 lxr.build()
 
@@ -133,7 +134,7 @@ class TestAstStatements(object):
 
     def test_elseStatementContentIsEvaluatedIfConditionIsFalse(self, ast):
         assert {'kato': 9} == evaluate_and_return_state_variables(
-                   ast, "se malvero tiam kato estas sep. alie kato estas naux. finu")
+            ast, "se malvero tiam kato estas sep. alie kato estas naux. finu")
 
 
 class TestAstPrograms(object):

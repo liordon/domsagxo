@@ -1,4 +1,5 @@
 import pytest
+
 import kompilajxo.leksisto as lxr
 from kompilajxo.leksisto import PartOfSpeech, UnalphabeticTerminal, ReservedWord
 
@@ -210,11 +211,11 @@ class TestVerbalNumbers(LexerProvided):
 
     def test_canParseFractionHalf(self, lexer):
         lexer.input("duono")
-        self.assertVerbalNumberValue(1/2, lexer.token())
+        self.assertVerbalNumberValue(1 / 2, lexer.token())
 
     def test_canParseFractionQuarter(self, lexer):
         lexer.input("kvarono")
-        self.assertVerbalNumberValue(1/4, lexer.token())
+        self.assertVerbalNumberValue(1 / 4, lexer.token())
 
     def test_numberWithAdjectiveEndingIsNumerator(self, lexer):
         lexer.input("unua")

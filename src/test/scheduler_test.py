@@ -1,11 +1,9 @@
-import pytest
-from biblioteko.atomaj_tipoj import *
-import kompilajxo.leksisto as lxr
-import kompilajxo.abstrakta_sintaksarbo as ast_bld
 import datetime
 import time
-from apscheduler.schedulers.background import BackgroundScheduler
 
+import pytest
+
+from biblioteko.atomaj_tipoj import *
 from biblioteko.estra_komponantoj import Horaro
 
 

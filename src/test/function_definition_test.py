@@ -1,9 +1,8 @@
-import biblioteko.atomaj_tipoj as tipo
-import biblioteko.estra_komponantoj as esk
-import kompilajxo.leksisto as lxr
-import kompilajxo.abstrakta_sintaksarbo as ast_bld
-import kompilajxo.nodo as Node
 import pytest
+
+import biblioteko.estra_komponantoj as esk
+import kompilajxo.abstrakta_sintaksarbo as ast_bld
+import kompilajxo.leksisto as lxr
 
 lxr.build()
 

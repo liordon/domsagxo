@@ -1,6 +1,7 @@
-from random import randrange
-from biblioteko.atomaj_tipoj import *
 import datetime
+from random import randrange
+
+from biblioteko.atomaj_tipoj import *
 
 
 class Generate(Enum):
@@ -33,7 +34,6 @@ def generateRandom(argList):
             random_hour = randrange(0, 24)
             random_minute = randrange(0, 60)
         return datetime.time(hour=random_hour, minute=random_minute)
-            # TimePoint(random_hour, random_minute)
 
     elif argList[0] == Generate.TIME_SPAN.value:
         if len(argList) > 1:
