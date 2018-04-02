@@ -8,40 +8,40 @@ import kompilajxo.nodo as Node
 lxr.build()
 
 
-class TestBasicAstNodes(object):
+class ExpressionLevelAstProvided(object):
 
-    def test_parsedNumberReturnsNumberNode(self):
-        ast = ast_bld.build(start="expression")
+    @pytest.fixture
+    def ast(self):
+        return ast_bld.build(start="expression")
+
+
+class TestBasicAstNodes(ExpressionLevelAstProvided):
+
+    def test_parsedNumberReturnsNumberNode(self, ast):
         parse_res = ast.parse("1")
         assert Node.Number == type(parse_res)
 
-    def test_parsedVerbalNumberReturnsNumberNode(self):
-        ast = ast_bld.build(start="expression")
+    def test_parsedVerbalNumberReturnsNumberNode(self, ast):
         parse_res = ast.parse("unu")
         assert Node.Number == type(parse_res)
 
-    def test_parsedNegativeNumberReturnsOperationNode(self):
-        ast = ast_bld.build(start="expression")
+    def test_parsedNegativeNumberReturnsOperationNode(self, ast):
         parse_res = ast.parse("-1")
         assert Node.MathOp == type(parse_res)
 
-    def test_multiplicationReturnsOperationNode(self):
-        ast = ast_bld.build(start="expression")
+    def test_multiplicationReturnsOperationNode(self, ast):
         parse_res = ast.parse("1*1")
         assert Node.MathOp == type(parse_res)
 
-    def test_divisionReturnsOperationNode(self):
-        ast = ast_bld.build(start="expression")
+    def test_divisionReturnsOperationNode(self, ast):
         parse_res = ast.parse("1/1")
         assert Node.MathOp == type(parse_res)
 
-    def test_additionReturnsOperationNode(self):
-        ast = ast_bld.build(start="expression")
+    def test_additionReturnsOperationNode(self, ast):
         parse_res = ast.parse("1+1")
         assert Node.MathOp == type(parse_res)
 
-    def test_subtractionReturnsOperationNode(self):
-        ast = ast_bld.build(start="expression")
+    def test_subtractionReturnsOperationNode(self, ast):
         parse_res = ast.parse("1-1")
         assert Node.MathOp == type(parse_res)
 
@@ -51,11 +51,7 @@ def parsed_value_of(ast, expr, state=None):
     return node.evaluate(state)[1]
 
 
-class TestAstMathExpressions(object):
-
-    @pytest.fixture
-    def ast(self):
-        return ast_bld.build(start="expression")
+class TestAstMathExpressions(ExpressionLevelAstProvided):
 
     def test_capableOfAddition(self, ast):
         assert 2 == (parsed_value_of(ast, "1+1"))
