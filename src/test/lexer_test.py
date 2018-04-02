@@ -17,10 +17,10 @@ class TestPartsOfSpeech(LexerProvided):
         assert partOfSpeech.value == token.type
 
     def test_adjectivesAreNotCategorizedAsWords(self, lexer):
-        lexer.input("granda")
+        lexer.input("blanka")
         token = lexer.token()
         self.assertPartOfSpeech(token, PartOfSpeech.ADJECTIVE)
-        assert token.value == "granda"
+        assert token.value == "blanka"
 
     def test_ImperativeVerbsAreNotCategorizedAsWords(self, lexer):
         lexer.input("presu")
@@ -112,13 +112,35 @@ class TestReservedWords(LexerProvided):
         lexer.input("sekundoj")
         self.assertPartOfSpeech(lexer.token(), ReservedWord.TIME_INDICATION)
 
-    def test_theWordsIfThenAndElseAreUsedForConditionalStatements(self, lexer):
+    def test_theWordsIfThenAndElseAreReservedForConditionalStatements(self, lexer):
         lexer.input("se")
         self.assertPartOfSpeech(lexer.token(), ReservedWord.IF)
         lexer.input("tiam")
         self.assertPartOfSpeech(lexer.token(), ReservedWord.TIAM)
         lexer.input("alie")
         self.assertPartOfSpeech(lexer.token(), ReservedWord.ALIE)
+
+    def test_theWordWhileIsReservedForLoopStatements(self, lexer):
+        lexer.input("dum")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.DUM)
+
+    def test_theWords_ThenToMoreGreatSmallOrNot_AreReservedForComparisons(self, lexer):
+        lexer.input("ne")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.NE)
+        lexer.input("al")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.AL)
+        lexer.input("ol")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.OL)
+        lexer.input("pli")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.PLI)
+        lexer.input("aux")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.OR)
+        lexer.input("egala")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.EGALA)
+        lexer.input("granda")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.GRANDA)
+        lexer.input("malgranda")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.MALGRANDA)
 
 
 class TestMultipleTokenSequences(LexerProvided):

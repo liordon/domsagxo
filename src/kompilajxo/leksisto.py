@@ -29,20 +29,29 @@ class UnalphabeticTerminal(Enum):
 
 class ReservedWord(Enum):
     DE = 'DE'
+    NE = 'NE'
     EN = 'EN'
     LA = 'LA'
+    AL = 'AL'
+    OL = 'OL'
+    OR = 'OR'
     IF = 'IF'
+    PLI = 'PLI'
     KAJ = 'KAJ'
     FOR = 'FOR'
+    DUM = 'DUM'
     WORD = 'WORD'
     TIEL = 'TIEL'
     TIAM = 'TIAM'
     ALIE = 'ALIE'
     FINU = 'FINU'
     TRUE = 'TRUE'
+    EGALA = 'EGALA'
     FALSE = 'FALSE'
     NENIO = 'NENIO'
     REVENU = 'REVENU'
+    GRANDA = 'GRANDA'
+    MALGRANDA = 'MALGRANDA'
     VERBAL_DIGIT = 'VERBAL_DIGIT'
     TIME_INDICATION = 'TIME_INDICATION'
 
@@ -60,19 +69,28 @@ class PartOfSpeech(Enum):
 
 
 reserved_words = {
-    "se"     : ReservedWord.IF.value,
-    "la"     : ReservedWord.LA.value,
-    "por"    : ReservedWord.FOR.value,
-    "kaj"    : ReservedWord.KAJ.value,
-    "finu"   : ReservedWord.FINU.value,
-    "tiel"   : ReservedWord.TIEL.value,
-    "tiam"   : ReservedWord.TIAM.value,
-    "alie"   : ReservedWord.ALIE.value,
-    "vero"   : ReservedWord.TRUE.value,
-    "estas"  : UnalphabeticTerminal.ASSIGN.value,
-    "nenio"  : ReservedWord.NENIO.value,
-    "revenu" : ReservedWord.REVENU.value,
-    "malvero": ReservedWord.FALSE.value
+    "se"       : ReservedWord.IF.value,
+    "ne"       : ReservedWord.NE.value,
+    "la"       : ReservedWord.LA.value,
+    "al"       : ReservedWord.AL.value,
+    "ol"       : ReservedWord.OL.value,
+    "aux"      : ReservedWord.OR.value,
+    "pli"      : ReservedWord.PLI.value,
+    "por"      : ReservedWord.FOR.value,
+    "dum"      : ReservedWord.DUM.value,
+    "kaj"      : ReservedWord.KAJ.value,
+    "finu"     : ReservedWord.FINU.value,
+    "tiel"     : ReservedWord.TIEL.value,
+    "tiam"     : ReservedWord.TIAM.value,
+    "alie"     : ReservedWord.ALIE.value,
+    "vero"     : ReservedWord.TRUE.value,
+    "estas"    : UnalphabeticTerminal.ASSIGN.value,
+    "egala"    : ReservedWord.EGALA.value,
+    "nenio"    : ReservedWord.NENIO.value,
+    "revenu"   : ReservedWord.REVENU.value,
+    "granda"   : ReservedWord.GRANDA.value,
+    "malvero"  : ReservedWord.FALSE.value,
+    "malgranda": ReservedWord.MALGRANDA.value
 }
 
 prepositions = [

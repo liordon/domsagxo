@@ -88,6 +88,62 @@ class TestAstMathExpressions(ExpressionLevelAstProvided):
         assert parsed_value_of(ast, "ses estas ses")
 
 
+class TestAstBooleanExpressions(ExpressionLevelAstProvided):
+    @pytest.fixture
+    def relation_ast(self):
+        return ast_bld.build(start="relation")
+
+    def test_existsAnEqualityRelation(self, relation_ast):
+        node = relation_ast.parse("estas egala al")
+        assert node is not None
+
+    def test_existsAGreatnessRelation(self, relation_ast):
+        node = relation_ast.parse("estas pli granda ol")
+        assert node is not None
+
+    def test_existsAnEqualOrGreatnessRelation(self, relation_ast):
+        node = relation_ast.parse("estas pli granda aux egala al")
+        assert node is not None
+
+    def test_existsASmallnessRelation(self, relation_ast):
+        node = relation_ast.parse("estas pli malgranda ol")
+        assert node is not None
+
+    def test_existsAnEqualOrSmallnessRelation(self, relation_ast):
+        node = relation_ast.parse("estas pli malgranda aux egala al")
+        assert node is not None
+
+    def test_canEvaluateEqualityBetweenNumberAndItself(self, ast):
+        assert parsed_value_of(ast, "unu estas egala al unu")
+        assert not parsed_value_of(ast, "unu estas egala al du")
+        assert not parsed_value_of(ast, "du estas egala al unu")
+
+    def test_canEvaluateInequalityBetweenNumberAndItself(self, ast):
+        assert not parsed_value_of(ast, "unu ne estas egala al unu")
+        assert parsed_value_of(ast, "unu ne estas egala al du")
+        assert parsed_value_of(ast, "du ne estas egala al unu")
+
+    def test_canEvaluateGreatnessBetween2Numbers(self, ast):
+        assert not parsed_value_of(ast, "unu estas pli granda ol unu")
+        assert not parsed_value_of(ast, "unu estas pli granda ol du")
+        assert parsed_value_of(ast, "du estas pli granda ol unu")
+
+    def test_canEvaluateGreatnessOrEqualityBetween2Numbers(self, ast):
+        assert parsed_value_of(ast, "unu estas pli granda aux egala al unu")
+        assert not parsed_value_of(ast, "unu estas pli granda aux egala al du")
+        assert parsed_value_of(ast, "du estas pli granda aux egala al unu")
+
+    def test_canEvaluateSmallnessBetween2Numbers(self, ast):
+        assert not parsed_value_of(ast, "unu estas pli malgranda ol unu")
+        assert parsed_value_of(ast, "unu estas pli malgranda ol du")
+        assert not parsed_value_of(ast, "du estas pli malgranda ol unu")
+
+    def test_canEvaluateSmallnessOrEqualityBetween2Numbers(self, ast):
+        assert parsed_value_of(ast, "unu estas pli malgranda aux egala al unu")
+        assert parsed_value_of(ast, "unu estas pli malgranda aux egala al du")
+        assert not parsed_value_of(ast, "du estas pli malgranda aux egala al unu")
+
+
 def evaluate_and_return_state_variables(ast, statement, initial_state=None):
     if initial_state is None:
         initial_state = esk.Domsagxo()  # so as not to put a mutable default
@@ -110,9 +166,15 @@ class TestAstStatements(object):
         assert {'kato': 42} == evaluate_and_return_state_variables(ast, "kato=2+4*10")
 
     def test_adjectivesJoinNounsToDefineVariableNames(self, ast):
-        new_state = evaluate_and_return_state_variables(ast, "malgranda kato=7")
-        assert {'malgranda kato': 7} == new_state
+        new_state = evaluate_and_return_state_variables(ast, "nigra kato=7")
+        assert {'nigra kato': 7} == new_state
         assert 'kato' not in new_state
+
+    def test_reservedAdjectivesCanBeUsedForVariableNamesOutOfReservedContext(self, ast):
+        new_state = evaluate_and_return_state_variables(ast, "malgranda kato estas 7")
+        assert {'malgranda kato': 7} == new_state
+        new_state = evaluate_and_return_state_variables(ast, "granda kato estas 17")
+        assert {'granda kato': 17} == new_state
 
     def test_definiteNounsBecomeIndefinite(self, ast):
         assert {'kato': 9} == evaluate_and_return_state_variables(ast, "la kato = 9")
@@ -131,6 +193,22 @@ class TestAstStatements(object):
     def test_elseStatementContentIsEvaluatedIfConditionIsFalse(self, ast):
         assert {'kato': 9} == evaluate_and_return_state_variables(
             ast, "se malvero tiam kato estas sep. alie kato estas naux. finu")
+
+    def test_canDefineSimpleWhileLoopThatDoesNotEvaluate(self, ast):
+        assert {} == evaluate_and_return_state_variables(
+            ast, "dum malvero tiam kato estas sep. finu")
+
+    def test_canDefineWhileLoopThatEvaluatesOnce(self, ast):
+        initial_state = esk.Domsagxo()
+        initial_state.variables["kato"] = 1
+        assert {'kato': 0} == evaluate_and_return_state_variables(
+            ast, "dum kato estas pli granda ol nul tiam kato estas kato-1. finu", initial_state)
+
+    def test_canDefineWhileLoopThatEvaluatesFiveTimes(self, ast):
+        initial_state = esk.Domsagxo()
+        initial_state.variables["kato"] = 5
+        assert {'kato': 0} == evaluate_and_return_state_variables(
+            ast, "dum kato estas pli granda ol nul tiam kato estas kato-1. finu", initial_state)
 
 
 class TestAstPrograms(object):
@@ -160,3 +238,17 @@ class TestAstPrograms(object):
         new_state, value = ast.parse('''revenu ses. kato = 10.''').evaluate(state)
         assert 6 == value
         assert {} == new_state.variables
+
+    def test_returnStopsWhileLoopFromContinuing(self, ast):
+        initial_state = esk.Domsagxo()
+        state, value = ast.parse("""
+        kato estas naux.
+        dum kato estas pli granda ol nul tiam
+            kato estas kato-1.
+            se kato estas egala al tri tiam
+                revenu kato.
+            finu.
+        finu.
+        """).evaluate(initial_state)
+        assert {'kato': 3} == state.variables
+        assert 3 == value

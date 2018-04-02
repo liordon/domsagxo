@@ -36,11 +36,6 @@ def get_digit(number, digit):
 def build(start=None):
     allTokenTypes = tokens  # just so the import will be considered meaningful.
 
-    # precedence = (
-    #     ('left', 'KAJ', 'DELIM'),
-    #     ('left', 'PLUS', 'MINUS'),
-    # )
-
     @RULE('program', [['statement', UaTer.PERIOD],
                       ['program', 'statement', UaTer.PERIOD]])
     def p_program_separatedStatements(p):
@@ -49,6 +44,7 @@ def build(start=None):
         else:
             p[0] = Node.Program(p[1], p[2])
 
+    # ------------------------     statement definitions     --------------------------#
     @RULE('statement', [[ResWord.IF, 'expression', ResWord.TIAM, 'program', ResWord.FINU],
                         [ResWord.IF, 'expression', ResWord.TIAM, 'program',
                          ResWord.ALIE, 'program', ResWord.FINU]])
@@ -57,6 +53,10 @@ def build(start=None):
             p[0] = Node.ConditionalStatement(p[2], p[4], None)
         else:
             p[0] = Node.ConditionalStatement(p[2], p[4], p[6])
+
+    @RULE('statement', [[ResWord.DUM, 'expression', ResWord.TIAM, 'program', ResWord.FINU]])
+    def p_statement_whileLoop(p):
+        p[0] = Node.LoopStatement(p[2], p[4])
 
     @RULE('statement', [['expression']])
     def p_statement_expr(p):
@@ -70,23 +70,31 @@ def build(start=None):
     def p_statement_return(p):
         p[0] = Node.ReturnValue(p[2])
 
+    # ---------------------       variable name definitions     ----------------------------#
     @RULE('name', [[POS.NOUN],
                    ['partialName', POS.NOUN]])
     def p_name_partialNameAndNoun(p):
         p[0] = Node.VariableName(p[1] + (p[2] if len(p) == 3 else ""))
 
-    @RULE('partialName', [['partialName', POS.ADJECTIVE],
-                          [POS.ADJECTIVE]])
+    @RULE('partialName', [['partialName', 'adjective'],
+                          ['adjective']])
     def p_partialName_partialNameAndAdjective(p):
         if len(p) == 3:
             p[0] = p[1] + p[2] + " "
         else:
             p[0] = p[1] + " "
 
+    @RULE('adjective', [[ResWord.GRANDA],
+                        [ResWord.MALGRANDA],
+                        [POS.ADJECTIVE]])
+    def p_adjective_normalAdjectiveOrWeaklyReservedWord(p):
+        p[0] = p[1]
+
     @RULE('partialName', [[ResWord.LA]])
     def p_partialName_la(p):
         p[0] = ""
 
+    # -------------------------   mathematical calculations   -----------------------------#
     @RULE('expression', [['expression', UaTer.PLUS, 'term'],
                          ['expression', UaTer.MINUS, 'term']])
     def p_expression_plus_minus(p):
@@ -137,13 +145,45 @@ def build(start=None):
     def p_factor_noun(p):
         p[0] = p[1]
 
-    @RULE('factor', [[ResWord.NENIO]])
-    def p_factor_none(p):
-        p[0] = Node.NoneNode()
-
     @RULE('factor', [[UaTer.L_PAREN, 'expression', UaTer.R_PAREN]])
     def p_factor_expr(p):
         p[0] = p[2]
+
+    # ----------------------------   boolean calculations    ------------------------- #
+    @RULE('relation', [[UaTer.ASSIGN, ResWord.EGALA, ResWord.AL]])
+    def p_relation_equal(p):
+        p[0] = Node.Comparison.Relation.EQUAL
+
+    @RULE('relation', [[UaTer.ASSIGN, ResWord.PLI, ResWord.GRANDA, ResWord.OL],
+                       [UaTer.ASSIGN, ResWord.PLI, ResWord.GRANDA,
+                        ResWord.OR, ResWord.EGALA, ResWord.AL]])
+    def p_relation_greatnessAndEquality(p):
+        if len(p) == 5:
+            p[0] = Node.Comparison.Relation.GREATER
+        else:
+            p[0] = Node.Comparison.Relation.GREATER_OR_EQUAL
+
+    @RULE('relation', [[UaTer.ASSIGN, ResWord.PLI, ResWord.MALGRANDA,
+                        ResWord.OR, ResWord.EGALA, ResWord.AL],
+                       [UaTer.ASSIGN, ResWord.PLI, ResWord.MALGRANDA, ResWord.OL]])
+    def p_relation_smallnessAndEquality(p):
+        if len(p) == 5:
+            p[0] = Node.Comparison.Relation.LESSER
+        else:
+            p[0] = Node.Comparison.Relation.LESSER_OR_EQUAL
+
+    @RULE('expression', [['expression', 'relation', 'expression'],
+                         ['expression', ResWord.NE, 'relation', 'expression']])
+    def p_expression_sizeComparison(p):
+        if len(p) == 4:
+            p[0] = Node.Comparison(p[1], p[2], p[3])
+        else:
+            p[0] = Node.Comparison(p[1], p[3], p[4]).reverse()
+
+    # ----------------------------   expression constants    ------------------------- #
+    @RULE('expression', [[ResWord.NENIO]])
+    def p_factor_none(p):
+        p[0] = Node.NoneNode()
 
     @RULE('expression', [[ResWord.TRUE]])
     def p_expression_true(p):
@@ -153,6 +193,7 @@ def build(start=None):
     def p_expression_false(p):
         p[0] = Node.Boolean(False)
 
+    # -------------------------    constructors for special types  --------------------- #
     @RULE('timePoint', [['hourNumerator', ResWord.KAJ, 'verbalNumber']])
     def p_time_point(p):
         p[0] = p[1]
@@ -227,6 +268,7 @@ def build(start=None):
                              Node.Number(minutes),
                              Node.Number(seconds))
 
+    # ------------------------    function invocation and definition   --------------------- #
     @RULE('functionCall', [[POS.V_IMP, 'functionArgs']])
     def p_function_call(p):
         p[0] = Node.FunctionInvocation(p[1], p[2])

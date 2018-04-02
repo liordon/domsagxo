@@ -1,5 +1,6 @@
 import copy
 import datetime
+from enum import Enum
 
 import biblioteko.atomaj_tipoj as Types
 
@@ -194,3 +195,52 @@ class ConditionalStatement(AstNode):
             return falseStatement.evaluate(state)
         else:
             return state, None
+
+
+class Comparison(AstNode):
+    class Relation(Enum):
+        EQUAL = "EQ"
+        NOT_EQUAL = "NEQ"
+        GREATER = "GT"
+        GREATER_OR_EQUAL = "GTE"
+        LESSER = "LT"
+        LESSER_OR_EQUAL = "LTE"
+
+    def __init__(self, arg1, comparison, arg2):
+        super(Comparison, self).__init__(arg1, comparison, arg2)
+
+    def _method(self, state, arg1, comparison, arg2):
+        state, evaluated_arg1 = arg1.evaluate(state)
+        state, evaluated_arg2 = arg2.evaluate(state)
+        if comparison == self.Relation.EQUAL:
+            return state, evaluated_arg1 == evaluated_arg2
+        elif comparison == self.Relation.GREATER:
+            return state, evaluated_arg1 > evaluated_arg2
+        elif comparison == self.Relation.GREATER_OR_EQUAL:
+            return state, evaluated_arg1 >= evaluated_arg2
+        elif comparison == self.Relation.LESSER:
+            return state, evaluated_arg1 < evaluated_arg2
+        elif comparison == self.Relation.LESSER_OR_EQUAL:
+            return state, evaluated_arg1 <= evaluated_arg2
+        else:
+            return state, evaluated_arg1 != evaluated_arg2
+
+    def reverse(self):
+        print(self.args)
+        self.args = (self.args[0], self.Relation.NOT_EQUAL, self.args[2])
+        return self
+
+
+class LoopStatement(AstNode):
+    def __init__(self, condition, body):
+        super(LoopStatement, self).__init__(condition, body)
+
+    def _method(self, state, condition, body):
+        state, flag = condition.evaluate(state)
+        while flag:
+            state, return_value = body.evaluate(state)
+            if return_value is not None:
+                return state, return_value
+            state, flag = condition.evaluate(state)
+
+        return state, None

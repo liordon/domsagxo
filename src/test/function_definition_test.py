@@ -133,3 +133,34 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
 
         assert two_input_function_result == new_state.method_dict['trienigu']([0, 2, 5])
         assert four_input_function_result == new_state.method_dict['trienigu']([1, 2, 5])
+
+    def test_canDefineMuMinimisationOperator(self, ast):
+        """the Mu-recursive minimisation operator receives a k+1-ary function (g).
+        The result of the recursion is a k+1-ary function (f) following this specification:
+        f(z, x_1, ..., x_k) = z <-> g(z, x_1, ..., x_k) = 0 and
+                                    g(i, x_1, ..., x_k) > 0 forall i in [0, z-1]
+        (recall that these functions apply to natural numbers and return natural numbers)
+        Intuitively, minimisation seeks—beginning the search from 0 and proceeding upwards—the smallest
+        argument that causes the function to return zero; if there is no such argument, the search
+        never terminates.
+
+        in this case, I'll implement the function unuenigu that is the parabole: -x^2 + 2x +3
+        which returns zero when x is 3
+        """
+        new_state = self.evaluate_and_return_state(
+            ast, '''unuenigi unuo tiel revenu -unuo*unuo + du*unuo + tri. finu''')
+        new_state = self.evaluate_and_return_state(
+            ast, '''minimumigi tiel
+                    nombro estas nul.
+                    rezulto estas unuenigu nombro.
+                    dum rezulto ne estas egala al nul tiam
+                        nombro estas nombro + unu.
+                        rezulto estas unuenigu nombro.
+                    finu.
+                    revenu nombro.
+                    finu''', new_state)
+
+        # for i in range(0, 3):
+        #     assert 0 < new_state.method_dict['unuenigu']([i])
+        # assert 0 == new_state.method_dict['unuenigu']([3])
+        assert 3 == new_state.method_dict['minimumigu']([])
