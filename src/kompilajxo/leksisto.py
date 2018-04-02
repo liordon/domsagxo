@@ -36,6 +36,8 @@ class ReservedWord(Enum):
     FOR = 'FOR'
     WORD = 'WORD'
     TIEL = 'TIEL'
+    TIAM = 'TIAM'
+    ALIE = 'ALIE'
     FINU = 'FINU'
     TRUE = 'TRUE'
     FALSE = 'FALSE'
@@ -58,11 +60,14 @@ class PartOfSpeech(Enum):
 
 
 reserved_words = {
+    "se": ReservedWord.IF.value,
     "la": ReservedWord.LA.value,
     "por": ReservedWord.FOR.value,
     "kaj": ReservedWord.KAJ.value,
     "finu": ReservedWord.FINU.value,
     "tiel": ReservedWord.TIEL.value,
+    "tiam": ReservedWord.TIAM.value,
+    "alie": ReservedWord.ALIE.value,
     "vero": ReservedWord.TRUE.value,
     "estas": UnalphabeticTerminal.ASSIGN.value,
     "nenio": ReservedWord.NENIO.value,

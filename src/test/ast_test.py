@@ -86,6 +86,10 @@ class TestAstMathExpressions(object):
     def test_valueOfReservedWordForFalseIsFalse(self, ast):
         assert not parsed_value_of(ast, "malvero")
 
+    def test_canUseEqualsSignToCompare(self, ast):
+        assert not parsed_value_of(ast, "ses estas sep")
+        assert parsed_value_of(ast, "ses estas ses")
+
 
 def evaluate_and_return_state_variables(ast, statement, initial_state=None):
     if initial_state is None:
@@ -118,6 +122,18 @@ class TestAstStatements(object):
 
     def test_definiteDescribedNounAlsoBecomesIndefinite(self, ast):
         assert {"dika kato": 99} == evaluate_and_return_state_variables(ast, "la dika kato = 99")
+
+    def test_ifStatementContentIsNotEvaluatedIfConditionIsFalse(self, ast):
+        assert {} == evaluate_and_return_state_variables(
+            ast, "se malvero tiam kato estas sep. finu")
+
+    def test_ifStatementContentIsEvaluatedIfConditionIsTrue(self, ast):
+        assert {'kato': 7} == evaluate_and_return_state_variables(
+            ast, "se vero tiam kato estas sep. finu")
+
+    def test_elseStatementContentIsEvaluatedIfConditionIsFalse(self, ast):
+        assert {'kato': 9} == evaluate_and_return_state_variables(
+                   ast, "se malvero tiam kato estas sep. alie kato estas naux. finu")
 
 
 class TestAstPrograms(object):

@@ -1,7 +1,7 @@
 import datetime
 
 import biblioteko.atomaj_tipoj as Types
-import biblioteko.antauxdifinitaj_funkcioj as Functions
+import copy
 
 
 class AstNode(object):
@@ -47,6 +47,8 @@ class MathOp(AstNode):
             return state, value1 * value2
         elif op == '/':
             return state, value1 / value2
+        elif op == '=' or op == 'estas':
+            return state, value1 == value2
 
 
 class Boolean(AstNode):
@@ -63,6 +65,7 @@ class VariableName(AstNode):
 
     def _method(self, state, variable_name):
         if variable_name not in state.variables:
+            # raise NameError("name " + variable_name + " is not defined")
             return state, variable_name
         return state, state.variables[variable_name]
 
@@ -158,11 +161,15 @@ class FunctionDefinition(AstNode):
     def __init__(self, function_name, argument_names, command_subtree):
         super(FunctionDefinition, self).__init__(function_name, argument_names, command_subtree)
 
-    def turn_ast_into_function(self, closure, function_name, argument_names, abstract_syntax_tree):
+    @staticmethod
+    def turn_ast_into_function(state, function_name, argument_names, abstract_syntax_tree):
         def subtree_function(argument_list):
+            closure = copy.deepcopy(state)
             if len(argument_list) != len(argument_names):
-                raise TypeError(function_name, "() expects ", len(argument_names), "arguments:\n\t",
-                                argument_names, "\nbut ", len(argument_list), "were given.")
+                raise TypeError(str(function_name) + "() expects " +
+                                str(len(argument_names)) + "arguments:\n\t" +
+                                str([name.getContainedName() for name in argument_names]) + "\nbut " +
+                                str(len(argument_list)) + "were given.")
             for i in range(len(argument_list)):
                 closure.variables[argument_names[i].getContainedName()] = argument_list[i]
             return abstract_syntax_tree.evaluate(closure)[1]
@@ -170,7 +177,20 @@ class FunctionDefinition(AstNode):
         return subtree_function
 
     def _method(self, state, function_name, argument_names, command_subtree):
-        # state.method_dict[function_name]
         state.method_dict[function_name] = self.turn_ast_into_function(
             state, function_name, argument_names, command_subtree)
         return state, None
+
+
+class ConditionalStatement(AstNode):
+    def __init__(self, condition, trueStatement, falseStatement):
+        super(ConditionalStatement, self).__init__(condition, trueStatement, falseStatement)
+
+    def _method(self, state, condition, trueStatement, falseStatement):
+        state, evaluated_condition = condition.evaluate(state)
+        if evaluated_condition:
+            return trueStatement.evaluate(state)
+        elif falseStatement is not None:
+            return falseStatement.evaluate(state)
+        else:
+            return state, None

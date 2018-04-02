@@ -111,6 +111,14 @@ class TestReservedWords(LexerProvided):
         lexer.input("sekundoj")
         self.assertPartOfSpeech(lexer.token(), ReservedWord.TIME_INDICATION)
 
+    def test_theWordsIfThenAndElseAreUsedForConditionalStatements(self, lexer):
+        lexer.input("se")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.IF)
+        lexer.input("tiam")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.TIAM)
+        lexer.input("alie")
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.ALIE)
+
 
 class TestMultipleTokenSequences(LexerProvided):
 

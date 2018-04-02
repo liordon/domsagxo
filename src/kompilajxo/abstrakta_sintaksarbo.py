@@ -54,10 +54,14 @@ def build(start=None):
         else:
             p[0] = Node.Program(p[1], p[2])
 
-    # @RULE('statement : ' + ResWord.IF + ' expression ' + UaTer.COLON + ' statement')
-    # def p_statement_ifCondition(p):
-    #     if p[2]:
-    #
+    @RULE('statement', [[ResWord.IF, 'expression', ResWord.TIAM, 'program', ResWord.FINU],
+                        [ResWord.IF, 'expression', ResWord.TIAM, 'program',
+                         ResWord.ALIE, 'program', ResWord.FINU]])
+    def p_statement_ifCondition(p):
+        if len(p) == 6:
+            p[0] = Node.ConditionalStatement(p[2], p[4], None)
+        else:
+            p[0] = Node.ConditionalStatement(p[2], p[4], p[6])
 
     @RULE('statement', [['expression']])
     def p_statement_expr(p):
@@ -91,6 +95,10 @@ def build(start=None):
     @RULE('expression', [['expression', UaTer.PLUS, 'term'],
                          ['expression', UaTer.MINUS, 'term']])
     def p_expression_plus_minus(p):
+        p[0] = Node.MathOp(p[1], p[2], p[3])
+
+    @RULE('expression', [['expression', UaTer.ASSIGN, 'expression']])
+    def p_expression_comparison(p):
         p[0] = Node.MathOp(p[1], p[2], p[3])
 
     @RULE('expression', [['term'],
@@ -243,7 +251,7 @@ def build(start=None):
 
     @RULE('defFuncName', [[POS.V_INF]])
     def p_define_function_name(p):
-        p[0] = p[1][:-1]+"u"
+        p[0] = p[1][:-1] + "u"
 
     @RULE('inputArgs', [['name'],
                         ['inputArgs', ResWord.KAJ, 'name'],
