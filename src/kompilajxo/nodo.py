@@ -208,26 +208,28 @@ class Comparison(AstNode):
 
     def __init__(self, arg1, comparison, arg2):
         super(Comparison, self).__init__(arg1, comparison, arg2)
+        self.reverser_flag = False
 
     def _method(self, state, arg1, comparison, arg2):
         state, evaluated_arg1 = arg1.evaluate(state)
         state, evaluated_arg2 = arg2.evaluate(state)
+        res = False
         if comparison == self.Relation.EQUAL:
-            return state, evaluated_arg1 == evaluated_arg2
+            res = evaluated_arg1 == evaluated_arg2
         elif comparison == self.Relation.GREATER:
-            return state, evaluated_arg1 > evaluated_arg2
+            res = evaluated_arg1 > evaluated_arg2
         elif comparison == self.Relation.GREATER_OR_EQUAL:
-            return state, evaluated_arg1 >= evaluated_arg2
+            res = evaluated_arg1 >= evaluated_arg2
         elif comparison == self.Relation.LESSER:
-            return state, evaluated_arg1 < evaluated_arg2
+            res = evaluated_arg1 < evaluated_arg2
         elif comparison == self.Relation.LESSER_OR_EQUAL:
-            return state, evaluated_arg1 <= evaluated_arg2
+            res = evaluated_arg1 <= evaluated_arg2
         else:
-            return state, evaluated_arg1 != evaluated_arg2
+            res = evaluated_arg1 != evaluated_arg2
+        return state, res != self.reverser_flag
 
     def reverse(self):
-        print(self.args)
-        self.args = (self.args[0], self.Relation.NOT_EQUAL, self.args[2])
+        self.reverser_flag = not self.reverser_flag
         return self
 
 

@@ -128,20 +128,40 @@ class TestAstBooleanExpressions(ExpressionLevelAstProvided):
         assert not parsed_value_of(ast, "unu estas pli granda ol du")
         assert parsed_value_of(ast, "du estas pli granda ol unu")
 
+    def test_canEvaluateUnGreatnessBetween2Numbers(self, ast):
+        assert parsed_value_of(ast, "unu ne estas pli granda ol unu")
+        assert parsed_value_of(ast, "unu ne estas pli granda ol du")
+        assert not parsed_value_of(ast, "du ne estas pli granda ol unu")
+
     def test_canEvaluateGreatnessOrEqualityBetween2Numbers(self, ast):
         assert parsed_value_of(ast, "unu estas pli granda aux egala al unu")
         assert not parsed_value_of(ast, "unu estas pli granda aux egala al du")
         assert parsed_value_of(ast, "du estas pli granda aux egala al unu")
+
+    def test_canEvaluateUnGreatnessOrEqualityBetween2Numbers(self, ast):
+        assert not parsed_value_of(ast, "unu ne estas pli granda aux egala al unu")
+        assert parsed_value_of(ast, "unu ne estas pli granda aux egala al du")
+        assert not parsed_value_of(ast, "du ne estas pli granda aux egala al unu")
 
     def test_canEvaluateSmallnessBetween2Numbers(self, ast):
         assert not parsed_value_of(ast, "unu estas pli malgranda ol unu")
         assert parsed_value_of(ast, "unu estas pli malgranda ol du")
         assert not parsed_value_of(ast, "du estas pli malgranda ol unu")
 
+    def test_canEvaluateUnSmallnessBetween2Numbers(self, ast):
+        assert parsed_value_of(ast, "unu ne estas pli malgranda ol unu")
+        assert not parsed_value_of(ast, "unu ne estas pli malgranda ol du")
+        assert parsed_value_of(ast, "du ne estas pli malgranda ol unu")
+
     def test_canEvaluateSmallnessOrEqualityBetween2Numbers(self, ast):
         assert parsed_value_of(ast, "unu estas pli malgranda aux egala al unu")
         assert parsed_value_of(ast, "unu estas pli malgranda aux egala al du")
         assert not parsed_value_of(ast, "du estas pli malgranda aux egala al unu")
+
+    def test_canEvaluateUnSmallnessOrEqualityBetween2Numbers(self, ast):
+        assert not parsed_value_of(ast, "unu ne estas pli malgranda aux egala al unu")
+        assert not parsed_value_of(ast, "unu ne estas pli malgranda aux egala al du")
+        assert parsed_value_of(ast, "du ne estas pli malgranda aux egala al unu")
 
 
 def evaluate_and_return_state_variables(ast, statement, initial_state=None):

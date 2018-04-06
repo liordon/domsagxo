@@ -1,3 +1,4 @@
+import math
 import pytest
 
 import biblioteko.estra_komponantoj as esk
@@ -19,6 +20,23 @@ class ProvidedAstUpToProgramLevel(object):
     @pytest.fixture
     def ast(self):
         return ast_bld.build(start="funcDef")
+
+
+def all_true(argument_list):
+    for arg in argument_list:
+        if not arg:
+            return False
+    return True
+
+
+def is_prime(number):
+    if number <= 1:
+        return False
+    return all_true([number%i for i in range(2, int(math.sqrt(number))+1)])
+    # for i in range(2, int(math.sqrt(number))+1):
+    #     if i * i == number:
+    #         return False
+    # return True
 
 
 class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
@@ -160,7 +178,59 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
                     revenu nombro.
                     finu''', new_state)
 
-        # for i in range(0, 3):
-        #     assert 0 < new_state.method_dict['unuenigu']([i])
-        # assert 0 == new_state.method_dict['unuenigu']([3])
+        for i in range(0, 3):
+            assert 0 < new_state.method_dict['unuenigu']([i])
+        assert 0 == new_state.method_dict['unuenigu']([3])
         assert 3 == new_state.method_dict['minimumigu']([])
+
+    def test_canDefineFunctionToTellIfANumberIsPrime(self, ast):
+        """yogi was sassy and said I could not tell the prime numbers apart even if I tried.
+        So let's check, since I bet I can do that with several simple functions."""
+        new_state = self.evaluate_and_return_state(
+            ast, '''cxuprimi nombro tiel
+                unua indekso estas du.
+                dum unua indekso * unua indekso ne estas pli granda ol nombro tiam
+                    dua indekso estas unua indekso.
+                    dum unua indekso * dua indekso ne estas pli granda ol nombro tiam
+                        se unua indekso * dua indekso estas egala al nombro tiam
+                            revenu malvero.
+                        finu.
+                        dua indekso estas dua indekso +1.
+                    finu.
+                    unua indekso estas unua indekso +1.
+                finu.
+                revenu vero.
+                finu''')
+
+        for i in range(2, 100):
+            assert is_prime(i) == new_state.method_dict['cxuprimu']([i])
+
+    def test_assumingICanDifferentiateAPrimeICanFindAllPrimesUpTo100(self, ast):
+        """For the sake of test independence I will program the prime chekcer in python.
+        also, the printing part itself will feed a list and the list will be verified."""
+        self.prime_list = []
+
+        def is_esperanto_prime(argument_list):
+            return is_prime(argument_list[0])
+
+        def add_prime_to_list(prime):
+            self.prime_list += prime
+
+        new_state = self.evaluate_and_return_state(
+            ast, '''primumi tiel
+                indekso estas du.
+                dum indekso ne estas pli granda ol cent tiam
+                    se cxuprimu indekso tiam
+                        presu indekso.
+                    finu.
+                    indekso estas indekso +1.
+                finu.
+                finu''')
+        new_state.method_dict['cxuprimu'] = is_esperanto_prime
+        new_state.method_dict['presu'] = add_prime_to_list
+        new_state.method_dict['primumu']([])
+
+        assert 25 == len(self.prime_list)
+        for prime in self.prime_list:
+            square_root = math.sqrt(prime)
+            assert int(square_root) != square_root

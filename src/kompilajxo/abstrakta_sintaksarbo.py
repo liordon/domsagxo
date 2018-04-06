@@ -86,9 +86,10 @@ def build(start=None):
 
     @RULE('adjective', [[ResWord.GRANDA],
                         [ResWord.MALGRANDA],
-                        [POS.ADJECTIVE]])
+                        [POS.ADJECTIVE],
+                        [POS.NUMERATOR]])
     def p_adjective_normalAdjectiveOrWeaklyReservedWord(p):
-        p[0] = p[1]
+        p[0] = str(p[1])
 
     @RULE('partialName', [[ResWord.LA]])
     def p_partialName_la(p):
