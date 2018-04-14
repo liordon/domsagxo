@@ -3,8 +3,8 @@ from biblioteko.atomaj_tipoj import *
 import kompilajxo.leksisto as lxr
 import kompilajxo.abstrakta_sintaksarbo as ast_bld
 import datetime
+# from datetime import datetime.timedelta
 import time
-from apscheduler.schedulers.background import BackgroundScheduler
 
 from biblioteko.estra_komponantoj import Horaro
 
@@ -33,25 +33,25 @@ class TimeManagerProvided(object):
 
     @pytest.fixture
     def one_sec(self):
-        return TimeSpan(seconds=1)
+        return datetime.timedelta(seconds=1)
 
     @pytest.fixture
     def one_min(self):
-        return TimeSpan(minutes=1)
+        return datetime.timedelta(minutes=1)
 
     @pytest.fixture
     def one_day(self):
-        return TimeSpan(days=1)
+        return datetime.timedelta(days=1)
 
     @pytest.fixture
     def dawn_of_time(self):
         return datetime.datetime.utcfromtimestamp(0)
 
-
 class TestTimedActions(TimeManagerProvided):
 
+
     def test_canRunSetAmountOfTime(self, scd):
-        scd.runSetTime(TimeSpan(seconds=3))
+        scd.runSetTime(datetime.timedelta(seconds=3))
 
         assert 3 == self.schedule_time
 
@@ -63,10 +63,10 @@ class TestTimedActions(TimeManagerProvided):
         assert 1 == self.counter
 
     def test_ifRunForSetTimeAllActionedTimedInBetweenAreExecuted(self, scd, increaser):
-        scd.enter(TimeSpan(seconds=1), increaser)
-        scd.enter(TimeSpan(seconds=2), increaser)
+        scd.enter(datetime.timedelta(seconds=1), increaser)
+        scd.enter(datetime.timedelta(seconds=2), increaser)
 
-        scd.runSetTime(TimeSpan(seconds=3))
+        scd.runSetTime(datetime.timedelta(seconds=3))
         assert 2 == self.counter
 
     def test_eventCanBeScheduledForLaterDay(self, scd, one_sec, one_day, increaser):
@@ -79,21 +79,21 @@ class TestTimedActions(TimeManagerProvided):
         assert 1 == self.counter
 
     def test_eventCanBeScheduledToRepeat(self, scd, one_sec, increaser):
-        scd.repeat(one_sec, increaser)
+        scd.repeatSnooze(one_sec, increaser)
         assert 0 == self.counter
         scd.runSetTime(one_sec)
         assert 1 == self.counter
-        scd.runSetTime(TimeSpan(seconds=2))
+        scd.runSetTime(datetime.timedelta(seconds=2))
         assert 3 == self.counter
 
     def test_eventCanRepeatInDifferentIntervals(self, scd, increaser):
-        scd.repeat(TimeSpan(seconds=2), increaser)
-        scd.runSetTime(TimeSpan(seconds=4))
+        scd.repeatSnooze(datetime.timedelta(seconds=2), increaser)
+        scd.runSetTime(datetime.timedelta(seconds=4))
         assert 2 == self.counter
 
     def test_eventCanBeScheduledToDifferentTimeUnits(self, scd, one_min, increaser):
-        scd.repeat(one_min, increaser)
-        scd.runSetTime(TimeSpan(minutes=3))
+        scd.repeatSnooze(one_min, increaser)
+        scd.runSetTime(datetime.timedelta(minutes=3))
         assert 3 == self.counter
 
     def test_mockSchedulerStartsAt0UnixTime(self, scd, dawn_of_time):
@@ -122,44 +122,151 @@ class TestTimedActions(TimeManagerProvided):
         assert dawn_of_time.second + 1 == current_day.second
 
     def test_eventCanBeScheduledToTimeOfDay(self, scd, increaser):
-        scd.enterAtTimeOfDay(datetime.time(6, 00), increaser)
-        scd.runSetTime(TimeSpan(hours=5, minutes=59, seconds=59))
+        scd.enter(datetime.time(6, 00), increaser)
+        scd.runSetTime(datetime.timedelta(hours=5, minutes=59, seconds=59))
 
         assert 0 == self.counter
-        scd.runSetTime(TimeSpan(seconds=1))
+        scd.runSetTime(datetime.timedelta(seconds=1))
         assert 1 == self.counter
 
     def test_eventScheduledForPastTimeTodayIsOverflowedToTomorrow(self, scd, increaser):
-        scd.runSetTime(TimeSpan(hours=5))
-        scd.enterAtTimeOfDay(datetime.time(4, 00), increaser)
-        # scd.runSetTime(TimeSpan(hours=1))
+        scd.runSetTime(datetime.timedelta(hours=5))
+        scd.enter(datetime.time(4, 00), increaser)
+        # scd.runSetTime(datetime.timedelta(hours=1))
 
         assert 0 == self.counter
-        scd.runSetTime(TimeSpan(hours=23))
+        scd.runSetTime(datetime.timedelta(hours=23))
         assert 1 == self.counter
 
     def test_repeatingTaskScheduledForPastTimeTodayIsOverflowedToTomorrow(self, scd, increaser):
-        scd.runSetTime(TimeSpan(hours=5))
-        scd.repeatAt(datetime.time(4, 00), increaser)
-        # scd.runSetTime(TimeSpan(hours=1))
+        scd.runSetTime(datetime.timedelta(hours=5))
+        scd.repeatAtTime(datetime.time(4, 00), datetime.timedelta(seconds=24*60*60), increaser)
+        # scd.repeatAtTime(datetime.time(4, 00), increaser)
+        # scd.runSetTime(datetime.timedelta(hours=1))
 
         assert 0 == self.counter
-        scd.runSetTime(TimeSpan(hours=23))
+        scd.runSetTime(datetime.timedelta(hours=23))
         assert 1 == self.counter
-        scd.runSetTime(TimeSpan(hours=24))
+        scd.runSetTime(datetime.timedelta(hours=24))
         assert 2 == self.counter
 
     def test_taskCanBeScheduledForFutureDate(self, scd, dawn_of_time, increaser):
-        scd.enterAtFutureTime(datetime.datetime(year=dawn_of_time.year,
+        scd.enter(datetime.datetime(year=dawn_of_time.year,
                                                 month=dawn_of_time.month,
                                                 day=3, hour=4), increaser)
-        scd.runSetTime(TimeSpan(hours=4))
+        scd.runSetTime(datetime.timedelta(hours=4))
 
         assert 0 == self.counter
-        scd.runSetTime(TimeSpan(days=3))
+        scd.runSetTime(datetime.timedelta(days=3))
         assert 1 == self.counter
 
     def test_taskScheduledToPastTimeWillThrowException(self, scd, increaser):
         prehistory = datetime.datetime.utcfromtimestamp(-1)
         with pytest.raises(ValueError):
-            scd.enterAtFutureTime(prehistory, increaser)
+            scd.enter(prehistory, increaser)
+
+    def test_repeatAtCustomTime(self, scd, increaser):
+        scd.runSetTime(datetime.timedelta(hours=5))
+        scd.repeatAtTime(datetime.time(4, 00), datetime.timedelta(hours=2, minutes=10), increaser)
+
+        assert 0 == self.counter
+        scd.runSetTime(datetime.timedelta(hours=1, minutes=10))
+        assert 0 == self.counter
+        scd.runSetTime(datetime.timedelta(hours=21, minutes=50))
+        assert 1 == self.counter
+        scd.runSetTime(datetime.timedelta(hours=2, minutes=10))
+        assert 2 == self.counter
+
+    def test_canDoActionByTrigger(self, scd, increaser):
+        def trigger_function():
+            return action_time < scd.getDate()
+
+        action_time = scd.getDate() + datetime.timedelta(seconds=2)
+
+        scd.enterAtTrigger(trigger_function, increaser)
+
+        assert 0 == self.counter
+        scd.runSetTime(datetime.timedelta(seconds=3))
+        assert 1 == self.counter
+
+    def test_canDoTwoActionsByTrigger(self, scd, increaser):
+        def trigger_function1():
+            return action_time < scd.getDate()
+
+        def trigger_function2():
+            return (scd.getDate().time() > datetime.time(second=2)) and (scd.getDate().time() <\
+                                                                             datetime.time(hour=12, second=2))
+
+        action_time = scd.getDate() + datetime.timedelta(seconds=2)
+
+        scd.enterAtTrigger(trigger_function1, increaser)
+        scd.enterAtTrigger(trigger_function2, increaser)
+
+        assert 0 == self.counter
+        scd.runSetTime(datetime.timedelta(seconds=3))
+        assert 2 == self.counter
+
+    def test_repeatsActionByTrigger(self, scd, increaser):
+        def trigger_function():
+            if (scd.getDate().time() > datetime.time(second=2)) and (scd.getDate().time() <\
+                                                                             datetime.time(second=5)):
+                return True
+            return (scd.getDate().time() > datetime.time(second=10)) and (scd.getDate().time() <\
+                                                                             datetime.time(second=15))
+
+        scd.repeatAtTrigger(trigger_function, increaser)
+
+        assert 0 == self.counter
+        scd.runSetTime(datetime.timedelta(seconds=3))
+        assert 1 == self.counter
+        scd.runSetTime(datetime.timedelta(seconds=7))
+        assert 1 == self.counter
+        scd.runSetTime(datetime.timedelta(seconds=1))
+        assert 2 == self.counter
+
+    def test_eventCancellationByTime(self, scd, increaser):
+
+        scd.runSetTime(datetime.timedelta(hours=5))
+        scd.enter(datetime.time(4, 00), increaser)
+        scd.enter(datetime.time(8, 00), increaser)
+
+        scd.cancelEventByTime(datetime.time(hour=4))
+
+        assert 0 == self.counter
+        scd.runSetTime(datetime.timedelta(hours=3))
+        assert 1 == self.counter
+        scd.runSetTime(datetime.timedelta(hours=21))
+        assert 1 == self.counter
+
+    def test_unscheduledEventCancelationGivesError(self, scd, increaser):
+        scd.runSetTime(datetime.timedelta(hours=5))
+        scd.enter(datetime.time(4, 00), increaser)
+        scd.enter(datetime.time(8, 00), increaser)
+
+        with pytest.raises(ValueError):
+            scd.cancelEventByTime(datetime.time(hour=3))
+
+        assert 0 == self.counter
+        scd.runSetTime(datetime.timedelta(hours=3))
+        assert 1 == self.counter
+        scd.runSetTime(datetime.timedelta(hours=21))
+        assert 2 == self.counter
+
+    def test_triggeredEventsCanBeCancelled(self, scd, increaser):
+
+        def trigger_function():
+            return (scd.getDate().time() > datetime.time(hour=5, second=2)) and (scd.getDate().time() <\
+                                                                             datetime.time(hour=17, second=2))
+
+        scd.repeatAtTrigger(trigger_function, increaser)
+
+        scd.runSetTime(datetime.timedelta(hours=5))
+        scd.enter(datetime.time(8, 00), increaser)
+
+
+        assert 0 == self.counter
+        scd.runSetTime(datetime.timedelta(hours=3))
+        scd.cancelAllTriggeredEvents()
+        assert 2 == self.counter
+        scd.runSetTime(datetime.timedelta(hours=21))
+        assert 2 == self.counter
