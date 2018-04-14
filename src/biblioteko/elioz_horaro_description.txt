@@ -1,0 +1,21 @@
+horaro by Elioz
+
+scheduler -
+		enter			creats a new action in current time + delay. returns action code
+		enterabs		same as enter but creates in absolute time (no delay)
+		queue			returns a list of the pending actions in the queue
+		run			runs the scheduler
+		empty			returns True if the queue is empty
+
+functions
+V	getDate					gives the current time in datetime.datetime format
+V	time edit				brings time by: datetime.time, datetime.timedelta, datetime.datetime to a delay format.
+V	zeroFunc				an empty function - good for delays
+V	enter					adds an action to the queue
+V	run					runs the scheduler
+V	cancel by time				cancels the action in the specified hour, if there are more then one sends a warning
+V	cancel all triggered events		triggered events cannot be cancelled by time
+V	repeatSnooze				runs action now and in a constant interval	
+V	repeat at time				runs action in delay and constant interval
+V	enter at trigger			waits for an outside action to happen to triger
+V	repeat at trigger			same as enterAtTrigger but waits for the trigger to be off to reactivate and never suts down unless cancelled
