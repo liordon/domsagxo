@@ -1,0 +1,23 @@
+[
+  "scheduler_test.py::TestTimedActions::()::test_canRunSetAmountOfTime",
+  "scheduler_test.py::TestTimedActions::()::test_canScheduleAMutationToAVariable",
+  "scheduler_test.py::TestTimedActions::()::test_ifRunForSetTimeAllActionedTimedInBetweenAreExecuted",
+  "scheduler_test.py::TestTimedActions::()::test_eventCanBeScheduledForLaterDay",
+  "scheduler_test.py::TestTimedActions::()::test_eventCanBeScheduledToRepeat",
+  "scheduler_test.py::TestTimedActions::()::test_eventCanRepeatInDifferentIntervals",
+  "scheduler_test.py::TestTimedActions::()::test_eventCanBeScheduledToDifferentTimeUnits",
+  "scheduler_test.py::TestTimedActions::()::test_mockSchedulerStartsAt0UnixTime",
+  "scheduler_test.py::TestTimedActions::()::test_mockSchedulerAdvancesAccordingToSpecifiedTime",
+  "scheduler_test.py::TestTimedActions::()::test_eventCanBeScheduledToTimeOfDay",
+  "scheduler_test.py::TestTimedActions::()::test_eventScheduledForPastTimeTodayIsOverflowedToTomorrow",
+  "scheduler_test.py::TestTimedActions::()::test_repeatingTaskScheduledForPastTimeTodayIsOverflowedToTomorrow",
+  "scheduler_test.py::TestTimedActions::()::test_taskCanBeScheduledForFutureDate",
+  "scheduler_test.py::TestTimedActions::()::test_taskScheduledToPastTimeWillThrowException",
+  "scheduler_test.py::TestTimedActions::()::test_repeatAtCustomTime",
+  "scheduler_test.py::TestTimedActions::()::test_canDoActionByTrigger",
+  "scheduler_test.py::TestTimedActions::()::test_canDoTwoActionsByTrigger",
+  "scheduler_test.py::TestTimedActions::()::test_repeatsActionByTrigger",
+  "scheduler_test.py::TestTimedActions::()::test_eventCancellationByTime",
+  "scheduler_test.py::TestTimedActions::()::test_unscheduledEventCancelationGivesError",
+  "scheduler_test.py::TestTimedActions::()::test_triggeredEventsCanBeCancelled"
+]

@@ -79,7 +79,7 @@ class TestTimedActions(TimeManagerProvided):
         assert 1 == self.counter
 
     def test_eventCanBeScheduledToRepeat(self, scd, one_sec, increaser):
-        scd.repeatSnooze(one_sec, increaser)
+        scd.startAtIntervalRpeatAtinterval(one_sec, increaser)
         assert 0 == self.counter
         scd.runSetTime(one_sec)
         assert 1 == self.counter
@@ -87,12 +87,12 @@ class TestTimedActions(TimeManagerProvided):
         assert 3 == self.counter
 
     def test_eventCanRepeatInDifferentIntervals(self, scd, increaser):
-        scd.repeatSnooze(datetime.timedelta(seconds=2), increaser)
+        scd.startAtIntervalRpeatAtinterval(datetime.timedelta(seconds=2), increaser)
         scd.runSetTime(datetime.timedelta(seconds=4))
         assert 2 == self.counter
 
     def test_eventCanBeScheduledToDifferentTimeUnits(self, scd, one_min, increaser):
-        scd.repeatSnooze(one_min, increaser)
+        scd.startAtIntervalRpeatAtinterval(one_min, increaser)
         scd.runSetTime(datetime.timedelta(minutes=3))
         assert 3 == self.counter
 
@@ -140,8 +140,8 @@ class TestTimedActions(TimeManagerProvided):
 
     def test_repeatingTaskScheduledForPastTimeTodayIsOverflowedToTomorrow(self, scd, increaser):
         scd.runSetTime(datetime.timedelta(hours=5))
-        scd.repeatAtTime(datetime.time(4, 00), datetime.timedelta(seconds=24*60*60), increaser)
-        # scd.repeatAtTime(datetime.time(4, 00), increaser)
+        scd.startAtTimeRepeatAtInterval(datetime.time(4, 00), datetime.timedelta(seconds=24*60*60), increaser)
+        # scd.startAtTimeRepeatAtInterval(datetime.time(4, 00), increaser)
         # scd.runSetTime(datetime.timedelta(hours=1))
 
         assert 0 == self.counter
@@ -167,7 +167,7 @@ class TestTimedActions(TimeManagerProvided):
 
     def test_repeatAtCustomTime(self, scd, increaser):
         scd.runSetTime(datetime.timedelta(hours=5))
-        scd.repeatAtTime(datetime.time(4, 00), datetime.timedelta(hours=2, minutes=10), increaser)
+        scd.startAtTimeRepeatAtInterval(datetime.time(4, 00), datetime.timedelta(hours=2, minutes=10), increaser)
 
         assert 0 == self.counter
         scd.runSetTime(datetime.timedelta(hours=1, minutes=10))
