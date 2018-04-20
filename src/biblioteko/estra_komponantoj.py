@@ -1,6 +1,7 @@
 import sched
 
 from biblioteko.antauxdifinitaj_funkcioj import *
+import datetime
 
 
 class Domsagxo(object):
@@ -122,31 +123,10 @@ class Domsagxo(object):
 class Horaro(object):
 
     def __init__(self, timefunc, delayfunc):
+        """create the class object"""
         self.scheduler = sched.scheduler(timefunc, delayfunc)
+        self.time_check_interval = 1
 
-    def enter(self, delay, action, argument=(), kwargs={}):
-        seconds = delay.total_seconds()
-        if seconds > 0:
-            self.scheduler.enter(seconds, 1, action, argument, kwargs)
-        else:
-            raise ValueError("cannot schedule events for past time.")
-
-    def enterAtTimeOfDay(self, time_point, action, argument=(), kwargs={}):
-        day_offset = 0
-        if time_point < self.getDate().time():
-            day_offset = 1
-        scheduled_time = datetime.datetime(self.getDate().year,
-                                           self.getDate().month,
-                                           self.getDate().day + day_offset,
-                                           time_point.hour,
-                                           time_point.minute)
-        self.enter(scheduled_time - self.getDate(), action, argument, kwargs)
-
-    def enterAtFutureTime(self, date_time_point, action):
-        self.enter(date_time_point - self.getDate(), action)
-
-    def run(self, blocking=True):
-        self.scheduler.run(blocking)
 
     def runSetTime(self, amountOfTime):
         target_time = self.scheduler.timefunc() + amountOfTime.total_seconds()
@@ -157,18 +137,89 @@ class Horaro(object):
         self.scheduler.delayfunc(target_time - self.scheduler.timefunc())
 
     def getDate(self):
+        """returns the current time in datetime format"""
         return datetime.datetime.utcfromtimestamp(self.scheduler.timefunc())
 
-    def repeat(self, delay, action):
+    def time2Seconds(self, time_point):
+        """returns delay in seconds (default for the enter function) from the current time"""
+        now = self.getDate()
+        if isinstance(time_point, datetime.time):
+            delay=datetime.timedelta(hours=time_point.hour-now.hour, minutes=time_point.minute-now.minute, seconds=time_point.second-now.second)
+            if delay.total_seconds() > 0:
+                return delay.total_seconds()
+            return delay.total_seconds() + 24*60*60
+        elif isinstance(time_point, datetime.datetime):
+            return (time_point - now).total_seconds()
+        elif isinstance(time_point, datetime.timedelta):
+            return time_point.total_seconds()
+        else:
+            return time_point
+
+    def run(self, blocking=True):
+        self.scheduler.run(blocking)
+
+    def enter(self, time_point, action, argument=(), kwargs={}):
+        """redefine the enter function"""
+        delay = self.time2Seconds(time_point)
+        if delay > 0:
+            self.scheduler.enter(delay, 1, action, *argument, **kwargs)
+        else:
+            raise ValueError("cannot schedule events for past time.")
+
+    def startAtIntervalRpeatAtinterval(self, interval, action, argument=(), kwargs={}):
+        """performs an action after interval and repeats at intervals"""
         def repetition():
-            action()
-            self.scheduler.enter(delay.total_seconds(), 1, repetition)
+            action(*argument, **kwargs)
+            self.enter(interval, repetition)
 
-        self.scheduler.enter(delay.total_seconds(), 1, repetition)
+        self.enter(interval, repetition)
 
-    def repeatAt(self, time_point, action):
+    def startAtTimeRepeatAtInterval(self, time_point, interval, action, argument=(), kwargs={}):
+        """performs an action after delay and repeats at intervals determined by delay"""
         def repetition():
-            action()
-            self.scheduler.enter(24 * 60 * 60, 1, repetition)
+            action(*argument, **kwargs)
+            self.enter(interval.total_seconds(), repetition)
 
-        self.enterAtTimeOfDay(time_point, repetition)
+        self.enter(time_point,  repetition)
+
+    def enterAtTrigger(self, triggerFunc, action, argument=(), kwargs={}):
+        """performs the action action when triggerFunc() == True"""
+        def triggerCheck():
+            if triggerFunc():
+                action(*argument, **kwargs)
+                return True
+            self.enter(self.time_check_interval, triggerCheck)
+
+        self.enter(self.time_check_interval, triggerCheck)
+
+    def repeatAtTrigger(self, triggerFunc, action, argument=(), kwargs={}):
+        """performs the action action when triggerFunc() == True waits for it to be False and repeats this process"""
+        def triggerCheck():
+            if triggerFunc():
+                action(*argument, **kwargs)
+                self.enter(self.time_check_interval, unTriggerCheck)
+                return
+            self.enter(self.time_check_interval, triggerCheck)
+
+        def unTriggerCheck():
+            if not triggerFunc():
+                self.enter(self.time_check_interval, triggerCheck)
+                return
+            self.enter(self.time_check_interval, unTriggerCheck)
+
+        self.enter(self.time_check_interval, triggerCheck)
+
+    def cancelEventByTime(self, time_point):
+        """cancels a past scheduled event if no event exist return error msg. time_point can be any datetime object"""
+        delay = self.time2Seconds(time_point)
+        for event in self.scheduler.queue:
+            if abs(event[0] - self.scheduler.timefunc() - delay) < self.time_check_interval:
+                self.scheduler.cancel(event)
+                return
+        raise ValueError("Cannot cancel unscheduled event")
+
+    def cancelAllTriggeredEvents(self):
+        """cancells all past scheduled triggered events. time_point can be any datetime object"""
+        for event in self.scheduler.queue:
+            if abs(event[0] - self.scheduler.timefunc()) <= self.time_check_interval:
+                self.scheduler.cancel(event)
