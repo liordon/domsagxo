@@ -4,7 +4,7 @@ import pytest
 
 import library.atomic_types as tipo
 import library.management_components as esk
-import compilation.abstrakta_sintaksarbo as ast_bld
+import compilation.abstract_syntax_tree as ast_bld
 import compilation.esp_lexer as lxr
 
 lxr.build()

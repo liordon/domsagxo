@@ -1,10 +1,8 @@
 import datetime
-# from datetime import datetime.timedelta
 import time
 
 import pytest
 
-from library.atomic_types import *
 from library.management_components import Horaro
 
 
