@@ -1,6 +1,6 @@
 import pytest
 
-from biblioteko.estra_komponantoj import *
+from library.management_components import *
 
 
 class SmartHomeManagerProvided(object):

@@ -1,7 +1,7 @@
 import pytest
 
-import kompilajxo.leksisto as lxr
-from kompilajxo.leksisto import PartOfSpeech, UnalphabeticTerminal, ReservedWord
+import compilation.esp_lexer as lxr
+from compilation.esp_lexer import PartOfSpeech, UnalphabeticTerminal, ReservedWord
 
 
 class LexerProvided(object):

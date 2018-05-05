@@ -1,9 +1,9 @@
 import pytest
 
-import biblioteko.estra_komponantoj as esk
-import kompilajxo.abstrakta_sintaksarbo as ast_bld
-import kompilajxo.leksisto as lxr
-import kompilajxo.nodo as Node
+import library.management_components as esk
+import compilation.abstrakta_sintaksarbo as ast_bld
+import compilation.esp_lexer as lxr
+import compilation.node as Node
 
 lxr.build()
 

@@ -1,7 +1,7 @@
 import datetime
 from random import randrange
 
-from biblioteko.atomaj_tipoj import *
+from library.atomic_types import *
 
 
 class Generate(Enum):

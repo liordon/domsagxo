@@ -2,7 +2,7 @@ import copy
 import datetime
 from enum import Enum
 
-import biblioteko.atomaj_tipoj as Types
+import library.atomic_types as Types
 
 
 class AstNode(object):

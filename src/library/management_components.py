@@ -1,6 +1,6 @@
 import sched
 
-from biblioteko.antauxdifinitaj_funkcioj import *
+from library.predefined_functions import *
 import datetime
 
 

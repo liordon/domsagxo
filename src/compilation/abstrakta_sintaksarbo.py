@@ -1,9 +1,9 @@
 import math
 import ply.yacc as yacc
 
-import kompilajxo.nodo as Node
-from biblioteko.atomaj_tipoj import *
-from kompilajxo.leksisto import UnalphabeticTerminal as UaTer, PartOfSpeech as POS, ReservedWord as ResWord, tokens
+import compilation.node as Node
+from library.atomic_types import *
+from compilation.esp_lexer import UnalphabeticTerminal as UaTer, PartOfSpeech as POS, ReservedWord as ResWord, tokens
 
 
 class EsperantoSyntaxError(Exception):
@@ -317,7 +317,7 @@ def build(start=None):
 
 
 if __name__ == "__main__":
-    import kompilajxo.leksisto as lxr
+    import compilation.esp_lexer as lxr
 
     lxr.build()
     ast = build(start="statement")

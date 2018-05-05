@@ -2,10 +2,10 @@ import datetime
 
 import pytest
 
-import biblioteko.atomaj_tipoj as tipo
-import biblioteko.estra_komponantoj as esk
-import kompilajxo.abstrakta_sintaksarbo as ast_bld
-import kompilajxo.leksisto as lxr
+import library.atomic_types as tipo
+import library.management_components as esk
+import compilation.abstrakta_sintaksarbo as ast_bld
+import compilation.esp_lexer as lxr
 
 lxr.build()
 

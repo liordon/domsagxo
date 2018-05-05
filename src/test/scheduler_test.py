@@ -4,8 +4,8 @@ import time
 
 import pytest
 
-from biblioteko.atomaj_tipoj import *
-from biblioteko.estra_komponantoj import Horaro
+from library.atomic_types import *
+from library.management_components import Horaro
 
 
 class TimeManagerProvided(object):
