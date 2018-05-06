@@ -158,32 +158,43 @@ class Horaro(object):
     def run(self, blocking=True):
         self.scheduler.run(blocking)
 
-    def enter(self, time_point, action, argument=(), kwargs={}):
+    def enter(self, time_point, action, argument=(), kwargs=None):
         """redefine the enter function"""
+        if kwargs is None:
+            kwargs = {}
         delay = self.time2Seconds(time_point)
         if delay > 0:
             self.scheduler.enter(delay, 1, action, *argument, **kwargs)
         else:
             raise ValueError("cannot schedule events for past time.")
 
-    def startAtIntervalRpeatAtinterval(self, interval, action, argument=(), kwargs={}):
+    def startAtIntervalRpeatAtinterval(self, interval, action, argument=(), kwargs=None):
         """performs an action after interval and repeats at intervals"""
+        if kwargs is None:
+            kwargs = {}
+
         def repetition():
             action(*argument, **kwargs)
             self.enter(interval, repetition)
 
         self.enter(interval, repetition)
 
-    def startAtTimeRepeatAtInterval(self, time_point, interval, action, argument=(), kwargs={}):
+    def startAtTimeRepeatAtInterval(self, time_point, interval, action, argument=(), kwargs=None):
         """performs an action after delay and repeats at intervals determined by delay"""
+        if kwargs is None:
+            kwargs = {}
+
         def repetition():
             action(*argument, **kwargs)
             self.enter(interval.total_seconds(), repetition)
 
         self.enter(time_point,  repetition)
 
-    def enterAtTrigger(self, triggerFunc, action, argument=(), kwargs={}):
+    def enterAtTrigger(self, triggerFunc, action, argument=(), kwargs=None):
         """performs the action action when triggerFunc() == True"""
+        if kwargs is None:
+            kwargs = {}
+
         def triggerCheck():
             if triggerFunc():
                 action(*argument, **kwargs)
@@ -192,8 +203,11 @@ class Horaro(object):
 
         self.enter(self.time_check_interval, triggerCheck)
 
-    def repeatAtTrigger(self, triggerFunc, action, argument=(), kwargs={}):
+    def repeatAtTrigger(self, triggerFunc, action, argument=(), kwargs=None):
         """performs the action action when triggerFunc() == True waits for it to be False and repeats this process"""
+        if kwargs is None:
+            kwargs = {}
+
         def triggerCheck():
             if triggerFunc():
                 action(*argument, **kwargs)

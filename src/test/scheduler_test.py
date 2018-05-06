@@ -15,7 +15,6 @@ class TimeManagerProvided(object):
 
     @pytest.fixture
     def scd(self):
-        self.strt = time.time()
         self.schedule_time = 0
         return Horaro(timefunc=lambda: self.schedule_time, delayfunc=self.incTime)
 
@@ -44,8 +43,8 @@ class TimeManagerProvided(object):
     def dawn_of_time(self):
         return datetime.datetime.utcfromtimestamp(0)
 
-class TestTimedActions(TimeManagerProvided):
 
+class TestTimedActions(TimeManagerProvided):
 
     def test_canRunSetAmountOfTime(self, scd):
         scd.runSetTime(datetime.timedelta(seconds=3))
@@ -137,7 +136,8 @@ class TestTimedActions(TimeManagerProvided):
 
     def test_repeatingTaskScheduledForPastTimeTodayIsOverflowedToTomorrow(self, scd, increaser):
         scd.runSetTime(datetime.timedelta(hours=5))
-        scd.startAtTimeRepeatAtInterval(datetime.time(4, 00), datetime.timedelta(seconds=24*60*60), increaser)
+        scd.startAtTimeRepeatAtInterval(datetime.time(4, 00),
+                                        datetime.timedelta(seconds=24 * 60 * 60), increaser)
         # scd.startAtTimeRepeatAtInterval(datetime.time(4, 00), increaser)
         # scd.runSetTime(datetime.timedelta(hours=1))
 
@@ -149,8 +149,8 @@ class TestTimedActions(TimeManagerProvided):
 
     def test_taskCanBeScheduledForFutureDate(self, scd, dawn_of_time, increaser):
         scd.enter(datetime.datetime(year=dawn_of_time.year,
-                                                month=dawn_of_time.month,
-                                                day=3, hour=4), increaser)
+                                    month=dawn_of_time.month,
+                                    day=3, hour=4), increaser)
         scd.runSetTime(datetime.timedelta(hours=4))
 
         assert 0 == self.counter
@@ -164,7 +164,8 @@ class TestTimedActions(TimeManagerProvided):
 
     def test_repeatAtCustomTime(self, scd, increaser):
         scd.runSetTime(datetime.timedelta(hours=5))
-        scd.startAtTimeRepeatAtInterval(datetime.time(4, 00), datetime.timedelta(hours=2, minutes=10), increaser)
+        scd.startAtTimeRepeatAtInterval(datetime.time(4, 00),
+                                        datetime.timedelta(hours=2, minutes=10), increaser)
 
         assert 0 == self.counter
         scd.runSetTime(datetime.timedelta(hours=1, minutes=10))
@@ -191,8 +192,8 @@ class TestTimedActions(TimeManagerProvided):
             return action_time < scd.getDate()
 
         def trigger_function2():
-            return (scd.getDate().time() > datetime.time(second=2)) and (scd.getDate().time() <\
-                                                                             datetime.time(hour=12, second=2))
+            return (scd.getDate().time() > datetime.time(second=2)) and (
+                    scd.getDate().time() < datetime.time(hour=12, second=2))
 
         action_time = scd.getDate() + datetime.timedelta(seconds=2)
 
@@ -205,11 +206,11 @@ class TestTimedActions(TimeManagerProvided):
 
     def test_repeatsActionByTrigger(self, scd, increaser):
         def trigger_function():
-            if (scd.getDate().time() > datetime.time(second=2)) and (scd.getDate().time() <\
-                                                                             datetime.time(second=5)):
+            if (scd.getDate().time() > datetime.time(second=2)) and (
+                    scd.getDate().time() < datetime.time(second=5)):
                 return True
-            return (scd.getDate().time() > datetime.time(second=10)) and (scd.getDate().time() <\
-                                                                             datetime.time(second=15))
+            return (scd.getDate().time() > datetime.time(second=10)) and (
+                    scd.getDate().time() < datetime.time(second=15))
 
         scd.repeatAtTrigger(trigger_function, increaser)
 
@@ -252,14 +253,13 @@ class TestTimedActions(TimeManagerProvided):
     def test_triggeredEventsCanBeCancelled(self, scd, increaser):
 
         def trigger_function():
-            return (scd.getDate().time() > datetime.time(hour=5, second=2)) and (scd.getDate().time() <\
-                                                                             datetime.time(hour=17, second=2))
+            return (scd.getDate().time() > datetime.time(hour=5, second=2)) and (
+                    scd.getDate().time() < datetime.time(hour=17, second=2))
 
         scd.repeatAtTrigger(trigger_function, increaser)
 
         scd.runSetTime(datetime.timedelta(hours=5))
         scd.enter(datetime.time(8, 00), increaser)
-
 
         assert 0 == self.counter
         scd.runSetTime(datetime.timedelta(hours=3))
