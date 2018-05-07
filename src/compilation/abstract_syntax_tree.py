@@ -45,16 +45,16 @@ def build(start=None):
             p[0] = Node.Program(p[1], p[2])
 
     # ------------------------     statement definitions     --------------------------#
-    @RULE('statement', [[ResWord.IF, 'expression', ResWord.TIAM, 'program', ResWord.FINU],
-                        [ResWord.IF, 'expression', ResWord.TIAM, 'program',
-                         ResWord.ALIE, 'program', ResWord.FINU]])
+    @RULE('statement', [[ResWord.IF, 'expression', ResWord.THEN, 'program', ResWord.END],
+                        [ResWord.IF, 'expression', ResWord.THEN, 'program',
+                         ResWord.ELSE, 'program', ResWord.END]])
     def p_statement_ifCondition(p):
         if len(p) == 6:
             p[0] = Node.ConditionalStatement(p[2], p[4], None)
         else:
             p[0] = Node.ConditionalStatement(p[2], p[4], p[6])
 
-    @RULE('statement', [[ResWord.DUM, 'expression', ResWord.TIAM, 'program', ResWord.FINU]])
+    @RULE('statement', [[ResWord.DURING, 'expression', ResWord.THEN, 'program', ResWord.END]])
     def p_statement_whileLoop(p):
         p[0] = Node.LoopStatement(p[2], p[4])
 
@@ -66,7 +66,7 @@ def build(start=None):
     def p_statement_assign(p):
         p[0] = Node.VariableAssignment(p[1], p[3])
 
-    @RULE('statement', [[ResWord.REVENU, 'expression']])
+    @RULE('statement', [[ResWord.RETURN, 'expression']])
     def p_statement_return(p):
         p[0] = Node.ReturnValue(p[2])
 
@@ -84,14 +84,14 @@ def build(start=None):
         else:
             p[0] = p[1] + " "
 
-    @RULE('adjective', [[ResWord.GRANDA],
-                        [ResWord.MALGRANDA],
+    @RULE('adjective', [[ResWord.GREATER],
+                        [ResWord.SMALLER],
                         [POS.ADJECTIVE],
                         [POS.NUMERATOR]])
     def p_adjective_normalAdjectiveOrWeaklyReservedWord(p):
         p[0] = str(p[1])
 
-    @RULE('partialName', [[ResWord.LA]])
+    @RULE('partialName', [[ResWord.THE]])
     def p_partialName_la(p):
         p[0] = ""
 
@@ -151,22 +151,22 @@ def build(start=None):
         p[0] = p[2]
 
     # ----------------------------   boolean calculations    ------------------------- #
-    @RULE('relation', [[UaTer.ASSIGN, ResWord.EGALA, ResWord.AL]])
+    @RULE('relation', [[UaTer.ASSIGN, ResWord.EQUAL, ResWord.TO]])
     def p_relation_equal(p):
         p[0] = Node.Comparison.Relation.EQUAL
 
-    @RULE('relation', [[UaTer.ASSIGN, ResWord.PLI, ResWord.GRANDA, ResWord.OL],
-                       [UaTer.ASSIGN, ResWord.PLI, ResWord.GRANDA,
-                        ResWord.OR, ResWord.EGALA, ResWord.AL]])
+    @RULE('relation', [[UaTer.ASSIGN, ResWord.MORE, ResWord.GREATER, ResWord.THAN],
+                       [UaTer.ASSIGN, ResWord.MORE, ResWord.GREATER,
+                        ResWord.OR, ResWord.EQUAL, ResWord.TO]])
     def p_relation_greatnessAndEquality(p):
         if len(p) == 5:
             p[0] = Node.Comparison.Relation.GREATER
         else:
             p[0] = Node.Comparison.Relation.GREATER_OR_EQUAL
 
-    @RULE('relation', [[UaTer.ASSIGN, ResWord.PLI, ResWord.MALGRANDA,
-                        ResWord.OR, ResWord.EGALA, ResWord.AL],
-                       [UaTer.ASSIGN, ResWord.PLI, ResWord.MALGRANDA, ResWord.OL]])
+    @RULE('relation', [[UaTer.ASSIGN, ResWord.MORE, ResWord.SMALLER,
+                        ResWord.OR, ResWord.EQUAL, ResWord.TO],
+                       [UaTer.ASSIGN, ResWord.MORE, ResWord.SMALLER, ResWord.THAN]])
     def p_relation_smallnessAndEquality(p):
         if len(p) == 5:
             p[0] = Node.Comparison.Relation.LESSER
@@ -174,7 +174,7 @@ def build(start=None):
             p[0] = Node.Comparison.Relation.LESSER_OR_EQUAL
 
     @RULE('expression', [['expression', 'relation', 'expression'],
-                         ['expression', ResWord.NE, 'relation', 'expression']])
+                         ['expression', ResWord.NOT, 'relation', 'expression']])
     def p_expression_sizeComparison(p):
         if len(p) == 4:
             p[0] = Node.Comparison(p[1], p[2], p[3])
@@ -182,7 +182,7 @@ def build(start=None):
             p[0] = Node.Comparison(p[1], p[3], p[4]).reverse()
 
     # ----------------------------   expression constants    ------------------------- #
-    @RULE('expression', [[ResWord.NENIO]])
+    @RULE('expression', [[ResWord.NONE]])
     def p_factor_none(p):
         p[0] = Node.NoneNode()
 
@@ -195,7 +195,7 @@ def build(start=None):
         p[0] = Node.Boolean(False)
 
     # -------------------------    constructors for special types  --------------------- #
-    @RULE('timePoint', [['hourNumerator', ResWord.KAJ, 'verbalNumber']])
+    @RULE('timePoint', [['hourNumerator', ResWord.AND, 'verbalNumber']])
     def p_time_point(p):
         p[0] = p[1]
         if p[3] < 1:
@@ -210,8 +210,8 @@ def build(start=None):
             raise EsperantoSyntaxError("wrong hour format. expected hour descriptor, then minute number.")
         p[0] = Node.TimePoint(hour=p[1])
 
-    @RULE('hourNumerator', [[ResWord.LA, POS.NUMERATOR],
-                            [ResWord.LA, 'verbalNumber', POS.NUMERATOR]])
+    @RULE('hourNumerator', [[ResWord.THE, POS.NUMERATOR],
+                            [ResWord.THE, 'verbalNumber', POS.NUMERATOR]])
     def p_hour_numerator(p):
         p[0] = p[2]
         if len(p) > 3:
@@ -220,11 +220,11 @@ def build(start=None):
             raise EsperantoSyntaxError("Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
         p[0] = Node.Number(p[0])
 
-    @RULE('timeSpan', [['timeSpan', ResWord.KAJ, 'partTimeSpan']])
+    @RULE('timeSpan', [['timeSpan', ResWord.AND, 'partTimeSpan']])
     def p_time_span_kaj_time_span(p):
         p[0] = Node.TimeUnion(p[1], p[3])
 
-    @RULE('timeSpan', [['timeSpan', ResWord.KAJ, 'verbalNumber']])
+    @RULE('timeSpan', [['timeSpan', ResWord.AND, 'verbalNumber']])
     def p_time_fractions(p):
         if p[3] >= 1:
             raise EsperantoSyntaxError("Illegal time span format, recieved: "
@@ -275,7 +275,7 @@ def build(start=None):
         p[0] = Node.FunctionInvocation(p[1], p[2])
 
     @RULE('functionArgs', [['functionArg'],
-                           ['functionArgs', ResWord.KAJ, 'functionArg'],
+                           ['functionArgs', ResWord.AND, 'functionArg'],
                            ['functionArgs', UaTer.DELIM, 'functionArg']])
     def p_function_arguments(p):
         if len(p) == 2:
@@ -292,7 +292,7 @@ def build(start=None):
         p[0] = p[1][:-1] + "u"
 
     @RULE('inputArgs', [['name'],
-                        ['inputArgs', ResWord.KAJ, 'name'],
+                        ['inputArgs', ResWord.AND, 'name'],
                         ['inputArgs', UaTer.DELIM, 'name']])
     def p_inputArg_NOUN(p):
         if len(p) == 2:
@@ -304,7 +304,7 @@ def build(start=None):
     def p_inputArg_nothing(p):
         p[0] = []
 
-    @RULE('funcDef', [['defFuncName', 'inputArgs', ResWord.TIEL, 'program', ResWord.FINU]])
+    @RULE('funcDef', [['defFuncName', 'inputArgs', ResWord.THIS_WAY, 'program', ResWord.END]])
     def p_funcDef_nameAndArgs(p):
         p[0] = Node.FunctionDefinition(p[1], p[2], p[4])
 

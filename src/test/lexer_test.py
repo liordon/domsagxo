@@ -62,7 +62,7 @@ class TestReservedWords(LexerProvided):
 
     def test_kajIsAReservedWordAndNotAnAdjective(self, lexer):
         lexer.input("kaj")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.KAJ)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.AND)
 
     def test_kunIsADelimAndNotAnAccusativeImperativeVerb(self, lexer):
         lexer.input("kun")
@@ -82,7 +82,7 @@ class TestReservedWords(LexerProvided):
 
     def test_reservedWordLa(self, lexer):
         lexer.input("la")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.LA)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.THE)
 
     def test_YearIsTimeIndicationAndNotNoun(self, lexer):
         lexer.input("jaro")
@@ -116,31 +116,31 @@ class TestReservedWords(LexerProvided):
         lexer.input("se")
         self.assertPartOfSpeech(lexer.token(), ReservedWord.IF)
         lexer.input("tiam")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.TIAM)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.THEN)
         lexer.input("alie")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.ALIE)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.ELSE)
 
     def test_theWordWhileIsReservedForLoopStatements(self, lexer):
         lexer.input("dum")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.DUM)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.DURING)
 
     def test_theWords_ThenToMoreGreatSmallOrNot_AreReservedForComparisons(self, lexer):
         lexer.input("ne")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.NE)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.NOT)
         lexer.input("al")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.AL)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.TO)
         lexer.input("ol")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.OL)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.THAN)
         lexer.input("pli")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.PLI)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.MORE)
         lexer.input("aux")
         self.assertPartOfSpeech(lexer.token(), ReservedWord.OR)
         lexer.input("egala")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.EGALA)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.EQUAL)
         lexer.input("granda")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.GRANDA)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.GREATER)
         lexer.input("malgranda")
-        self.assertPartOfSpeech(lexer.token(), ReservedWord.MALGRANDA)
+        self.assertPartOfSpeech(lexer.token(), ReservedWord.SMALLER)
 
 
 class TestMultipleTokenSequences(LexerProvided):
