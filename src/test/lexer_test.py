@@ -74,7 +74,7 @@ class TestReservedWords(LexerProvided):
         lexer.input("42")
         assert 42 == lexer.token().value
 
-    def test_booleanReservedWordsTrueAndFalse(self, lexer):
+    def test_booleanReservedWords_TrueFalse(self, lexer):
         lexer.input("vero")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.TRUE)
         lexer.input("malvero")
@@ -96,7 +96,7 @@ class TestReservedWords(LexerProvided):
         lexer.input("sekundoj")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.TIME_INDICATION)
 
-    def test_theWordsIfThenAndElseAreReservedForConditionalStatements(self, lexer):
+    def test_theWords_IfThenAndElse_areReservedForConditionalStatements(self, lexer):
         lexer.input("se")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.IF)
         lexer.input("tiam")
@@ -104,11 +104,11 @@ class TestReservedWords(LexerProvided):
         lexer.input("alie")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.ELSE)
 
-    def test_theWordWhileIsReservedForLoopStatements(self, lexer):
+    def test_theWord_While_isReservedForLoopStatements(self, lexer):
         lexer.input("dum")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.DURING)
 
-    def test_theWords_ThenToMoreGreatSmallOrNot_AreReservedForComparisons(self, lexer):
+    def test_theWords_ThenToMoreGreatSmallOrNot_areReservedForComparisons(self, lexer):
         lexer.input("ne")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.NOT)
         lexer.input("al")
@@ -125,6 +125,14 @@ class TestReservedWords(LexerProvided):
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.GREATER)
         lexer.input("malgranda")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.SMALLER)
+
+    def test_theWords_AtAfterEvery_areReservedForScheduling(self, lexer):
+        lexer.input("je")
+        self.assertPartOfSpeechForNextToken(lexer, ReservedWord.AT)
+        lexer.input("post")
+        self.assertPartOfSpeechForNextToken(lexer, ReservedWord.AFTER)
+        lexer.input("cxiu")
+        self.assertPartOfSpeechForNextToken(lexer, ReservedWord.EVERY)
 
 
 class TestMultipleTokenSequences(LexerProvided):

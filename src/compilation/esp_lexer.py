@@ -28,69 +28,75 @@ class UnalphabeticTerminal(Enum):
 
 
 class ReservedWord(Enum):
-    OF = 'DE'
-    NOT = 'NE'
-    IN = 'EN'
-    THE = 'LA'
-    TO = 'AL'
-    THAN = 'OL'
-    OR = 'OR'
-    IF = 'IF'
-    MORE = 'PLI'
+    AFTER = 'POST'
     AND = 'KAJ'
-    FOR = 'FOR'
+    AT = 'JE'
     DURING = 'DUM'
-    WORD = 'WORD'
-    THIS_WAY = 'TIEL'
-    THEN = 'TIAM'
     ELSE = 'ALIE'
     END = 'FINU'
-    TRUE = 'TRUE'
     EQUAL = 'EGALA'
+    EVERY = 'CXIU'
     FALSE = 'FALSE'
-    NONE = 'NENIO'
-    RETURN = 'REVENU'
+    FOR = 'FOR'
     GREATER = 'GRANDA'
+    IF = 'IF'
+    IN = 'EN'
+    MORE = 'PLI'
+    NONE = 'NENIO'
+    NOT = 'NE'
+    OF = 'DE'
+    OR = 'OR'
+    RETURN = 'REVENU'
     SMALLER = 'MALGRANDA'
-    VERBAL_DIGIT = 'VERBAL_DIGIT'
+    THAN = 'OL'
+    THE = 'LA'
+    THEN = 'TIAM'
+    THIS_WAY = 'TIEL'
     TIME_INDICATION = 'TIME_INDICATION'
+    TO = 'AL'
+    TRUE = 'TRUE'
+    VERBAL_DIGIT = 'VERBAL_DIGIT'
+    WORD = 'WORD'
 
 
 class PartOfSpeech(Enum):
-    NOUN = 'NOUN'
     ADJECTIVE = 'ADJECTIVE'
     ADVERB = 'ADVERB'
+    NOUN = 'NOUN'
+    NUMERATOR = "NUMERATOR"
+    OTHER = "OTHER"
+    PREPOSITION = "PREPOSITION"
     V_INF = 'VINF'
     V_PRES = 'VPRES'
     V_IMP = 'VIMP'
-    PREPOSITION = "PREPOSITION"
-    NUMERATOR = "NUMERATOR"
-    OTHER = "OTHER"
 
 
 reserved_words = {
     "se"       : ReservedWord.IF.value,
+    "je"       : ReservedWord.AT.value,
+    "al"       : ReservedWord.TO.value,
+    "aux"      : ReservedWord.OR.value,
     "ne"       : ReservedWord.NOT.value,
     "la"       : ReservedWord.THE.value,
-    "al"       : ReservedWord.TO.value,
-    "ol"       : ReservedWord.THAN.value,
-    "aux"      : ReservedWord.OR.value,
-    "pli"      : ReservedWord.MORE.value,
     "por"      : ReservedWord.FOR.value,
-    "dum"      : ReservedWord.DURING.value,
     "kaj"      : ReservedWord.AND.value,
     "finu"     : ReservedWord.END.value,
-    "tiel"     : ReservedWord.THIS_WAY.value,
+    "ol"       : ReservedWord.THAN.value,
+    "pli"      : ReservedWord.MORE.value,
     "tiam"     : ReservedWord.THEN.value,
     "alie"     : ReservedWord.ELSE.value,
     "vero"     : ReservedWord.TRUE.value,
-    "estas"    : UnalphabeticTerminal.ASSIGN.value,
-    "egala"    : ReservedWord.EQUAL.value,
     "nenio"    : ReservedWord.NONE.value,
+    "post"     : ReservedWord.AFTER.value,
+    "cxiu"     : ReservedWord.EVERY.value,
+    "egala"    : ReservedWord.EQUAL.value,
+    "malvero"  : ReservedWord.FALSE.value,
+    "dum"      : ReservedWord.DURING.value,
     "revenu"   : ReservedWord.RETURN.value,
     "granda"   : ReservedWord.GREATER.value,
-    "malvero"  : ReservedWord.FALSE.value,
-    "malgranda": ReservedWord.SMALLER.value
+    "malgranda": ReservedWord.SMALLER.value,
+    "tiel"     : ReservedWord.THIS_WAY.value,
+    "estas"    : UnalphabeticTerminal.ASSIGN.value,
 }
 
 prepositions = [
