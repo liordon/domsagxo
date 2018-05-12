@@ -38,7 +38,9 @@ def generateRandom(argList):
     elif argList[0] == Generate.TIME_SPAN.value:
         if len(argList) > 1:
             return generateConstrainedTimeSpan(argList[1], argList[2])
-        return TimeSpan(randrange(0, 24), randrange(0, 60), randrange(0, 60))
+        return datetime.timedelta(hours=randrange(0, 24),
+                                  minutes=randrange(0, 60),
+                                  seconds=randrange(0, 60))
 
     if len(argList) > 1:
         return randrange(argList[1], argList[2])
@@ -47,18 +49,4 @@ def generateRandom(argList):
 
 
 def generateConstrainedTimeSpan(lower_bound, upper_bound):
-    hour_range = upper_bound.hours - lower_bound.hours
-    minute_range = upper_bound.minutes - lower_bound.minutes
-    second_range = upper_bound.seconds - lower_bound.seconds
-    random_total_seconds = randrange(0, hour_range * 3600
-                                     + minute_range * 60
-                                     + second_range)
-    random_seconds = lower_bound.seconds + random_total_seconds % 60
-    random_minutes = lower_bound.minutes + random_total_seconds // 60 % 60 \
-                     + (1 if random_seconds >= 60 else 0)
-    random_hours = lower_bound.hours + random_total_seconds // 3600 \
-                   + (1 if random_minutes >= 60 else 0)
-
-    return TimeSpan(hours=random_hours,
-                    minutes=random_minutes % 60,
-                    seconds=random_seconds % 60)
+    return datetime.timedelta(seconds=randrange(lower_bound.seconds,upper_bound.seconds))

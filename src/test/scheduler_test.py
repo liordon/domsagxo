@@ -1,6 +1,5 @@
+from test.mocks import MockClock
 import datetime
-import time
-
 import pytest
 
 from library.management_components import Horaro
@@ -8,15 +7,11 @@ from library.management_components import Horaro
 
 class TimeManagerProvided(object):
 
-    def incTime(self, amount):
-        if amount < 0:
-            raise ValueError("sleep length must be non-negative")
-        self.schedule_time += amount
-
     @pytest.fixture
     def scd(self):
-        self.schedule_time = 0
-        return Horaro(timefunc=lambda: self.schedule_time, delayfunc=self.incTime)
+        simulative_time = MockClock()
+        return Horaro(timefunc=simulative_time.get_current_time,
+                      delayfunc=simulative_time.increase_time)
 
     @pytest.fixture
     def increaser(self):
@@ -49,7 +44,7 @@ class TestTimedActions(TimeManagerProvided):
     def test_canRunSetAmountOfTime(self, scd):
         scd.runSetTime(datetime.timedelta(seconds=3))
 
-        assert 3 == self.schedule_time
+        assert 3 == scd.currentTime()
 
     def test_canScheduleAMutationToAVariable(self, scd, one_sec, increaser):
         scd.enter(one_sec, increaser)
@@ -128,7 +123,6 @@ class TestTimedActions(TimeManagerProvided):
     def test_eventScheduledForPastTimeTodayIsOverflowedToTomorrow(self, scd, increaser):
         scd.runSetTime(datetime.timedelta(hours=5))
         scd.enter(datetime.time(4, 00), increaser)
-        # scd.runSetTime(datetime.timedelta(hours=1))
 
         assert 0 == self.counter
         scd.runSetTime(datetime.timedelta(hours=23))
@@ -138,8 +132,6 @@ class TestTimedActions(TimeManagerProvided):
         scd.runSetTime(datetime.timedelta(hours=5))
         scd.startAtTimeRepeatAtInterval(datetime.time(4, 00),
                                         datetime.timedelta(seconds=24 * 60 * 60), increaser)
-        # scd.startAtTimeRepeatAtInterval(datetime.time(4, 00), increaser)
-        # scd.runSetTime(datetime.timedelta(hours=1))
 
         assert 0 == self.counter
         scd.runSetTime(datetime.timedelta(hours=23))

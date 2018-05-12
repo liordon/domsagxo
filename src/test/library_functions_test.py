@@ -46,39 +46,31 @@ class TestTimeSpanGeneration(object):
 
     def test_canGenerateTotallyRandomTimeSpan(self):
         time_span = generateRandom([Generate.TIME_SPAN.value])
-        assert isinstance(time_span, TimeSpan)
+        assert isinstance(time_span, datetime.timedelta)
 
     def test_canGenerateConstrainedRandomTimeSpan(self):
         time_span = generateRandom([Generate.TIME_SPAN.value,
-                                    TimeSpan(seconds=1),
-                                    TimeSpan(minutes=1)])
-        assert isinstance(time_span, TimeSpan)
-        assert 0 == time_span.hours
-        assert 1 >= time_span.minutes
+                                    datetime.timedelta(seconds=1),
+                                    datetime.timedelta(minutes=1)])
+        assert isinstance(time_span, datetime.timedelta)
         assert 60 > time_span.seconds
-        assert 0 < time_span.seconds
+        assert 1 < time_span.seconds
 
     def test_canGenerateLargeConstrainedRandomTimeSpan(self):
         time_span = generateRandom([Generate.TIME_SPAN.value,
-                                    TimeSpan(hours=1),
-                                    TimeSpan(hours=2)])
-        assert isinstance(time_span, TimeSpan)
-        assert 1 == time_span.hours
-        assert 0 <= time_span.minutes
-        assert 60 > time_span.minutes
-        assert 60 > time_span.seconds
-        assert 0 <= time_span.seconds
+                                    datetime.timedelta(hours=1),
+                                    datetime.timedelta(hours=2)])
+        assert isinstance(time_span, datetime.timedelta)
+        assert 2*3600 > time_span.seconds
+        assert 3600 <= time_span.seconds
 
     def test_canGenerateRandomTimeSpanWithOverflow(self):
         time_span = generateRandom([Generate.TIME_SPAN.value,
-                                    TimeSpan(minutes=59),
-                                    TimeSpan(hours=2)])
-        assert isinstance(time_span, TimeSpan)
-        assert 1 >= time_span.hours
-        assert 0 <= time_span.minutes
-        assert 60 > time_span.minutes
-        assert 60 > time_span.seconds
-        assert 0 <= time_span.seconds
+                                    datetime.timedelta(minutes=59),
+                                    datetime.timedelta(hours=2)])
+        assert isinstance(time_span, datetime.timedelta)
+        assert 2*3600 > time_span.seconds
+        assert 59*60 <= time_span.seconds
 
 
 class TestApplianceManagement(SmartHomeManagerProvided):

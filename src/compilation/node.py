@@ -104,7 +104,7 @@ class TimeSpan(AstNode):
         evaluated_kwargs = {}
         for key, value in kwargs.items():
             state, evaluated_kwargs[key] = value.evaluate(state)
-        return state, Types.TimeSpan(**evaluated_kwargs)
+        return state, datetime.timedelta(**evaluated_kwargs)
 
 
 class TimeUnion(AstNode):
@@ -114,7 +114,7 @@ class TimeUnion(AstNode):
     def _method(self, state, span1, span2):
         state, evaluated_span1 = span1.evaluate(state)
         state, evaluated_span2 = span2.evaluate(state)
-        return state, Types.TimeSpan.unite(evaluated_span1, evaluated_span2)
+        return state, evaluated_span1 + evaluated_span2
 
 
 class TimeFractionAddition(AstNode):
@@ -124,7 +124,7 @@ class TimeFractionAddition(AstNode):
     def _method(self, state, span, fraction):
         state, evaluated_span = span.evaluate(state)
         state, evaluated_fraction = fraction.evaluate(state)
-        return state, evaluated_span.addFraction(evaluated_fraction)
+        return state, evaluated_span*(1+evaluated_fraction)
 
 
 class TimePoint(AstNode):

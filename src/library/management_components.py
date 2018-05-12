@@ -1,7 +1,7 @@
+import datetime
 import sched
 
 from library.predefined_functions import *
-import datetime
 
 
 class Domsagxo(object):
@@ -127,6 +127,8 @@ class Horaro(object):
         self.scheduler = sched.scheduler(timefunc, delayfunc)
         self.time_check_interval = 1
 
+    def currentTime(self):
+        return self.scheduler.timefunc()
 
     def runSetTime(self, amountOfTime):
         target_time = self.scheduler.timefunc() + amountOfTime.total_seconds()
@@ -144,10 +146,12 @@ class Horaro(object):
         """returns delay in seconds (default for the enter function) from the current time"""
         now = self.getDate()
         if isinstance(time_point, datetime.time):
-            delay=datetime.timedelta(hours=time_point.hour-now.hour, minutes=time_point.minute-now.minute, seconds=time_point.second-now.second)
+            delay = datetime.timedelta(hours=time_point.hour - now.hour,
+                                       minutes=time_point.minute - now.minute,
+                                       seconds=time_point.second - now.second)
             if delay.total_seconds() > 0:
                 return delay.total_seconds()
-            return delay.total_seconds() + 24*60*60
+            return delay.total_seconds() + 24 * 60 * 60
         elif isinstance(time_point, datetime.datetime):
             return (time_point - now).total_seconds()
         elif isinstance(time_point, datetime.timedelta):
@@ -188,7 +192,7 @@ class Horaro(object):
             action(*argument, **kwargs)
             self.enter(interval.total_seconds(), repetition)
 
-        self.enter(time_point,  repetition)
+        self.enter(time_point, repetition)
 
     def enterAtTrigger(self, triggerFunc, action, argument=(), kwargs=None):
         """performs the action action when triggerFunc() == True"""
@@ -204,7 +208,8 @@ class Horaro(object):
         self.enter(self.time_check_interval, triggerCheck)
 
     def repeatAtTrigger(self, triggerFunc, action, argument=(), kwargs=None):
-        """performs the action action when triggerFunc() == True waits for it to be False and repeats this process"""
+        """performs the action action when triggerFunc() == True waits for it to be False and
+        repeats this process"""
         if kwargs is None:
             kwargs = {}
 
@@ -224,7 +229,8 @@ class Horaro(object):
         self.enter(self.time_check_interval, triggerCheck)
 
     def cancelEventByTime(self, time_point):
-        """cancels a past scheduled event if no event exist return error msg. time_point can be any datetime object"""
+        """cancels a past scheduled event if no event exist return error msg. time_point can be
+        any datetime object"""
         delay = self.time2Seconds(time_point)
         for event in self.scheduler.queue:
             if abs(event[0] - self.scheduler.timefunc() - delay) < self.time_check_interval:

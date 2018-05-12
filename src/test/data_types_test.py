@@ -1,11 +1,9 @@
-import datetime
-
-import pytest
-
-import library.atomic_types as tipo
-import library.management_components as esk
 import compilation.abstract_syntax_tree as ast_bld
+import library.management_components as esk
 import compilation.esp_lexer as lxr
+import library.atomic_types as tipo
+import datetime
+import pytest
 
 lxr.build()
 
@@ -24,11 +22,11 @@ class TestAstTimeSpans(object):
 
     @staticmethod
     def assertTimeSpan(parse_result, days=0, hours=0, minutes=0, seconds=0):
-        assert isinstance(parse_result, tipo.TimeSpan)
+        assert isinstance(parse_result, datetime.timedelta)
         assert days == parse_result.days
-        assert hours == parse_result.hours
-        assert minutes == parse_result.minutes
-        assert seconds == parse_result.seconds
+        # assert hours == parse_result.hours
+        # assert minutes == parse_result.minutes
+        assert seconds + minutes*60 + hours*3600== parse_result.seconds
 
     def test_canFormatSingleHour(self, ast):
         parse_result = parsed_value_of(ast, "horo")
@@ -164,11 +162,9 @@ class TestAstRandomGeneration(object):
 
     def test_canGenerateRandomTimeSpanWithConstraints(self, ast):
         parse_result = parsed_value_of(ast, "hazardu tempon el du minutoj gxis tri minutoj")
-        assert isinstance(parse_result, tipo.TimeSpan)
-        assert 2 >= parse_result.minutes
-        assert 1 <= parse_result.minutes
-        assert 60 > parse_result.seconds
-        assert 0 <= parse_result.seconds
+        assert isinstance(parse_result, datetime.timedelta)
+        assert 180 > parse_result.seconds
+        assert 120 <= parse_result.seconds
 
 
 def evaluate_and_return_state(ast, statement, initial_state=None):
