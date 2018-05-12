@@ -2,8 +2,6 @@ import copy
 import datetime
 from enum import Enum
 
-import library.atomic_types as Types
-
 
 class AstNode(object):
     def __init__(self, *args, **kwargs):
@@ -98,7 +96,8 @@ class Program(AstNode):
 
 class TimeSpan(AstNode):
     def __init__(self, days=Number(0), hours=Number(0), minutes=Number(0), seconds=Number(0)):
-        super(TimeSpan, self).__init__(self, days=days, hours=hours, minutes=minutes, seconds=seconds)
+        super(TimeSpan, self).__init__(self, days=days, hours=hours, minutes=minutes,
+                                       seconds=seconds)
 
     def _method(self, state, *args, **kwargs):
         evaluated_kwargs = {}
@@ -125,7 +124,7 @@ class TimeFractionAddition(AstNode):
         state, evaluated_span = span.evaluate(state)
         state, evaluated_fraction = fraction.evaluate(state)
         # return state, evaluated_span.addFraction(evaluated_fraction)
-        return state, evaluated_span*(1+evaluated_fraction)
+        return state, evaluated_span * (1 + evaluated_fraction)
 
 
 class TimePoint(AstNode):
@@ -170,7 +169,8 @@ class FunctionDefinition(AstNode):
             if len(argument_list) != len(argument_names):
                 raise TypeError(str(function_name) + "() expects " +
                                 str(len(argument_names)) + "arguments:\n\t" +
-                                str([name.getContainedName() for name in argument_names]) + "\nbut " +
+                                str([name.getContainedName() for name in
+                                     argument_names]) + "\nbut " +
                                 str(len(argument_list)) + "were given.")
             for i in range(len(argument_list)):
                 closure.variables[argument_names[i].getContainedName()] = argument_list[i]
@@ -198,22 +198,37 @@ class ConditionalStatement(AstNode):
             return state, None
 
 
-class DelayedStatement(AstNode):
-
-    def __init__(self, statement, delay):
-        super(DelayedStatement, self).__init__(statement, delay)
-
+class ExecutionWrapper(object):
     @staticmethod
     def delayed_evaluation(state, statement):
         def evaluate():
             return statement.evaluate(state)
+
         return evaluate
+
+
+class DelayedStatement(AstNode, ExecutionWrapper):
+
+    def __init__(self, statement, delay):
+        super(DelayedStatement, self).__init__(statement, delay)
 
     def _method(self, state, statement, delay):
         state, evaluated_delay = delay.evaluate(state)
         state.scheduler.enter(evaluated_delay,
-                              DelayedStatement.delayed_evaluation(state, statement))
+                              self.delayed_evaluation(state, statement))
         return state, evaluated_delay
+
+
+class ScheduledStatement(AstNode, ExecutionWrapper):
+
+    def __init__(self, statement, delay):
+        super(ScheduledStatement, self).__init__(statement, delay)
+
+    def _method(self, state, statement, delay):
+        state, evaluated_time = delay.evaluate(state)
+        state.scheduler.enter(evaluated_time,
+                              self.delayed_evaluation(state, statement))
+        return state, evaluated_time
 
 
 class Comparison(AstNode):

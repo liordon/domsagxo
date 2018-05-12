@@ -139,6 +139,10 @@ class Horaro(object):
             self.scheduler.run(False)
         self.scheduler.delayfunc(target_time - self.scheduler.timefunc())
 
+    def runUntil(self, time_point):
+        time_amount = time_point - self.getDate()
+        self.runSetTime(time_amount)
+
     def getDate(self):
         """returns the current time in datetime format"""
         return datetime.datetime.utcfromtimestamp(self.scheduler.timefunc())
@@ -163,11 +167,11 @@ class Horaro(object):
     def run(self, blocking=True):
         self.scheduler.run(blocking)
 
-    def enter(self, time_point, action, argument=(), kwargs=None):
+    def enter(self, time_point_or_date, action, argument=(), kwargs=None):
         """redefine the sched.scheduler enter function"""
         if kwargs is None:
             kwargs = {}
-        delay = self.timeToSeconds(time_point)
+        delay = self.timeToSeconds(time_point_or_date)
         if delay > 0:
             self.scheduler.enter(delay, 1, action, *argument, **kwargs)
         else:

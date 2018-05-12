@@ -1,9 +1,11 @@
-import compilation.abstract_syntax_tree as ast_bld
-import library.management_components as mng_co
-import compilation.esp_lexer as lxr
-from test.mocks import MockClock
 import datetime
+
 import pytest
+
+import compilation.abstract_syntax_tree as ast_bld
+import compilation.esp_lexer as lxr
+import library.management_components as mng_co
+from test.mocks import MockClock
 
 lxr.build()
 
@@ -88,13 +90,26 @@ class TestTimedAstStatements(StatementLevelAstProvided):
         return mng_co.Domsagxo(scheduler)
 
     @staticmethod
-    def fast_forward(smart_home, time):
-        smart_home.scheduler.runSetTime(datetime.timedelta(seconds=time))
+    def fastForwardBy(smart_home, **time):
+        smart_home.scheduler.runSetTime(datetime.timedelta(**time))
 
-    def test_canUseScheduledActionToTurnLightOn(self, ast, fake_timed_smart_home):
+    @staticmethod
+    def fastForwardTo(smart_home, **time):
+        current_date = smart_home.scheduler.getDate()
+        smart_home.scheduler.runUntil(current_date.replace(**time))
+
+    def test_canUseDelayedActionToTurnLightOn(self, ast, fake_timed_smart_home):
         state, value = ast.parse("aldonu lumon post sekundo").evaluate(fake_timed_smart_home)
         assert 0 == len(state.appliances)
-        self.fast_forward(fake_timed_smart_home, 1)
+        self.fastForwardBy(fake_timed_smart_home, seconds=1)
+        assert 1 == len(state.appliances)
+
+    def test_canUseScheduledActionToTurnLightOn(self, ast, fake_timed_smart_home):
+        state, value = ast.parse("aldonu lumon je la sesa horo").evaluate(fake_timed_smart_home)
+        assert 0 == len(state.appliances)
+        self.fastForwardBy(fake_timed_smart_home, seconds=1)
+        assert 0 == len(state.appliances)
+        self.fastForwardTo(fake_timed_smart_home, hour=6)
         assert 1 == len(state.appliances)
 
 

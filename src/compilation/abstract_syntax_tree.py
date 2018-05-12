@@ -1,9 +1,11 @@
 import math
+
 import ply.yacc as yacc
 
 import compilation.node as Node
+from compilation.esp_lexer import UnalphabeticTerminal as UaTer, PartOfSpeech as POS, \
+    ReservedWord as ResWord, tokens
 from library.atomic_types import *
-from compilation.esp_lexer import UnalphabeticTerminal as UaTer, PartOfSpeech as POS, ReservedWord as ResWord, tokens
 
 
 class EsperantoSyntaxError(Exception):
@@ -61,6 +63,10 @@ def build(start=None):
     @RULE('statement', [['statement', ResWord.AFTER, 'timeSpan']])
     def p_statement_delayedAction(p):
         p[0] = Node.DelayedStatement(p[1], p[3])
+
+    @RULE('statement', [['statement', ResWord.AT, 'timePoint']])
+    def p_statement_scheduledAction(p):
+        p[0] = Node.ScheduledStatement(p[1], p[3])
 
     @RULE('statement', [['expression']])
     def p_statement_expr(p):
@@ -211,7 +217,8 @@ def build(start=None):
     @RULE('timePoint', [['hourNumerator', ResWord.TIME_INDICATION]])
     def p_round_time_point(p):
         if len(p) > 2 and p[2] != "horo":
-            raise EsperantoSyntaxError("wrong hour format. expected hour descriptor, then minute number.")
+            raise EsperantoSyntaxError(
+                "wrong hour format. expected hour descriptor, then minute number.")
         p[0] = Node.TimePoint(hour=p[1])
 
     @RULE('hourNumerator', [[ResWord.THE, POS.NUMERATOR],
@@ -221,7 +228,8 @@ def build(start=None):
         if len(p) > 3:
             p[0] += p[3]
         if p[0] > 24:
-            raise EsperantoSyntaxError("Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
+            raise EsperantoSyntaxError(
+                "Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
         p[0] = Node.Number(p[0])
 
     @RULE('timeSpan', [['timeSpan', ResWord.AND, 'partTimeSpan']])
