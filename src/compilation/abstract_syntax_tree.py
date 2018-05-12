@@ -58,6 +58,10 @@ def build(start=None):
     def p_statement_whileLoop(p):
         p[0] = Node.LoopStatement(p[2], p[4])
 
+    @RULE('statement', [['statement', ResWord.AFTER, 'timeSpan']])
+    def p_statement_delayedAction(p):
+        p[0] = Node.DelayedStatement(p[1], p[3])
+
     @RULE('statement', [['expression']])
     def p_statement_expr(p):
         p[0] = p[1]

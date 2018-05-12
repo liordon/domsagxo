@@ -1,9 +1,11 @@
-import compilation.abstract_syntax_tree as ast_bld
-import library.management_components as esk
-import compilation.esp_lexer as lxr
-import library.atomic_types as tipo
 import datetime
+
 import pytest
+import time
+import library.atomic_types as tipo
+import library.management_components as esk
+import compilation.abstract_syntax_tree as ast_bld
+import compilation.esp_lexer as lxr
 
 lxr.build()
 

@@ -1,4 +1,3 @@
-import datetime
 import sched
 
 from library.predefined_functions import *
@@ -16,7 +15,7 @@ class Domsagxo(object):
         ApplianceTypes.CAMERA    : "bildiloj"
     }
 
-    def __init__(self):
+    def __init__(self, scheduler=None):
         self.variables = {}
         self.method_dict = {
             "hazardu": generateRandom,
@@ -27,6 +26,7 @@ class Domsagxo(object):
         for appType in Domsagxo.appliance_type_group:
             self.groups[Domsagxo.appliance_type_group[appType]] = []
         self.appliances = {}
+        self.scheduler = scheduler
 
     def addAppliance(self, appliance):
         if appliance.name in self.appliances:
@@ -123,7 +123,8 @@ class Domsagxo(object):
 class Horaro(object):
 
     def __init__(self, timefunc, delayfunc):
-        """create the class object"""
+        """receives a function that tells the time in each invocation, and a function that
+        enables a wait for desired amount of time. returns a Horaro scheduler"""
         self.scheduler = sched.scheduler(timefunc, delayfunc)
         self.time_check_interval = 1
 
@@ -142,7 +143,7 @@ class Horaro(object):
         """returns the current time in datetime format"""
         return datetime.datetime.utcfromtimestamp(self.scheduler.timefunc())
 
-    def time2Seconds(self, time_point):
+    def timeToSeconds(self, time_point):
         """returns delay in seconds (default for the enter function) from the current time"""
         now = self.getDate()
         if isinstance(time_point, datetime.time):
@@ -163,10 +164,10 @@ class Horaro(object):
         self.scheduler.run(blocking)
 
     def enter(self, time_point, action, argument=(), kwargs=None):
-        """redefine the enter function"""
+        """redefine the sched.scheduler enter function"""
         if kwargs is None:
             kwargs = {}
-        delay = self.time2Seconds(time_point)
+        delay = self.timeToSeconds(time_point)
         if delay > 0:
             self.scheduler.enter(delay, 1, action, *argument, **kwargs)
         else:
@@ -184,7 +185,7 @@ class Horaro(object):
         self.enter(interval, repetition)
 
     def startAtTimeRepeatAtInterval(self, time_point, interval, action, argument=(), kwargs=None):
-        """performs an action after delay and repeats at intervals determined by delay"""
+        """performs an action after delay and repeats at intervals determined by delay."""
         if kwargs is None:
             kwargs = {}
 
@@ -195,7 +196,8 @@ class Horaro(object):
         self.enter(time_point, repetition)
 
     def enterAtTrigger(self, triggerFunc, action, argument=(), kwargs=None):
-        """performs the action action when triggerFunc() == True"""
+        """performs the action action when triggerFunc() becomes True i.e.
+        returns True for the first time."""
         if kwargs is None:
             kwargs = {}
 
@@ -208,8 +210,8 @@ class Horaro(object):
         self.enter(self.time_check_interval, triggerCheck)
 
     def repeatAtTrigger(self, triggerFunc, action, argument=(), kwargs=None):
-        """performs the action action when triggerFunc() == True waits for it to be False and
-        repeats this process"""
+        """performs the action action when triggerFunc() becomes True, waits for it to be False and
+        repeats this process."""
         if kwargs is None:
             kwargs = {}
 
@@ -229,9 +231,9 @@ class Horaro(object):
         self.enter(self.time_check_interval, triggerCheck)
 
     def cancelEventByTime(self, time_point):
-        """cancels a past scheduled event if no event exist return error msg. time_point can be
-        any datetime object"""
-        delay = self.time2Seconds(time_point)
+        """Cancels a past scheduled event. If no event exist return error msg. time_point can be
+        any datetime object."""
+        delay = self.timeToSeconds(time_point)
         for event in self.scheduler.queue:
             if abs(event[0] - self.scheduler.timefunc() - delay) < self.time_check_interval:
                 self.scheduler.cancel(event)
@@ -239,7 +241,7 @@ class Horaro(object):
         raise ValueError("Cannot cancel unscheduled event")
 
     def cancelAllTriggeredEvents(self):
-        """cancells all past scheduled triggered events. time_point can be any datetime object"""
+        """Cancels all past scheduled triggered events."""
         for event in self.scheduler.queue:
             if abs(event[0] - self.scheduler.timefunc()) <= self.time_check_interval:
                 self.scheduler.cancel(event)

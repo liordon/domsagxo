@@ -124,6 +124,7 @@ class TimeFractionAddition(AstNode):
     def _method(self, state, span, fraction):
         state, evaluated_span = span.evaluate(state)
         state, evaluated_fraction = fraction.evaluate(state)
+        # return state, evaluated_span.addFraction(evaluated_fraction)
         return state, evaluated_span*(1+evaluated_fraction)
 
 
@@ -195,6 +196,24 @@ class ConditionalStatement(AstNode):
             return falseStatement.evaluate(state)
         else:
             return state, None
+
+
+class DelayedStatement(AstNode):
+
+    def __init__(self, statement, delay):
+        super(DelayedStatement, self).__init__(statement, delay)
+
+    @staticmethod
+    def delayed_evaluation(state, statement):
+        def evaluate():
+            return statement.evaluate(state)
+        return evaluate
+
+    def _method(self, state, statement, delay):
+        state, evaluated_delay = delay.evaluate(state)
+        state.scheduler.enter(evaluated_delay,
+                              DelayedStatement.delayed_evaluation(state, statement))
+        return state, evaluated_delay
 
 
 class Comparison(AstNode):
