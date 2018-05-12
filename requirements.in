@@ -1,0 +1,3 @@
+pytest
+ply
+pytest-timeout

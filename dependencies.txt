@@ -1,4 +1,0 @@
-ply
-apscheduler
-pytest
-pytest-timeout
