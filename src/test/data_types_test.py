@@ -1,11 +1,11 @@
 import datetime
 
 import pytest
-import time
-import library.atomic_types as tipo
-import library.management_components as esk
+
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esp_lexer as lxr
+import library.atomic_types as tipo
+import library.management_components as esk
 
 lxr.build()
 
@@ -28,7 +28,7 @@ class TestAstTimeSpans(object):
         assert days == parse_result.days
         # assert hours == parse_result.hours
         # assert minutes == parse_result.minutes
-        assert seconds + minutes*60 + hours*3600== parse_result.seconds
+        assert seconds + minutes * 60 + hours * 3600 == parse_result.seconds
 
     def test_canFormatSingleHour(self, ast):
         parse_result = parsed_value_of(ast, "horo")

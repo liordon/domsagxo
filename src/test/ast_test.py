@@ -1,7 +1,8 @@
+import pytest
+
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esp_lexer as lxr
 import compilation.node as Node
-import pytest
 
 lxr.build()
 

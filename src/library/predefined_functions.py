@@ -49,4 +49,4 @@ def generateRandom(argList):
 
 
 def generateConstrainedTimeSpan(lower_bound, upper_bound):
-    return datetime.timedelta(seconds=randrange(lower_bound.seconds,upper_bound.seconds))
+    return datetime.timedelta(seconds=randrange(lower_bound.seconds, upper_bound.seconds))

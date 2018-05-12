@@ -1,9 +1,10 @@
 import math
+
 import pytest
 
-import library.management_components as esk
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esp_lexer as lxr
+import library.management_components as esk
 
 lxr.build()
 
@@ -32,7 +33,7 @@ def all_true(argument_list):
 def is_prime(number):
     if number <= 1:
         return False
-    return all_true([number%i for i in range(2, int(math.sqrt(number))+1)])
+    return all_true([number % i for i in range(2, int(math.sqrt(number)) + 1)])
     # for i in range(2, int(math.sqrt(number))+1):
     #     if i * i == number:
     #         return False
@@ -158,7 +159,8 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
         f(z, x_1, ..., x_k) = z <-> g(z, x_1, ..., x_k) = 0 and
                                     g(i, x_1, ..., x_k) > 0 forall i in [0, z-1]
         (recall that these functions apply to natural numbers and return natural numbers)
-        Intuitively, minimisation seeks—beginning the search from 0 and proceeding upwards—the smallest
+        Intuitively, minimisation seeks—beginning the search from 0 and proceeding upwards—the
+        smallest
         argument that causes the function to return zero; if there is no such argument, the search
         never terminates.
 

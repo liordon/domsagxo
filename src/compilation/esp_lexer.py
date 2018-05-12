@@ -247,7 +247,6 @@ def t_newline(t):
 # Error handling rule
 def t_error(t):
     raise SemanticError("Illegal character '%s'" % t.value[0])
-    # t.lexer.skip(1) # this line is unreachable because I raised an exception instead of skipping it.
 
 
 def build():

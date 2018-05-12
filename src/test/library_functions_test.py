@@ -61,7 +61,7 @@ class TestTimeSpanGeneration(object):
                                     datetime.timedelta(hours=1),
                                     datetime.timedelta(hours=2)])
         assert isinstance(time_span, datetime.timedelta)
-        assert 2*3600 > time_span.seconds
+        assert 2 * 3600 > time_span.seconds
         assert 3600 <= time_span.seconds
 
     def test_canGenerateRandomTimeSpanWithOverflow(self):
@@ -69,8 +69,8 @@ class TestTimeSpanGeneration(object):
                                     datetime.timedelta(minutes=59),
                                     datetime.timedelta(hours=2)])
         assert isinstance(time_span, datetime.timedelta)
-        assert 2*3600 > time_span.seconds
-        assert 59*60 <= time_span.seconds
+        assert 2 * 3600 > time_span.seconds
+        assert 59 * 60 <= time_span.seconds
 
 
 class TestApplianceManagement(SmartHomeManagerProvided):
