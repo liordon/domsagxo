@@ -330,12 +330,18 @@ def build(start=None):
 
 if __name__ == "__main__":
     import compilation.esp_lexer as lxr
+    class Object(object):
+        pass
 
     lxr.build()
     ast = build(start="statement")
+    demo_state = Object()
+    demo_state.variables={}
+    print("this is a limited AST demo, it can only deal with simple arithmetic and variable usage")
 
     while True:
         txt = input(">")
         if txt == "":
             break
-        print(ast.parse(txt))
+        demo_state, result = ast.parse(txt).evaluate(demo_state)
+        print(result)

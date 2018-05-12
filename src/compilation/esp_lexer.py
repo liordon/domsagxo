@@ -255,10 +255,10 @@ def build():
 
 if __name__ == "__main__":
     lexer = build()
-    lexer.input(input())
 
     while True:
-        tok = lexer.token()
-        if not tok:
-            break
-        print(tok)
+        lexer.input(input("kio vi diras?"))
+        for token in lexer:
+            print(token)
+            if token.value == "finu":
+                exit(0)
