@@ -68,6 +68,10 @@ def build(start=None):
     def p_statement_scheduledAction(p):
         p[0] = Node.ScheduledStatement(p[1], p[3])
 
+    @RULE('statement', [['statement', ResWord.EVERY, 'timeSpan']])
+    def p_statement_repeatedAction(p):
+        p[0] = Node.RepeatedStatement(p[1], p[3])
+
     @RULE('statement', [['expression']])
     def p_statement_expr(p):
         p[0] = p[1]

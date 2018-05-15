@@ -98,19 +98,27 @@ class TestTimedAstStatements(StatementLevelAstProvided):
         current_date = smart_home.scheduler.getDate()
         smart_home.scheduler.runUntil(current_date.replace(**time))
 
-    def test_canUseDelayedActionToTurnLightOn(self, ast, fake_timed_smart_home):
+    def test_canUseDelayedActionToAddLight(self, ast, fake_timed_smart_home):
         state, value = ast.parse("aldonu lumon post sekundo").evaluate(fake_timed_smart_home)
         assert 0 == len(state.appliances)
         self.fastForwardBy(fake_timed_smart_home, seconds=1)
         assert 1 == len(state.appliances)
 
-    def test_canUseScheduledActionToTurnLightOn(self, ast, fake_timed_smart_home):
+    def test_canUseScheduledActionToAddLight(self, ast, fake_timed_smart_home):
         state, value = ast.parse("aldonu lumon je la sesa horo").evaluate(fake_timed_smart_home)
         assert 0 == len(state.appliances)
         self.fastForwardBy(fake_timed_smart_home, seconds=1)
         assert 0 == len(state.appliances)
         self.fastForwardTo(fake_timed_smart_home, hour=6)
         assert 1 == len(state.appliances)
+
+    def test_canUseRepeatedActionToAddLightTwice(self, ast, fake_timed_smart_home):
+        state, value = ast.parse("aldonu lumon cxiu minuto").evaluate(fake_timed_smart_home)
+        assert 0 == len(state.appliances)
+        self.fastForwardBy(fake_timed_smart_home, minutes=1)
+        assert 1 == len(state.appliances)
+        self.fastForwardBy(fake_timed_smart_home, minutes=1)
+        assert 2 == len(state.appliances)
 
 
 class TestAstPrograms(object):

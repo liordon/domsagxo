@@ -177,7 +177,7 @@ class Horaro(object):
         else:
             raise ValueError("cannot schedule events for past time.")
 
-    def startAtIntervalRpeatAtinterval(self, interval, action, argument=(), kwargs=None):
+    def startAtIntervalRepeatAtInterval(self, interval, action, argument=(), kwargs=None):
         """performs an action after interval and repeats at intervals"""
         if kwargs is None:
             kwargs = {}

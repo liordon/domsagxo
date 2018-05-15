@@ -71,7 +71,7 @@ class TestTimedActions(TimeManagerProvided):
         assert 1 == self.counter
 
     def test_eventCanBeScheduledToRepeat(self, scd, one_sec, increaser):
-        scd.startAtIntervalRpeatAtinterval(one_sec, increaser)
+        scd.startAtIntervalRepeatAtInterval(one_sec, increaser)
         assert 0 == self.counter
         scd.runSetTime(one_sec)
         assert 1 == self.counter
@@ -79,12 +79,12 @@ class TestTimedActions(TimeManagerProvided):
         assert 3 == self.counter
 
     def test_eventCanRepeatInDifferentIntervals(self, scd, increaser):
-        scd.startAtIntervalRpeatAtinterval(datetime.timedelta(seconds=2), increaser)
+        scd.startAtIntervalRepeatAtInterval(datetime.timedelta(seconds=2), increaser)
         scd.runSetTime(datetime.timedelta(seconds=4))
         assert 2 == self.counter
 
     def test_eventCanBeScheduledToDifferentTimeUnits(self, scd, one_min, increaser):
-        scd.startAtIntervalRpeatAtinterval(one_min, increaser)
+        scd.startAtIntervalRepeatAtInterval(one_min, increaser)
         scd.runSetTime(datetime.timedelta(minutes=3))
         assert 3 == self.counter
 

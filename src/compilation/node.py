@@ -231,6 +231,18 @@ class ScheduledStatement(AstNode, ExecutionWrapper):
         return state, evaluated_time
 
 
+class RepeatedStatement(AstNode, ExecutionWrapper):
+
+    def __init__(self, statement, delay):
+        super(RepeatedStatement, self).__init__(statement, delay)
+
+    def _method(self, state, statement, delay):
+        state, evaluated_time = delay.evaluate(state)
+        state.scheduler.startAtIntervalRepeatAtInterval(
+            evaluated_time, self.delayed_evaluation(state, statement))
+        return state, evaluated_time
+
+
 class Comparison(AstNode):
     class Relation(Enum):
         EQUAL = "EQ"
