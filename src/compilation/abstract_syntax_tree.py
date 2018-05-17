@@ -110,11 +110,13 @@ def build(start=None):
         p[0] = ""
 
     # -------------------------   mathematical calculations   -----------------------------#
-    @RULE('expression', [['expression', UaTer.PLUS, 'term']])
+    @RULE('expression', [['expression', UaTer.PLUS, 'term'],
+                         ['expression', ResWord.MORE, 'term']])
     def p_expression_plus(p):
         p[0] = Node.Add(p[1], p[3])
 
-    @RULE('expression', [['expression', UaTer.MINUS, 'term']])
+    @RULE('expression', [['expression', UaTer.MINUS, 'term'],
+                         ['expression', ResWord.LESS, 'term']])
     def p_expression_minus(p):
         p[0] = Node.Subtract(p[1], p[3])
 

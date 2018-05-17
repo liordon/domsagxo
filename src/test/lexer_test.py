@@ -80,6 +80,12 @@ class TestReservedWords(LexerProvided):
         lexer.input("malvero")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.FALSE)
 
+    def test_words_moreLess_areReservedForMath(self, lexer):
+        lexer.input("pli")
+        self.assertPartOfSpeechForNextToken(lexer, ReservedWord.MORE)
+        lexer.input("malpli")
+        self.assertPartOfSpeechForNextToken(lexer, ReservedWord.LESS)
+
     def test_timeUnitsAreRecognizedTimeIndicationsAndNotNouns(self, lexer):
         lexer.input("jaro")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.TIME_INDICATION)

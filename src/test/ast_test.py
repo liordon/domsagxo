@@ -37,9 +37,11 @@ class TestBasicAstNodes(ExpressionLevelAstProvided):
 
     def test_additionReturnsOperationNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "1+1", Node.Add)
+        self.assertThatExpressionIsOfNodeType(ast, "unu pli unu", Node.Add)
 
     def test_subtractionReturnsOperationNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "1-1", Node.Subtract)
+        self.assertThatExpressionIsOfNodeType(ast, "unu malpli unu", Node.Subtract)
 
 
 def parsed_value_of(ast, expr, state=None):

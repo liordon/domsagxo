@@ -41,6 +41,7 @@ class ReservedWord(Enum):
     GREATER = 'GRANDA'
     IF = 'IF'
     IN = 'EN'
+    LESS = 'MALPLI'
     MORE = 'PLI'
     NONE = 'NENIO'
     NOT = 'NE'
@@ -95,6 +96,7 @@ reserved_words = {
     "revenu"   : ReservedWord.RETURN.value,
     "granda"   : ReservedWord.GREATER.value,
     "malgranda": ReservedWord.SMALLER.value,
+    "malpli"   : ReservedWord.LESS.value,
     "tiel"     : ReservedWord.THIS_WAY.value,
     "estas"    : UnalphabeticTerminal.ASSIGN.value,
 }
