@@ -72,7 +72,7 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
         new_state = self.evaluate_and_return_state(
             ast, '''
             rekursi sxambalulo tiel
-                se sxambalulo estas nul tiam
+                se sxambalulo estas egala al nul tiam
                     revenu nul.
                 alie
                     rekurso estas rekursu sxambalulo-1.
@@ -140,7 +140,7 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
             revenu kvaro*unuo*unuo + trio*unuo + duo. finu''', new_state)
         new_state = self.evaluate_and_return_state(
             ast, '''trienigi oro, argxento kaj kupro tiel
-                    se oro estas nul tiam
+                    se oro estas egala al nul tiam
                         duenigu argxento kaj kupro.
                     finu.
                     rekursajxo estas trienigu oro-1, argxento kaj kupro.

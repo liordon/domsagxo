@@ -110,14 +110,25 @@ def build(start=None):
         p[0] = ""
 
     # -------------------------   mathematical calculations   -----------------------------#
-    @RULE('expression', [['expression', UaTer.PLUS, 'term'],
-                         ['expression', UaTer.MINUS, 'term']])
-    def p_expression_plus_minus(p):
-        p[0] = Node.MathOp(p[1], p[2], p[3])
+    @RULE('expression', [['expression', UaTer.PLUS, 'term']])
+    def p_expression_plus(p):
+        p[0] = Node.Add(p[1], p[3])
 
-    @RULE('expression', [['expression', UaTer.ASSIGN, 'expression']])
-    def p_expression_comparison(p):
-        p[0] = Node.MathOp(p[1], p[2], p[3])
+    @RULE('expression', [['expression', UaTer.MINUS, 'term']])
+    def p_expression_minus(p):
+        p[0] = Node.Subtract(p[1], p[3])
+
+    @RULE('term', [['term', UaTer.TIMES, 'factor']])
+    def p_term_mult(p):
+        p[0] = Node.Multiply(p[1], p[3])
+
+    @RULE('term', [['term', UaTer.DIVIDE, 'factor']])
+    def p_term_div(p):
+        p[0] = Node.Divide(p[1], p[3])
+
+    @RULE('factor', [[UaTer.MINUS, 'factor']])
+    def p_factor_unaryMinus(p):
+        p[0] = Node.Subtract(Node.Number(0), p[2])
 
     @RULE('expression', [['term'],
                          ['timePoint'],
@@ -126,23 +137,14 @@ def build(start=None):
     def p_expression_term(p):
         p[0] = p[1]
 
-    @RULE('term', [['term', UaTer.TIMES, 'factor'],
-                   ['term', UaTer.DIVIDE, 'factor']])
-    def p_term_mult_div(p):
-        p[0] = Node.MathOp(p[1], p[2], p[3])
-
     @RULE('term', [['factor']])
     def p_term_factor(p):
         p[0] = p[1]
 
     @RULE('factor', [[UaTer.NUMBER],
-                     ['verbalNumber'],
-                     [UaTer.MINUS, 'factor']])
+                     ['verbalNumber']])
     def p_factor_num(p):
-        if len(p) == 2:
-            p[0] = Node.Number(p[1])
-        else:
-            p[0] = Node.MathOp(Node.Number(0), p[1], p[2])
+        p[0] = Node.Number(p[1])
 
     @RULE('verbalNumber', [[ResWord.VERBAL_DIGIT],
                            ['verbalNumber', ResWord.VERBAL_DIGIT]])

@@ -32,22 +32,37 @@ class NoneNode(AstNode):
 
 
 class MathOp(AstNode):
-    def __init__(self, op, arg1, arg2):
-        super(MathOp, self).__init__(op, arg1, arg2)
 
-    def _method(self, state, arg1, op, arg2):
+    def __init__(self, arg1, arg2):
+        super(MathOp, self).__init__(arg1, arg2)
+
+
+class Add(MathOp):
+    def _method(self, state, arg1, arg2):
         value1 = arg1.evaluate(state)[1]
         value2 = arg2.evaluate(state)[1]
-        if op == '+':
-            return state, value1 + value2
-        elif op == '-':
-            return state, value1 - value2
-        elif op == '*':
-            return state, value1 * value2
-        elif op == '/':
-            return state, value1 / value2
-        elif op == '=' or op == 'estas':
-            return state, value1 == value2
+        return state, value1 + value2
+
+
+class Subtract(MathOp):
+    def _method(self, state, arg1, arg2):
+        value1 = arg1.evaluate(state)[1]
+        value2 = arg2.evaluate(state)[1]
+        return state, value1 - value2
+
+
+class Multiply(MathOp):
+    def _method(self, state, arg1, arg2):
+        value1 = arg1.evaluate(state)[1]
+        value2 = arg2.evaluate(state)[1]
+        return state, value1 * value2
+
+
+class Divide(MathOp):
+    def _method(self, state, arg1, arg2):
+        value1 = arg1.evaluate(state)[1]
+        value2 = arg2.evaluate(state)[1]
+        return state, value1 / value2
 
 
 class Boolean(AstNode):

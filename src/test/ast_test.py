@@ -16,33 +16,30 @@ class ExpressionLevelAstProvided(object):
 
 class TestBasicAstNodes(ExpressionLevelAstProvided):
 
+    @staticmethod
+    def assertThatExpressionIsOfNodeType(ast, expr, nodeType):
+        assert isinstance(ast.parse(expr), nodeType)
+
     def test_parsedNumberReturnsNumberNode(self, ast):
-        parse_res = ast.parse("1")
-        assert Node.Number == type(parse_res)
+        self.assertThatExpressionIsOfNodeType(ast, "1", Node.Number)
 
     def test_parsedVerbalNumberReturnsNumberNode(self, ast):
-        parse_res = ast.parse("unu")
-        assert Node.Number == type(parse_res)
+        self.assertThatExpressionIsOfNodeType(ast, "unu", Node.Number)
 
     def test_parsedNegativeNumberReturnsOperationNode(self, ast):
-        parse_res = ast.parse("-1")
-        assert Node.MathOp == type(parse_res)
+        self.assertThatExpressionIsOfNodeType(ast, "-1", Node.Subtract)
 
     def test_multiplicationReturnsOperationNode(self, ast):
-        parse_res = ast.parse("1*1")
-        assert Node.MathOp == type(parse_res)
+        self.assertThatExpressionIsOfNodeType(ast, "1*1", Node.Multiply)
 
     def test_divisionReturnsOperationNode(self, ast):
-        parse_res = ast.parse("1/1")
-        assert Node.MathOp == type(parse_res)
+        self.assertThatExpressionIsOfNodeType(ast, "1/1", Node.Divide)
 
     def test_additionReturnsOperationNode(self, ast):
-        parse_res = ast.parse("1+1")
-        assert Node.MathOp == type(parse_res)
+        self.assertThatExpressionIsOfNodeType(ast, "1+1", Node.Add)
 
     def test_subtractionReturnsOperationNode(self, ast):
-        parse_res = ast.parse("1-1")
-        assert Node.MathOp == type(parse_res)
+        self.assertThatExpressionIsOfNodeType(ast, "1-1", Node.Subtract)
 
 
 def parsed_value_of(ast, expr, state=None):
@@ -81,10 +78,6 @@ class TestAstMathExpressions(ExpressionLevelAstProvided):
 
     def test_valueOfReservedWordForFalseIsFalse(self, ast):
         assert not parsed_value_of(ast, "malvero")
-
-    def test_canUseEqualsSignToCompare(self, ast):
-        assert not parsed_value_of(ast, "ses estas sep")
-        assert parsed_value_of(ast, "ses estas ses")
 
 
 class TestAstBooleanExpressions(ExpressionLevelAstProvided):
