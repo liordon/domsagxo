@@ -28,12 +28,15 @@ class TestBasicAstNodes(ExpressionLevelAstProvided):
 
     def test_parsedNegativeNumberReturnsOperationNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "-1", Node.Subtract)
+        self.assertThatExpressionIsOfNodeType(ast, "malpli unu", Node.Subtract)
 
     def test_multiplicationReturnsOperationNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "1*1", Node.Multiply)
+        self.assertThatExpressionIsOfNodeType(ast, "unu fojoj unu", Node.Multiply)
 
     def test_divisionReturnsOperationNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "1/1", Node.Divide)
+        self.assertThatExpressionIsOfNodeType(ast, "unu partoj unu", Node.Divide)
 
     def test_additionReturnsOperationNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "1+1", Node.Add)

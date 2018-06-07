@@ -120,15 +120,18 @@ def build(start=None):
     def p_expression_minus(p):
         p[0] = Node.Subtract(p[1], p[3])
 
-    @RULE('term', [['term', UaTer.TIMES, 'factor']])
+    @RULE('term', [['term', UaTer.TIMES, 'factor'],
+                   ['term', ResWord.TIMES, 'factor']])
     def p_term_mult(p):
         p[0] = Node.Multiply(p[1], p[3])
 
-    @RULE('term', [['term', UaTer.DIVIDE, 'factor']])
+    @RULE('term', [['term', UaTer.DIVIDE, 'factor'],
+                   ['term', ResWord.PARTS, 'factor']])
     def p_term_div(p):
         p[0] = Node.Divide(p[1], p[3])
 
-    @RULE('factor', [[UaTer.MINUS, 'factor']])
+    @RULE('factor', [[UaTer.MINUS, 'factor'],
+                     [ResWord.LESS, 'factor']])
     def p_factor_unaryMinus(p):
         p[0] = Node.Subtract(Node.Number(0), p[2])
 

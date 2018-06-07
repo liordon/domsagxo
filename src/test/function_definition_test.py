@@ -9,7 +9,7 @@ import library.management_components as esk
 lxr.build()
 
 
-class ProvidedAstUpToProgramLevel(object):
+class ProvidedAstUpToFunctionDefinitionLevel(object):
     @staticmethod
     def evaluate_and_return_state(ast, statement, initial_state=None):
         if initial_state is None:
@@ -40,7 +40,7 @@ def is_prime(number):
     # return True
 
 
-class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
+class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLevel):
 
     def test_canDefineNoneReturningFunction(self, ast):
         num_predef_funcs = len(esk.Domsagxo().method_dict)
@@ -75,8 +75,8 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
                 se sxambalulo estas egala al nul tiam
                     revenu nul.
                 alie
-                    rekurso estas rekursu sxambalulo-1.
-                    revenu sxambalulo + rekurso.
+                    rekurso estas rekursu sxambalulo malpli unu.
+                    revenu sxambalulo pli rekurso.
                 finu.
             finu''')
         assert 6 == new_state.method_dict['rekursu']([3])
@@ -92,7 +92,7 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
         """the Mu-recursive successor function recieves an argument and returns it's successor.
         Basically, it's just f(x) = x+1."""
         new_state = self.evaluate_and_return_state(
-            ast, '''diri sxambalulo signifas revenu sxambalulo+1. finu''')
+            ast, '''diri sxambalulo signifas revenu sxambalulo pli unu. finu''')
         assert 42 == new_state.method_dict['diru']([41])
 
     def test_canDefineTheMuProjectionFunction(self, ast):
@@ -109,13 +109,13 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
         The result of the composition is a k-ary function (f) such thath:
         f(x_1, ..., x_k) = h(g_1(x_1, ..., x_k), ..., g_m(x_1, ..., x_k))"""
         new_state = self.evaluate_and_return_state(
-            ast, '''trienigi hundo kaj kato kaj muso signifas hundo*kato*muso. finu''')
+            ast, '''trienigi hundo kaj kato kaj muso signifas hundo fojoj kato fojoj muso. finu''')
         new_state = self.evaluate_and_return_state(
-            ast, '''hundi unuo kaj duo signifas revenu unuo*duo. finu''', new_state)
+            ast, '''hundi unuo kaj duo signifas revenu unuo fojoj duo. finu''', new_state)
         new_state = self.evaluate_and_return_state(
-            ast, '''kati unuo kaj duo signifas revenu unuo+duo. finu''', new_state)
+            ast, '''kati unuo kaj duo signifas revenu unuo pli duo. finu''', new_state)
         new_state = self.evaluate_and_return_state(
-            ast, '''musi unuo kaj duo signifas revenu unuo-duo. finu''', new_state)
+            ast, '''musi unuo kaj duo signifas revenu unuo malpli duo. finu''', new_state)
         new_state = self.evaluate_and_return_state(
             ast, '''sxambaluli oro kaj argxento signifas
             hundo estas hundu oro kaj cent.
@@ -134,17 +134,17 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
         it seems senseless, it's mathematical power is evident.
         """
         new_state = self.evaluate_and_return_state(
-            ast, '''duenigi unuo kaj duo signifas revenu unuo*duo. finu''')
+            ast, '''duenigi unuo kaj duo signifas revenu unuo fojoj duo. finu''')
         new_state = self.evaluate_and_return_state(
             ast, '''kvarenigi unuo, duo, trio kaj kvaro signifas
-            revenu kvaro*unuo*unuo + trio*unuo + duo. finu''', new_state)
+            revenu kvaro fojoj unuo fojoj unuo pli trio fojoj unuo pli duo. finu''', new_state)
         new_state = self.evaluate_and_return_state(
             ast, '''trienigi oro, argxento kaj kupro signifas
                     se oro estas egala al nul tiam
                         duenigu argxento kaj kupro.
                     finu.
-                    rekursajxo estas trienigu oro-1, argxento kaj kupro.
-                    revenu kvarenigu oro-1, rekursajxo, argxento kaj kupro. finu''', new_state)
+                    rekursajxo estas trienigu oro malpli unu, argxento kaj kupro.
+                    revenu kvarenigu oro malpli unu, rekursajxo, argxento kaj kupro. finu''', new_state)
 
         two_input_function_result = new_state.method_dict['duenigu']([2, 5])
         four_input_function_result = \
@@ -168,13 +168,14 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
         which returns zero when x is 3
         """
         new_state = self.evaluate_and_return_state(
-            ast, '''unuenigi unuo signifas revenu -unuo*unuo + du*unuo + tri. finu''')
+            ast, '''unuenigi unuo signifas revenu malpli unuo fojoj unuo pli du fojoj
+            unuo pli tri. finu''')
         new_state = self.evaluate_and_return_state(
             ast, '''minimumigi signifas
                     nombro estas nul.
                     rezulto estas unuenigu nombro.
                     dum rezulto ne estas egala al nul tiam
-                        nombro estas nombro + unu.
+                        nombro estas nombro pli unu.
                         rezulto estas unuenigu nombro.
                     finu.
                     revenu nombro.
@@ -191,15 +192,15 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
         new_state = self.evaluate_and_return_state(
             ast, '''cxuprimi nombro signifas
                 unua indekso estas du.
-                dum unua indekso * unua indekso ne estas pli granda ol nombro tiam
+                dum unua indekso fojoj unua indekso ne estas pli granda ol nombro tiam
                     dua indekso estas unua indekso.
-                    dum unua indekso * dua indekso ne estas pli granda ol nombro tiam
-                        se unua indekso * dua indekso estas egala al nombro tiam
+                    dum unua indekso fojoj dua indekso ne estas pli granda ol nombro tiam
+                        se unua indekso fojoj dua indekso estas egala al nombro tiam
                             revenu malvero.
                         finu.
-                        dua indekso estas dua indekso +1.
+                        dua indekso estas dua indekso pli unu.
                     finu.
-                    unua indekso estas unua indekso +1.
+                    unua indekso estas unua indekso pli unu.
                 finu.
                 revenu vero.
                 finu''')
@@ -225,7 +226,7 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToProgramLevel):
                     se cxuprimu indekso tiam
                         presu indekso.
                     finu.
-                    indekso estas indekso +1.
+                    indekso estas indekso pli unu.
                 finu.
                 finu''')
         new_state.method_dict['cxuprimu'] = is_esperanto_prime

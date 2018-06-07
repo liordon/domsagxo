@@ -47,6 +47,7 @@ class ReservedWord(Enum):
     NOT = 'NE'
     OF = 'DE'
     OR = 'AUX'
+    PARTS = 'PARTOJ'
     RETURN = 'REVENU'
     SMALLER = 'MALGRANDA'
     THAN = 'OL'
@@ -54,7 +55,7 @@ class ReservedWord(Enum):
     THEN = 'TIAM'
     THIS_WAY = 'TIEL'
     TIME_INDICATION = 'TEMPVORTO'
-    TIMES = 'FOJON'
+    TIMES = 'FOJOJ'
     TO = 'AL'
     TRUE = 'TRUE'
     VERBAL_DIGIT = 'PAROLCIFERO'
@@ -74,32 +75,34 @@ class PartOfSpeech(Enum):
 
 
 reserved_words = {
-    "se"       : ReservedWord.IF.value,
-    "je"       : ReservedWord.AT.value,
     "al"       : ReservedWord.TO.value,
-    "aux"      : ReservedWord.OR.value,
-    "ne"       : ReservedWord.NOT.value,
-    "la"       : ReservedWord.THE.value,
-    "por"      : ReservedWord.FOR.value,
-    "kaj"      : ReservedWord.AND.value,
-    "finu"     : ReservedWord.END.value,
-    "ol"       : ReservedWord.THAN.value,
-    "pli"      : ReservedWord.MORE.value,
-    "tiam"     : ReservedWord.THEN.value,
     "alie"     : ReservedWord.ELSE.value,
-    "vero"     : ReservedWord.TRUE.value,
-    "nenio"    : ReservedWord.NONE.value,
-    "post"     : ReservedWord.AFTER.value,
+    "aux"      : ReservedWord.OR.value,
     "cxiu"     : ReservedWord.EVERY.value,
-    "egala"    : ReservedWord.EQUAL.value,
-    "malvero"  : ReservedWord.FALSE.value,
     "dum"      : ReservedWord.DURING.value,
-    "revenu"   : ReservedWord.RETURN.value,
+    "egala"    : ReservedWord.EQUAL.value,
+    "estas"    : UnalphabeticTerminal.ASSIGN.value,
+    "finu"     : ReservedWord.END.value,
+    "fojoj"    : ReservedWord.TIMES.value,
     "granda"   : ReservedWord.GREATER.value,
+    "je"       : ReservedWord.AT.value,
+    "kaj"      : ReservedWord.AND.value,
+    "la"       : ReservedWord.THE.value,
     "malgranda": ReservedWord.SMALLER.value,
     "malpli"   : ReservedWord.LESS.value,
+    "malvero"  : ReservedWord.FALSE.value,
+    "ne"       : ReservedWord.NOT.value,
+    "nenio"    : ReservedWord.NONE.value,
+    "ol"       : ReservedWord.THAN.value,
+    "partoj"   : ReservedWord.PARTS.value,
+    "pli"      : ReservedWord.MORE.value,
+    "por"      : ReservedWord.FOR.value,
+    "post"     : ReservedWord.AFTER.value,
+    "revenu"   : ReservedWord.RETURN.value,
+    "se"       : ReservedWord.IF.value,
     "signifas" : ReservedWord.THIS_WAY.value,
-    "estas"    : UnalphabeticTerminal.ASSIGN.value,
+    "tiam"     : ReservedWord.THEN.value,
+    "vero"     : ReservedWord.TRUE.value,
 }
 
 prepositions = {
