@@ -1,6 +1,6 @@
 import os
 
-rooms = ["mia chambro", "la necesejo"]
+rooms = ["mia cxambro", "la necesejo"]
 
 
 def outputMethod(output):

@@ -36,28 +36,29 @@ class ReservedWord(Enum):
     END = 'FINU'
     EQUAL = 'EGALA'
     EVERY = 'CXIU'
-    FALSE = 'FALSE'
-    FOR = 'FOR'
+    FALSE = 'MALVERO'
+    FOR = 'POR'
     GREATER = 'GRANDA'
-    IF = 'IF'
+    IF = 'SE'
     IN = 'EN'
     LESS = 'MALPLI'
     MORE = 'PLI'
     NONE = 'NENIO'
     NOT = 'NE'
     OF = 'DE'
-    OR = 'OR'
+    OR = 'AUX'
     RETURN = 'REVENU'
     SMALLER = 'MALGRANDA'
     THAN = 'OL'
     THE = 'LA'
     THEN = 'TIAM'
     THIS_WAY = 'TIEL'
-    TIME_INDICATION = 'TIME_INDICATION'
+    TIME_INDICATION = 'TEMPVORTO'
+    TIMES = 'FOJON'
     TO = 'AL'
     TRUE = 'TRUE'
-    VERBAL_DIGIT = 'VERBAL_DIGIT'
-    WORD = 'WORD'
+    VERBAL_DIGIT = 'PAROLCIFERO'
+    WORD = 'VORTO'
 
 
 class PartOfSpeech(Enum):
@@ -97,11 +98,11 @@ reserved_words = {
     "granda"   : ReservedWord.GREATER.value,
     "malgranda": ReservedWord.SMALLER.value,
     "malpli"   : ReservedWord.LESS.value,
-    "tiel"     : ReservedWord.THIS_WAY.value,
+    "signifas" : ReservedWord.THIS_WAY.value,
     "estas"    : UnalphabeticTerminal.ASSIGN.value,
 }
 
-prepositions = [
+prepositions = {
     "al",
     "anstataux",
     "antaux",
@@ -145,7 +146,7 @@ prepositions = [
     "sur",
     "tra",
     "trans"
-]
+}
 
 tokens = [] + idList(ReservedWord) \
          + idList(PartOfSpeech) \

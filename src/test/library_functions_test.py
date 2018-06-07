@@ -54,7 +54,7 @@ class TestTimeSpanGeneration(object):
                                     datetime.timedelta(minutes=1)])
         assert isinstance(time_span, datetime.timedelta)
         assert 60 > time_span.seconds
-        assert 1 < time_span.seconds
+        assert 1 <= time_span.seconds
 
     def test_canGenerateLargeConstrainedRandomTimeSpan(self):
         time_span = generateRandom([Generate.TIME_SPAN.value,
