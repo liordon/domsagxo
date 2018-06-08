@@ -11,7 +11,7 @@ class ExpressionLevelAstProvided(object):
 
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start="expression")
+        return ast_bld.build(start=ast_bld.Var.EXPRESSION.value)
 
 
 class TestBasicAstNodes(ExpressionLevelAstProvided):
@@ -88,7 +88,7 @@ class TestAstMathExpressions(ExpressionLevelAstProvided):
 class TestAstBooleanExpressions(ExpressionLevelAstProvided):
     @pytest.fixture
     def relation_ast(self):
-        return ast_bld.build(start="relation")
+        return ast_bld.build(start=ast_bld.Var.RELATION.value)
 
     def test_existsAnEqualityRelation(self, relation_ast):
         node = relation_ast.parse("estas egala al")

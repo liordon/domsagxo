@@ -20,7 +20,7 @@ class ProvidedAstUpToFunctionDefinitionLevel(object):
 
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start="funcDef")
+        return ast_bld.build(start=ast_bld.Var.FUNCTION_DEFINITION.value)
 
 
 def all_true(argument_list):

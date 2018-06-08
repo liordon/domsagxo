@@ -12,17 +12,33 @@ class EsperantoSyntaxError(Exception):
     pass
 
 
-def RULE(product, rule_list):
-    def rulePartToString(rule_part):
-        if isinstance(rule_part, Enum):
-            return rule_part.value
-        else:
-            return rule_part
+class Var(Enum):
+    PROGRAM = 'Vprogram'
+    STATEMENT = 'Vstatement'
+    EXPRESSION = 'Vexpression'
+    TIME_SPAN = 'VtimeSpan'
+    TIME_POINT = 'VtimePoint'
+    NAME = 'Vname'
+    PARTIAL_NAME = 'VpartialName'
+    ADJECTIVE = 'Vadjective'
+    TERM = 'Vterm'
+    FACTOR = 'Vfactor'
+    FUNCTION_CALL = 'VfunctionCall'
+    VERBAL_NUMBER = 'VverbalNumber'
+    HOUR_NUMERATOR = 'VhourNumerator'
+    PARTIAL_TIME_SPAN = 'VpartTimeSpan'
+    FUNCTION_ARGUMENTS = 'VfunctionArgs'
+    FUNCTION_ARGUMENT = 'VfunctionArg'
+    INPUT_ARGUMENTS = 'VinputArgs'
+    FUNCTION_DEFINITION = 'VfuncDef'
+    RELATION = 'Vrelation'
 
+
+def RULE(product, rule_list):
     def set_rule(fun):
-        doc = product + " : "
+        doc = product.value + " : "
         for rule in rule_list:
-            doc = doc + ' '.join([rulePartToString(item) for item in rule])
+            doc = doc + ' '.join([item.value for item in rule])
             doc = doc + "\n | "
 
         fun.__doc__ = doc[:-2]
@@ -38,8 +54,8 @@ def get_digit(number, digit):
 def build(start=None):
     allTokenTypes = tokens  # just so the import will be considered meaningful.
 
-    @RULE('program', [['statement', UaTer.PERIOD],
-                      ['program', 'statement', UaTer.PERIOD]])
+    @RULE(Var.PROGRAM, [[Var.STATEMENT, UaTer.PERIOD],
+                      [Var.PROGRAM, Var.STATEMENT, UaTer.PERIOD]])
     def p_program_separatedStatements(p):
         if len(p) == 3:
             p[0] = Node.Program(None, p[1])
@@ -47,113 +63,113 @@ def build(start=None):
             p[0] = Node.Program(p[1], p[2])
 
     # ------------------------     statement definitions     --------------------------#
-    @RULE('statement', [[ResWord.IF, 'expression', ResWord.THEN, 'program', ResWord.END],
-                        [ResWord.IF, 'expression', ResWord.THEN, 'program',
-                         ResWord.ELSE, 'program', ResWord.END]])
+    @RULE(Var.STATEMENT, [[ResWord.IF, Var.EXPRESSION, ResWord.THEN, Var.PROGRAM, ResWord.END],
+                        [ResWord.IF, Var.EXPRESSION, ResWord.THEN, Var.PROGRAM,
+                         ResWord.ELSE, Var.PROGRAM, ResWord.END]])
     def p_statement_ifCondition(p):
         if len(p) == 6:
             p[0] = Node.ConditionalStatement(p[2], p[4], None)
         else:
             p[0] = Node.ConditionalStatement(p[2], p[4], p[6])
 
-    @RULE('statement', [[ResWord.DURING, 'expression', ResWord.THEN, 'program', ResWord.END]])
+    @RULE(Var.STATEMENT, [[ResWord.DURING, Var.EXPRESSION, ResWord.THEN, Var.PROGRAM, ResWord.END]])
     def p_statement_whileLoop(p):
         p[0] = Node.LoopStatement(p[2], p[4])
 
-    @RULE('statement', [['statement', ResWord.AFTER, 'timeSpan']])
+    @RULE(Var.STATEMENT, [[Var.STATEMENT, ResWord.AFTER, Var.TIME_SPAN]])
     def p_statement_delayedAction(p):
         p[0] = Node.DelayedStatement(p[1], p[3])
 
-    @RULE('statement', [['statement', ResWord.AT, 'timePoint']])
+    @RULE(Var.STATEMENT, [[Var.STATEMENT, ResWord.AT, Var.TIME_POINT]])
     def p_statement_scheduledAction(p):
         p[0] = Node.ScheduledStatement(p[1], p[3])
 
-    @RULE('statement', [['statement', ResWord.EVERY, 'timeSpan']])
+    @RULE(Var.STATEMENT, [[Var.STATEMENT, ResWord.EVERY, Var.TIME_SPAN]])
     def p_statement_repeatedAction(p):
         p[0] = Node.RepeatedStatement(p[1], p[3])
 
-    @RULE('statement', [['expression'],
-                        ['funcDef']])
+    @RULE(Var.STATEMENT, [[Var.EXPRESSION],
+                        [Var.FUNCTION_DEFINITION]])
     def p_statement_exprOrFuncDef(p):
         p[0] = p[1]
 
-    @RULE('statement', [['name ', UaTer.ASSIGN, 'expression']])
+    @RULE(Var.STATEMENT, [[Var.NAME, UaTer.ASSIGN, Var.EXPRESSION]])
     def p_statement_assign(p):
         p[0] = Node.VariableAssignment(p[1], p[3])
 
-    @RULE('statement', [[ResWord.RETURN, 'expression']])
+    @RULE(Var.STATEMENT, [[ResWord.RETURN, Var.EXPRESSION]])
     def p_statement_return(p):
         p[0] = Node.ReturnValue(p[2])
 
     # ---------------------       variable name definitions     ----------------------------#
-    @RULE('name', [[POS.NOUN],
-                   ['partialName', POS.NOUN]])
+    @RULE(Var.NAME, [[POS.NOUN],
+                   [Var.PARTIAL_NAME, POS.NOUN]])
     def p_name_partialNameAndNoun(p):
         p[0] = Node.VariableName(p[1] + (p[2] if len(p) == 3 else ""))
 
-    @RULE('partialName', [['partialName', 'adjective'],
-                          ['adjective']])
+    @RULE(Var.PARTIAL_NAME, [[Var.PARTIAL_NAME, Var.ADJECTIVE],
+                          [Var.ADJECTIVE]])
     def p_partialName_partialNameAndAdjective(p):
         if len(p) == 3:
             p[0] = p[1] + p[2] + " "
         else:
             p[0] = p[1] + " "
 
-    @RULE('adjective', [[ResWord.GREATER],
+    @RULE(Var.ADJECTIVE, [[ResWord.GREATER],
                         [ResWord.SMALLER],
                         [POS.ADJECTIVE],
                         [POS.NUMERATOR]])
     def p_adjective_normalAdjectiveOrWeaklyReservedWord(p):
         p[0] = str(p[1])
 
-    @RULE('partialName', [[ResWord.THE]])
+    @RULE(Var.PARTIAL_NAME, [[ResWord.THE]])
     def p_partialName_la(p):
         p[0] = ""
 
     # -------------------------   mathematical calculations   -----------------------------#
-    @RULE('expression', [['expression', UaTer.PLUS, 'term'],
-                         ['expression', ResWord.MORE, 'term']])
+    @RULE(Var.EXPRESSION, [[Var.EXPRESSION, UaTer.PLUS, Var.TERM],
+                         [Var.EXPRESSION, ResWord.MORE, Var.TERM]])
     def p_expression_plus(p):
         p[0] = Node.Add(p[1], p[3])
 
-    @RULE('expression', [['expression', UaTer.MINUS, 'term'],
-                         ['expression', ResWord.LESS, 'term']])
+    @RULE(Var.EXPRESSION, [[Var.EXPRESSION, UaTer.MINUS, Var.TERM],
+                         [Var.EXPRESSION, ResWord.LESS, Var.TERM]])
     def p_expression_minus(p):
         p[0] = Node.Subtract(p[1], p[3])
 
-    @RULE('term', [['term', UaTer.TIMES, 'factor'],
-                   ['term', ResWord.TIMES, 'factor']])
+    @RULE(Var.TERM, [[Var.TERM, UaTer.TIMES, Var.FACTOR],
+                   [Var.TERM, ResWord.TIMES, Var.FACTOR]])
     def p_term_mult(p):
         p[0] = Node.Multiply(p[1], p[3])
 
-    @RULE('term', [['term', UaTer.DIVIDE, 'factor'],
-                   ['term', ResWord.PARTS, 'factor']])
+    @RULE(Var.TERM, [[Var.TERM, UaTer.DIVIDE, Var.FACTOR],
+                   [Var.TERM, ResWord.PARTS, Var.FACTOR]])
     def p_term_div(p):
         p[0] = Node.Divide(p[1], p[3])
 
-    @RULE('factor', [[UaTer.MINUS, 'factor'],
-                     [ResWord.LESS, 'factor']])
+    @RULE(Var.FACTOR, [[UaTer.MINUS, Var.FACTOR],
+                     [ResWord.LESS, Var.FACTOR]])
     def p_factor_unaryMinus(p):
         p[0] = Node.Subtract(Node.Number(0), p[2])
 
-    @RULE('expression', [['term'],
-                         ['timePoint'],
-                         ['timeSpan'],
-                         ['functionCall']])
+    @RULE(Var.EXPRESSION, [[Var.TERM],
+                         [Var.TIME_POINT],
+                         [Var.TIME_SPAN],
+                         [Var.FUNCTION_CALL]])
     def p_expression_term(p):
         p[0] = p[1]
 
-    @RULE('term', [['factor']])
+    @RULE(Var.TERM, [[Var.FACTOR]])
     def p_term_factor(p):
         p[0] = p[1]
 
-    @RULE('factor', [[UaTer.NUMBER],
-                     ['verbalNumber']])
+    @RULE(Var.FACTOR, [[UaTer.NUMBER],
+                     [Var.VERBAL_NUMBER]])
     def p_factor_num(p):
         p[0] = Node.Number(p[1])
 
-    @RULE('verbalNumber', [[ResWord.VERBAL_DIGIT],
-                           ['verbalNumber', ResWord.VERBAL_DIGIT]])
+    @RULE(Var.VERBAL_NUMBER, [[ResWord.VERBAL_DIGIT],
+                           [Var.VERBAL_NUMBER, ResWord.VERBAL_DIGIT]])
     def p_verbal_number(p):
         if len(p) == 2:
             p[0] = p[1]
@@ -164,20 +180,20 @@ def build(start=None):
                                                + str(p[1]) + " and " + str(p[2]))
             p[0] = p[1] + p[2]
 
-    @RULE('factor', [['name']])
+    @RULE(Var.FACTOR, [[Var.NAME]])
     def p_factor_noun(p):
         p[0] = p[1]
 
-    @RULE('factor', [[UaTer.L_PAREN, 'expression', UaTer.R_PAREN]])
+    @RULE(Var.FACTOR, [[UaTer.L_PAREN, Var.EXPRESSION, UaTer.R_PAREN]])
     def p_factor_expr(p):
         p[0] = p[2]
 
     # ----------------------------   boolean calculations    ------------------------- #
-    @RULE('relation', [[UaTer.ASSIGN, ResWord.EQUAL, ResWord.TO]])
+    @RULE(Var.RELATION, [[UaTer.ASSIGN, ResWord.EQUAL, ResWord.TO]])
     def p_relation_equal(p):
         p[0] = Node.Comparison.Relation.EQUAL
 
-    @RULE('relation', [[UaTer.ASSIGN, ResWord.MORE, ResWord.GREATER, ResWord.THAN],
+    @RULE(Var.RELATION, [[UaTer.ASSIGN, ResWord.MORE, ResWord.GREATER, ResWord.THAN],
                        [UaTer.ASSIGN, ResWord.MORE, ResWord.GREATER,
                         ResWord.OR, ResWord.EQUAL, ResWord.TO]])
     def p_relation_greatnessAndEquality(p):
@@ -186,7 +202,7 @@ def build(start=None):
         else:
             p[0] = Node.Comparison.Relation.GREATER_OR_EQUAL
 
-    @RULE('relation', [[UaTer.ASSIGN, ResWord.MORE, ResWord.SMALLER,
+    @RULE(Var.RELATION, [[UaTer.ASSIGN, ResWord.MORE, ResWord.SMALLER,
                         ResWord.OR, ResWord.EQUAL, ResWord.TO],
                        [UaTer.ASSIGN, ResWord.MORE, ResWord.SMALLER, ResWord.THAN]])
     def p_relation_smallnessAndEquality(p):
@@ -195,8 +211,8 @@ def build(start=None):
         else:
             p[0] = Node.Comparison.Relation.LESSER_OR_EQUAL
 
-    @RULE('expression', [['expression', 'relation', 'expression'],
-                         ['expression', ResWord.NOT, 'relation', 'expression']])
+    @RULE(Var.EXPRESSION, [[Var.EXPRESSION, Var.RELATION, Var.EXPRESSION],
+                         [Var.EXPRESSION, ResWord.NOT, Var.RELATION, Var.EXPRESSION]])
     def p_expression_sizeComparison(p):
         if len(p) == 4:
             p[0] = Node.Comparison(p[1], p[2], p[3])
@@ -204,20 +220,20 @@ def build(start=None):
             p[0] = Node.Comparison(p[1], p[3], p[4]).reverse()
 
     # ----------------------------   expression constants    ------------------------- #
-    @RULE('expression', [[ResWord.NONE]])
+    @RULE(Var.EXPRESSION, [[ResWord.NONE]])
     def p_factor_none(p):
         p[0] = Node.NoneNode()
 
-    @RULE('expression', [[ResWord.TRUE]])
+    @RULE(Var.EXPRESSION, [[ResWord.TRUE]])
     def p_expression_true(p):
         p[0] = Node.Boolean(True)
 
-    @RULE('expression', [[ResWord.FALSE]])
+    @RULE(Var.EXPRESSION, [[ResWord.FALSE]])
     def p_expression_false(p):
         p[0] = Node.Boolean(False)
 
     # -------------------------    constructors for special types  --------------------- #
-    @RULE('timePoint', [['hourNumerator', ResWord.AND, 'verbalNumber']])
+    @RULE(Var.TIME_POINT, [[Var.HOUR_NUMERATOR, ResWord.AND, Var.VERBAL_NUMBER]])
     def p_time_point(p):
         p[0] = p[1]
         if p[3] < 1:
@@ -226,15 +242,15 @@ def build(start=None):
             raise EsperantoSyntaxError("Illegal number of minutes entered: " + str(p[3]))
         p[0] = Node.TimePoint(hour=p[1], minute=Node.Number(p[3]))
 
-    @RULE('timePoint', [['hourNumerator', ResWord.TIME_INDICATION]])
+    @RULE(Var.TIME_POINT, [[Var.HOUR_NUMERATOR, ResWord.TIME_INDICATION]])
     def p_round_time_point(p):
         if len(p) > 2 and p[2] != "horo":
             raise EsperantoSyntaxError(
                 "wrong hour format. expected hour descriptor, then minute number.")
         p[0] = Node.TimePoint(hour=p[1])
 
-    @RULE('hourNumerator', [[ResWord.THE, POS.NUMERATOR],
-                            [ResWord.THE, 'verbalNumber', POS.NUMERATOR]])
+    @RULE(Var.HOUR_NUMERATOR, [[ResWord.THE, POS.NUMERATOR],
+                            [ResWord.THE, Var.VERBAL_NUMBER, POS.NUMERATOR]])
     def p_hour_numerator(p):
         p[0] = p[2]
         if len(p) > 3:
@@ -244,27 +260,27 @@ def build(start=None):
                 "Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
         p[0] = Node.Number(p[0])
 
-    @RULE('timeSpan', [['timeSpan', ResWord.AND, 'partTimeSpan']])
+    @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, ResWord.AND, Var.PARTIAL_TIME_SPAN]])
     def p_time_span_kaj_time_span(p):
         p[0] = Node.TimeUnion(p[1], p[3])
 
-    @RULE('timeSpan', [['timeSpan', ResWord.AND, 'verbalNumber']])
+    @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, ResWord.AND, Var.VERBAL_NUMBER]])
     def p_time_fractions(p):
         if p[3] >= 1:
             raise EsperantoSyntaxError("Illegal time span format, recieved: "
                                        + str(p[3]) + " when expected fraction")
         p[0] = Node.TimeFractionAddition(p[1], Node.Number(p[3]))
 
-    @RULE('timeSpan', [['partTimeSpan']])
+    @RULE(Var.TIME_SPAN, [[Var.PARTIAL_TIME_SPAN]])
     def p_time_spans_escalation(p):
         p[0] = p[1]
 
-    @RULE('timeSpan', [['timeSpan', 'partTimeSpan']])
+    @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, Var.PARTIAL_TIME_SPAN]])
     def p_time_spans_consequtive(p):
         p[0] = Node.TimeUnion(p[1], p[2])
 
-    @RULE('partTimeSpan', [[ResWord.TIME_INDICATION],
-                           ['verbalNumber', ResWord.TIME_INDICATION]])
+    @RULE(Var.PARTIAL_TIME_SPAN, [[ResWord.TIME_INDICATION],
+                           [Var.VERBAL_NUMBER, ResWord.TIME_INDICATION]])
     def p_time_span(p):
         if len(p) > 2:
             time_unit = p[2]
@@ -294,43 +310,39 @@ def build(start=None):
                              Node.Number(seconds))
 
     # ------------------------    function invocation and definition   --------------------- #
-    @RULE('functionCall', [[POS.V_IMP, 'functionArgs']])
+    @RULE(Var.FUNCTION_CALL, [[POS.V_IMP, Var.FUNCTION_ARGUMENTS]])
     def p_function_call(p):
         p[0] = Node.FunctionInvocation(p[1], p[2])
 
-    @RULE('functionArgs', [['functionArg'],
-                           ['functionArgs', ResWord.AND, 'functionArg'],
-                           ['functionArgs', UaTer.DELIM, 'functionArg']])
+    @RULE(Var.FUNCTION_ARGUMENTS, [[Var.FUNCTION_ARGUMENT],
+                           [Var.FUNCTION_ARGUMENTS, ResWord.AND, Var.FUNCTION_ARGUMENT],
+                           [Var.FUNCTION_ARGUMENTS, UaTer.DELIM, Var.FUNCTION_ARGUMENT]])
     def p_function_arguments(p):
         if len(p) == 2:
             p[0] = [p[1]]
         else:
             p[0] = p[1] + [p[3]]
 
-    @RULE('functionArg', [['expression']])
+    @RULE(Var.FUNCTION_ARGUMENT, [[Var.EXPRESSION]])
     def p_first_function_argument(p):
         p[0] = p[1]
 
-    @RULE('defFuncName', [[POS.V_INF]])
-    def p_define_function_name(p):
-        p[0] = p[1][:-1] + "u"
-
-    @RULE('inputArgs', [['name'],
-                        ['inputArgs', ResWord.AND, 'name'],
-                        ['inputArgs', UaTer.DELIM, 'name']])
+    @RULE(Var.INPUT_ARGUMENTS, [[Var.NAME],
+                        [Var.INPUT_ARGUMENTS, ResWord.AND, Var.NAME],
+                        [Var.INPUT_ARGUMENTS, UaTer.DELIM, Var.NAME]])
     def p_inputArg_NOUN(p):
         if len(p) == 2:
             p[0] = [p[1]]
         else:
             p[0] = p[1] + [p[3]]
 
-    @RULE('inputArgs', [[]])
+    @RULE(Var.INPUT_ARGUMENTS, [[]])
     def p_inputArg_nothing(p):
         p[0] = []
 
-    @RULE('funcDef', [['defFuncName', 'inputArgs', ResWord.THIS_WAY, 'program', ResWord.END]])
+    @RULE(Var.FUNCTION_DEFINITION, [[POS.V_INF, Var.INPUT_ARGUMENTS, ResWord.THIS_WAY, Var.PROGRAM, ResWord.END]])
     def p_funcDef_nameAndArgs(p):
-        p[0] = Node.FunctionDefinition(p[1], p[2], p[4])
+        p[0] = Node.FunctionDefinition(p[1][:-1] + "u", p[2], p[4])
 
     # Error rule for syntax errors
     def p_error(p):
@@ -349,7 +361,7 @@ if __name__ == "__main__":
 
 
     lxr.build()
-    ast = build(start="statement")
+    ast = build(start=Var.STATEMENT.value)
     demo_state = Object()
     demo_state.variables = {}
     print("this is a limited AST demo, it can only deal with simple arithmetic and variable usage")

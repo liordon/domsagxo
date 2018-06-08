@@ -20,7 +20,7 @@ def evaluate_and_return_state_variables(ast, statement, initial_state=None):
 class StatementLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start="statement")
+        return ast_bld.build(start=ast_bld.Var.STATEMENT.value)
 
 
 class TestUntimedAstStatements(StatementLevelAstProvided):
@@ -125,7 +125,7 @@ class TestAstPrograms(object):
 
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start="program")
+        return ast_bld.build(start=ast_bld.Var.PROGRAM.value)
 
     @pytest.fixture
     def initial_state(self):
