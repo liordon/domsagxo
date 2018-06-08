@@ -147,7 +147,8 @@ class TestReservedWords(LexerProvided):
 
 class TestMultipleTokenSequences(LexerProvided):
 
-    def getTokenList(self, lexer):
+    @staticmethod
+    def getTokenList(lexer):
         res = []
         tok = lexer.token()
         while tok:

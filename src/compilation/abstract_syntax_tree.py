@@ -72,8 +72,9 @@ def build(start=None):
     def p_statement_repeatedAction(p):
         p[0] = Node.RepeatedStatement(p[1], p[3])
 
-    @RULE('statement', [['expression']])
-    def p_statement_expr(p):
+    @RULE('statement', [['expression'],
+                        ['funcDef']])
+    def p_statement_exprOrFuncDef(p):
         p[0] = p[1]
 
     @RULE('statement', [['name ', UaTer.ASSIGN, 'expression']])
@@ -341,13 +342,16 @@ def build(start=None):
 
 if __name__ == "__main__":
     import compilation.esp_lexer as lxr
+
+
     class Object(object):
         pass
+
 
     lxr.build()
     ast = build(start="statement")
     demo_state = Object()
-    demo_state.variables={}
+    demo_state.variables = {}
     print("this is a limited AST demo, it can only deal with simple arithmetic and variable usage")
 
     while True:

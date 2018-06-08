@@ -106,9 +106,9 @@ class TestAstTimePoints(object):
         parse_result = parsed_value_of(ast, "la dudek tria kaj nul")
         self.assertTimePointValues(parse_result, 23)
 
-    def test_canotFormatFormalFracturedHour_ITriedThatAndGotParsingConflicts(self, ast):
+    def test_cannotFormatFormalFracturedHour_ITriedThatAndGotParsingConflicts(self, ast):
         with pytest.raises(ast_bld.EsperantoSyntaxError):
-            parse_result = ast.parse("la deka horo kaj kvardek ses minutoj")
+            ast.parse("la deka horo kaj kvardek ses minutoj")
 
     def test_cannotFormatMoreThan24thHour(self, ast):
         with pytest.raises(ast_bld.EsperantoSyntaxError):

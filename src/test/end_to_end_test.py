@@ -127,6 +127,10 @@ class TestAstPrograms(object):
     def ast(self):
         return ast_bld.build(start="program")
 
+    @pytest.fixture
+    def initial_state(self):
+        return mng_co.Domsagxo()
+
     def test_unterminatedCommandIsNotAProgram(self, ast):
         with pytest.raises(ast_bld.EsperantoSyntaxError):
             ast.parse("12")
@@ -143,15 +147,13 @@ class TestAstPrograms(object):
         value = ast.parse('''revenu ses.''').evaluate(None)[1]
         assert 6 == value
 
-    def test_returnStopsProgramFromContinuing(self, ast):
-        state = mng_co.Domsagxo()
-        new_state, value = ast.parse('''revenu ses. kato = 10.''').evaluate(state)
+    def test_returnStopsProgramFromContinuing(self, ast, initial_state):
+        new_state, value = ast.parse('''revenu ses. kato = 10.''').evaluate(initial_state)
         assert 6 == value
         assert {} == new_state.variables
 
-    def test_returnStopsWhileLoopFromContinuing(self, ast):
-        initial_state = mng_co.Domsagxo()
-        state, value = ast.parse("""
+    def test_returnStopsWhileLoopFromContinuing(self, ast, initial_state):
+        state, value = ast.parse('''
         kato estas naux.
         dum kato estas pli granda ol nul tiam
             kato estas kato-1.
@@ -159,6 +161,6 @@ class TestAstPrograms(object):
                 revenu kato.
             finu.
         finu.
-        """).evaluate(initial_state)
+        ''').evaluate(initial_state)
         assert {'kato': 3} == state.variables
         assert 3 == value

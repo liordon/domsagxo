@@ -34,18 +34,15 @@ def is_prime(number):
     if number <= 1:
         return False
     return all_true([number % i for i in range(2, int(math.sqrt(number)) + 1)])
-    # for i in range(2, int(math.sqrt(number))+1):
-    #     if i * i == number:
-    #         return False
-    # return True
 
 
 class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLevel):
 
     def test_canDefineNoneReturningFunction(self, ast):
-        num_predef_funcs = len(esk.Domsagxo().method_dict)
-        new_state = self.evaluate_and_return_state(ast, '''sxambaluli signifas revenu nenio. finu''')
-        assert num_predef_funcs + 1 == len(new_state.method_dict)
+        number_of_predefined_functions = len(esk.Domsagxo().method_dict)
+        new_state = self.evaluate_and_return_state(ast,
+                                                   '''sxambaluli signifas revenu nenio. finu''')
+        assert number_of_predefined_functions + 1 == len(new_state.method_dict)
         assert 'sxambalulu' in new_state.method_dict.keys()
         assert new_state.method_dict['sxambalulu']([]) is None
 
@@ -144,7 +141,8 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLe
                         duenigu argxento kaj kupro.
                     finu.
                     rekursajxo estas trienigu oro malpli unu, argxento kaj kupro.
-                    revenu kvarenigu oro malpli unu, rekursajxo, argxento kaj kupro. finu''', new_state)
+                    revenu kvarenigu oro malpli unu, rekursajxo, argxento kaj kupro. finu''',
+            new_state)
 
         two_input_function_result = new_state.method_dict['duenigu']([2, 5])
         four_input_function_result = \
@@ -216,8 +214,8 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLe
         def is_esperanto_prime(argument_list):
             return is_prime(argument_list[0])
 
-        def add_prime_to_list(prime):
-            self.prime_list += prime
+        def add_prime_to_list(additional_prime):
+            self.prime_list += additional_prime
 
         new_state = self.evaluate_and_return_state(
             ast, '''primumi signifas
