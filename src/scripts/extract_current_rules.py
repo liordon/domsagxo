@@ -39,9 +39,9 @@ should_print_result = "-p" in sys.argv[1:]
 with open("Manuscripts/MscThesis/M_RawParseRules.tex", 'w') as output_file:
     for lhs in parse_rules:
         output_file.write("\n")
-        output_file.write(lhs + " = " + parse_rules[lhs][0] + "\n")
+        output_file.write(lhs + " = " + parse_rules[lhs][0] + "\\\\\n")
         for other_derivative in parse_rules[lhs][1:]:
-            output_file.write("\t| " + other_derivative + "\n")
+            output_file.write("\\-\\hspace{2cm}\\textbar\\-\\hspace{0.5cm}" + other_derivative + "\\\\\n")
 
 if should_print_result:
     with open("Manuscripts/MscThesis/M_RawParseRules.tex", 'r') as output_file:
