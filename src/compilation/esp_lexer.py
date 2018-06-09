@@ -13,18 +13,18 @@ def idList(token_enum):
 
 
 class UnalphabeticTerminal(Enum):
-    PLUS = 'PLUS'
-    MINUS = 'MINUS'
-    DELIM = 'DELIM'
-    COLON = 'COLON'
-    TIMES = 'TIMES'
-    DIVIDE = 'DIVIDE'
-    PERIOD = 'PERIOD'
-    ASSIGN = 'ASSIGN'
-    NUMBER = 'NUMBER'
-    L_PAREN = 'LPAREN'
-    R_PAREN = 'RPAREN'
-    COMMENT = 'COMMENT'
+    PLUS = 'TPLUS'
+    MINUS = 'TMINUS'
+    DELIM = 'TDELIM'
+    COLON = 'TCOLON'
+    TIMES = 'TTIMES'
+    DIVIDE = 'TDIVIDE'
+    PERIOD = 'TPERIOD'
+    ASSIGN = 'TASSIGN'
+    NUMBER = 'TNUMBER'
+    L_PAREN = 'TLPAREN'
+    R_PAREN = 'TRPAREN'
+    COMMENT = 'TCOMMENT'
 
 
 class ReservedWord(Enum):
@@ -156,20 +156,20 @@ tokens = [] + idList(ReservedWord) \
          + idList(UnalphabeticTerminal)
 
 # Regular expression rules for simple tokens
-t_PLUS = r'\+'
-t_MINUS = r'-'
-t_COLON = r':'
-t_TIMES = r'\*'
-t_DIVIDE = r'/'
-t_ASSIGN = r'='
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
-t_PERIOD = r'\.'
-t_DELIM = r','
-t_ignore_COMMENT = r'\#.*'
+t_TPLUS = r'\+'
+t_TMINUS = r'-'
+t_TCOLON = r':'
+t_TTIMES = r'\*'
+t_TDIVIDE = r'/'
+t_TASSIGN = r'='
+t_TLPAREN = r'\('
+t_TRPAREN = r'\)'
+t_TPERIOD = r'\.'
+t_TDELIM = r','
+t_ignore_TCOMMENT = r'\#.*'
 
 
-def t_NUMBER(t):
+def t_TNUMBER(t):
     r'\d+'
     t.value = int(t.value)
     return t
@@ -211,7 +211,7 @@ def parseDigit(name):
     return digitNames[name] * multiplier
 
 
-def t_WORD(t):
+def t_TWORD(t):
     r'[a-z]+'
     if reserved_words.keys().__contains__(t.value):
         t.type = reserved_words[t.value]
