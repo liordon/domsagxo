@@ -1,0 +1,9 @@
+can change property of appliance
+    def test_functionsCanMutateTheirOwnArgumentsAsPerReferenceSemantics(self, ast, initial_state):
+        new_state, value = ast.parse('''
+            pliigi nombro signifas
+                nombro estas nombro pli unu.
+            finu.
+            kato estas naux.
+            pliigu kato.''').evaluate(initial_state)
+        assert 11 == new_state.variables['kato']
