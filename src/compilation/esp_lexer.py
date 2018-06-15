@@ -54,10 +54,10 @@ class ReservedWord(Enum):
     THE = 'Tla'
     THEN = 'Ttiam'
     THIS_WAY = 'Ttiel'
-    TIME_INDICATION = 'Ttempvorto'
+    TIME_INDICATION = 'VtimeUnit'
     TIMES = 'Tfojoj'
     TO = 'Tal'
-    TRUE = 'Ttrue'
+    TRUE = 'Tvero'
     VERBAL_DIGIT = 'Tparolcifero'
     WORD = 'Tvorto'
 

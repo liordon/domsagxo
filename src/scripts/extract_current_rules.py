@@ -23,10 +23,12 @@ def convert_raw_token_to_tex(raw_token):
         raw_token[1:]) + "}"
 
 if __name__=="__main__":
+    print("building grammar")
     build(start=Var.PROGRAM.value)
 
     parse_rules = {}
 
+    print("parsing grammar rules")
     with open("esperanto/src/compilation/parser.out", 'r') as input_file:
         for line in input_file.readlines():
             if line.startswith("Rule "):
@@ -38,8 +40,10 @@ if __name__=="__main__":
                 else:
                     parse_rules[lhs] += [" ".join(rhs)]
 
+    new_grammar_file = "Manuscripts/MscThesis/raw-grammar-rules.tex"
+    print("writing new grammar rules to: " + new_grammar_file)
     should_print_result = "-p" in sys.argv[1:]
-    with open("Manuscripts/MscThesis/M_RawParseRules.tex", 'w') as output_file:
+    with open(new_grammar_file, 'w') as output_file:
         for lhs in parse_rules:
             output_file.write("\n")
             output_file.write(lhs + " = " + parse_rules[lhs][0] + "\\\\\n")
@@ -47,7 +51,7 @@ if __name__=="__main__":
                 output_file.write("\\-\\hspace{2cm}\\textbar\\-\\hspace{0.5cm}" + other_derivative + "\\\\\n")
 
     if should_print_result:
-        with open("Manuscripts/MscThesis/M_RawParseRules.tex", 'r') as output_file:
+        with open(new_grammar_file, 'r') as output_file:
             for line in output_file.readlines():
                 print(line, end='', flush=False)
         sys.stdout.flush()
