@@ -78,14 +78,33 @@ class TestAstMathExpressions(ExpressionLevelAstProvided):
         with pytest.raises(ast_bld.EsperantoSyntaxError):
             ast.parse("naux ses")
 
+
+class TestAstBooleanExpressions(ExpressionLevelAstProvided):
+
     def test_valueOfReservedWordForTrueIsTrue(self, ast):
         assert parsed_value_of(ast, "vero")
 
     def test_valueOfReservedWordForFalseIsFalse(self, ast):
         assert not parsed_value_of(ast, "malvero")
 
+    def test_functionTableOfOperator_not(self, ast):
+        assert not parsed_value_of(ast, "ne vero")
+        assert parsed_value_of(ast, "ne malvero")
 
-class TestAstBooleanExpressions(ExpressionLevelAstProvided):
+    def test_functionTableOfOperator_and(self, ast):
+        assert parsed_value_of(ast, "vero ambaux vero")
+        assert not parsed_value_of(ast, "vero ambaux malvero")
+        assert not parsed_value_of(ast, "malvero ambaux vero")
+        assert not parsed_value_of(ast, "malvero ambaux malvero")
+
+    def test_functionTableOfOperator_or(self, ast):
+        assert parsed_value_of(ast, "vero aux vero")
+        assert parsed_value_of(ast, "vero aux malvero")
+        assert parsed_value_of(ast, "malvero aux vero")
+        assert not parsed_value_of(ast, "malvero aux malvero")
+
+
+class TestAstRelationalExpressions(ExpressionLevelAstProvided):
     @pytest.fixture
     def relation_ast(self):
         return ast_bld.build(start=ast_bld.Var.RELATION.value)

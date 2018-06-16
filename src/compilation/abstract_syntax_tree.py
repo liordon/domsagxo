@@ -239,6 +239,18 @@ def build(start=None):
         else:
             p[0] = Node.Comparison(p[1], p[3], p[4]).reverse()
 
+    @RULE(Var.EXPRESSION, [[Var.EXPRESSION, ResWord.BOTH, Var.EXPRESSION]])
+    def p_expression_booleanAnd(p):
+        p[0] = Node.LogicAnd(p[1], p[3])
+
+    @RULE(Var.EXPRESSION, [[Var.EXPRESSION, ResWord.OR, Var.EXPRESSION]])
+    def p_expression_booleanOr(p):
+        p[0] = Node.LogicOr(p[1], p[3])
+
+    @RULE(Var.EXPRESSION, [[ResWord.NOT, Var.EXPRESSION]])
+    def p_expression_booleanNot(p):
+        p[0] = Node.LogicNot(p[2])
+
     # ----------------------------   expression constants    ------------------------- #
     @RULE(Var.EXPRESSION, [[ResWord.NONE]])
     def p_factor_none(p):

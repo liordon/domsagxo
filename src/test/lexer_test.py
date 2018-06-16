@@ -136,6 +136,10 @@ class TestReservedWords(LexerProvided):
         lexer.input("malgranda")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.SMALLER)
 
+    def test_theWord_Both_isReservedForLogicOperations(self, lexer):
+        lexer.input("ambaux")
+        self.assertPartOfSpeechForNextToken(lexer, ReservedWord.BOTH)
+
     def test_theWords_AtAfterEvery_areReservedForScheduling(self, lexer):
         lexer.input("je")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.AT)
