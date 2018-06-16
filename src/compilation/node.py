@@ -31,38 +31,63 @@ class NoneNode(AstNode):
         return state, None
 
 
-class MathOp(AstNode):
+class BinaryOp(AstNode):
 
     def __init__(self, arg1, arg2):
-        super(MathOp, self).__init__(arg1, arg2)
+        super(BinaryOp, self).__init__(arg1, arg2)
 
 
-class Add(MathOp):
+class Add(BinaryOp):
     def _method(self, state, arg1, arg2):
         value1 = arg1.evaluate(state)[1]
         value2 = arg2.evaluate(state)[1]
         return state, value1 + value2
 
 
-class Subtract(MathOp):
+class Subtract(BinaryOp):
     def _method(self, state, arg1, arg2):
         value1 = arg1.evaluate(state)[1]
         value2 = arg2.evaluate(state)[1]
         return state, value1 - value2
 
 
-class Multiply(MathOp):
+class Multiply(BinaryOp):
     def _method(self, state, arg1, arg2):
         value1 = arg1.evaluate(state)[1]
         value2 = arg2.evaluate(state)[1]
         return state, value1 * value2
 
 
-class Divide(MathOp):
+class Divide(BinaryOp):
     def _method(self, state, arg1, arg2):
         value1 = arg1.evaluate(state)[1]
         value2 = arg2.evaluate(state)[1]
         return state, value1 / value2
+
+
+class LogicAnd(BinaryOp):
+    def _method(self, state, arg1, arg2):
+        value1 = arg1.evaluate(state)[1]
+        value2 = arg2.evaluate(state)[1]
+        return state, value1 and value2
+
+
+class LogicOr(BinaryOp):
+    def _method(self, state, arg1, arg2):
+        value1 = arg1.evaluate(state)[1]
+        value2 = arg2.evaluate(state)[1]
+        return state, value1 or value2
+
+
+class UnaryOp(AstNode):
+    def __init__(self, arg):
+        super(UnaryOp, self).__init__(arg)
+
+
+class LogicNot(UnaryOp):
+    def _method(self, state, arg):
+        value = arg.evaluate(state)[1]
+        return state, not value
 
 
 class Boolean(AstNode):
@@ -274,7 +299,6 @@ class Comparison(AstNode):
     def _method(self, state, arg1, comparison, arg2):
         state, evaluated_arg1 = arg1.evaluate(state)
         state, evaluated_arg2 = arg2.evaluate(state)
-        res = False
         if comparison == self.Relation.EQUAL:
             res = evaluated_arg1 == evaluated_arg2
         elif comparison == self.Relation.GREATER:

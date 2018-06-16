@@ -31,6 +31,7 @@ class ReservedWord(Enum):
     AFTER = 'Tpost'
     AND = 'Tkaj'
     AT = 'Tje'
+    BOTH = 'Tambaux'
     DURING = 'Tdum'
     ELSE = 'Talie'
     END = 'Tfinu'
@@ -77,6 +78,7 @@ class PartOfSpeech(Enum):
 reserved_words = {
     "al"       : ReservedWord.TO.value,
     "alie"     : ReservedWord.ELSE.value,
+    "ambaux"   : ReservedWord.BOTH.value,
     "aux"      : ReservedWord.OR.value,
     "cxiu"     : ReservedWord.EVERY.value,
     "dum"      : ReservedWord.DURING.value,
