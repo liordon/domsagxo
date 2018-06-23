@@ -3,12 +3,12 @@ import pytest
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esp_lexer as lxr
 import compilation.node as Node
+import test.mocks
 
 lxr.build()
 
 
 class ExpressionLevelAstProvided(object):
-
     @pytest.fixture
     def ast(self):
         return ast_bld.build(start=ast_bld.Var.EXPRESSION.value)
@@ -45,6 +45,53 @@ class TestBasicAstNodes(ExpressionLevelAstProvided):
     def test_subtractionReturnsOperationNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "1-1", Node.Subtract)
         self.assertThatExpressionIsOfNodeType(ast, "unu malpli unu", Node.Subtract)
+
+    def test_nounReturnsVariableNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "sxambalulo", Node.VariableName)
+
+    def test_adjectiveAndNounReturnsVariableNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "sxamba lulo", Node.VariableName)
+
+    def test_fieldAccessReturnsDereferenceNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "sxa mbo de lulo", Node.Dereference)
+
+
+class TestReferenceSemantics(ExpressionLevelAstProvided):
+    @pytest.fixture
+    def state(self):
+        return test.mocks.Bunch(variables={})
+
+    def test_variableCanReturnASetterToItself(self, ast):
+        ast.parse("sxambalulo").setter
+
+    def test_variableSetterCanBeUsedToChangeVariableValue(self, ast, state):
+        variable_name = "sxambalulo"
+        setter = ast.parse(variable_name).setter
+        setter(state, 1)
+        assert state.variables[variable_name] == 1
+
+    def test_dereferenceSetterCanBeUsedToChangeVariableValue(self, ast, state):
+        variable_name = "sxambo de lulo"
+        setter = ast.parse(variable_name).setter
+        state.variables["lulo"] = test.mocks.Bunch(properties={"sxambo": 0})
+        setter(state, 2)
+        assert 2 == state.variables["lulo"].properties["sxambo"]
+
+    def test_recursiveDereferenceSettersCanStillBeUsedToChangeValue(self, ast, state):
+        variable_name = "sxambo de lulo de kahxolo"
+        setter = ast.parse(variable_name).setter
+        state.variables["kahxolo"] = test.mocks.Bunch(properties={
+            "lulo": test.mocks.Bunch(properties={"sxambo": 0})
+        })
+        setter(state, 3)
+        assert 3 == state.variables["kahxolo"].properties["lulo"].properties["sxambo"]
+
+    def test_cannotUseSetterToSetNonExistingProperty(self, ast, state):
+        with pytest.raises(KeyError):
+            variable_name = "sxambo de lulo"
+            setter = ast.parse(variable_name).setter
+            state.variables["lulo"] = test.mocks.Bunch(properties={})
+            setter(state, 3)
 
 
 def parsed_value_of(ast, expr, state=None):

@@ -122,6 +122,11 @@ def build(start=None):
         p[0] = Node.ReturnValue(p[2])
 
     # ---------------------       variable name definitions     ----------------------------#
+
+    @RULE(Var.NAME, [[Var.NAME, ResWord.OF, Var.NAME]])
+    def p_name_dereference(p):
+        p[0] = Node.Dereference(p[1], p[3])
+
     @RULE(Var.NAME, [[POS.NOUN],
                      [Var.PARTIAL_NAME, POS.NOUN]])
     def p_name_partialNameAndNoun(p):
@@ -385,23 +390,28 @@ def build(start=None):
     return ast_builder
 
 
+class Object(object):
+    pass
+
+
 if __name__ == "__main__":
     import compilation.esp_lexer as lxr
-
-
-    class Object(object):
-        pass
-
+    import sys
 
     lxr.build()
-    ast = build(start=Var.STATEMENT.value)
-    demo_state = Object()
-    demo_state.variables = {}
-    print("this is a limited AST demo, it can only deal with simple arithmetic and variable usage")
 
-    while True:
-        txt = input(">")
-        if txt == "":
-            break
-        demo_state, result = ast.parse(txt).evaluate(demo_state)
-        print(result)
+    if sys.argv[0] == "-c":
+        ast = build(start=Var.PROGRAM.value)
+    else:
+        ast = build(start=Var.STATEMENT.value)
+        demo_state = Object()
+        demo_state.variables = {}
+        print("This is a limited AST demo.\n",
+              "it can only deal with simple arithmetic and variable usage")
+
+        while True:
+            txt = input(">")
+            if txt == "":
+                break
+            demo_state, result = ast.parse(txt).evaluate(demo_state)
+            print(result)

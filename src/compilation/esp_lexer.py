@@ -82,6 +82,7 @@ reserved_words = {
     "aux"      : ReservedWord.OR.value,
     "cxiu"     : ReservedWord.EVERY.value,
     "dum"      : ReservedWord.DURING.value,
+    "de"       : ReservedWord.OF.value,
     "egala"    : ReservedWord.EQUAL.value,
     "estas"    : UnalphabeticTerminal.ASSIGN.value,
     "finu"     : ReservedWord.END.value,

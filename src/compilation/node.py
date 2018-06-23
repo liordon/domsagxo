@@ -103,13 +103,45 @@ class VariableName(AstNode):
         super(VariableName, self).__init__(variable_name)
 
     def _method(self, state, variable_name):
-        if variable_name not in state.variables:
-            # raise NameError("name " + variable_name + " is not defined")
-            return state, variable_name
-        return state, state.variables[variable_name]
+        if variable_name in state.variables:
+            return state, state.variables[variable_name]
+        # else:
+        #     raise NameError("name " + variable_name + " is not defined")
+        return state, variable_name
 
     def getContainedName(self):
         return self.args[0]
+
+    def setter(self, state, value):
+        state.variables[self.args[0]] = value
+
+    def getter(self, state):
+        return state.variables[self.args[0]]
+
+
+class Dereference(AstNode):
+    def __init__(self, field_name, variable_name):
+        super(Dereference, self).__init__(field_name, variable_name)
+
+    def _method(self, state, field_name, variable_name):
+        state, evaluated_var = variable_name.evaluate(state)
+        return state, evaluated_var.properties[field_name.getContainedName()]
+
+    def getContainedName(self):
+        return self.args[0].getContainedName()
+
+    def _get_containing_object(self, state):
+        return self.args[1].getter(state)
+
+    def setter(self, state, value):
+        containing_object = self._get_containing_object(state)
+        name = self.getContainedName()
+        if name not in containing_object.properties:
+            raise KeyError()
+        containing_object.properties[name] = value
+
+    def getter(self, state):
+        return self._get_containing_object(state).properties[self.getContainedName()]
 
 
 class VariableAssignment(AstNode):
@@ -118,7 +150,7 @@ class VariableAssignment(AstNode):
 
     def _method(self, state, variable_name, variable_value):
         state, value = variable_value.evaluate(state)
-        state.variables[variable_name.getContainedName()] = value
+        variable_name.setter(state, value)
         return state, None
 
 

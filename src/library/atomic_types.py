@@ -17,9 +17,12 @@ class ApplianceTypes(Enum):
 
 class ApplianceProperties(Enum):
     BRIGHTNESS = 'brilo'
+    COLOR = 'koloro'
 
-    def defaultValue(self):
-        return 1
+
+class LightColor(Enum):
+    WHITE = 'blanko'
+    RED = 'rugxo'
 
 
 class Appliance(object):
@@ -35,9 +38,10 @@ class Appliance(object):
 
     def createStateComponents(self):
         if self.type is ApplianceTypes.LIGHT:
-            self.state_components = {
-                ApplianceProperties.BRIGHTNESS.value: ApplianceProperties.BRIGHTNESS.defaultValue()
+            self.properties = {
+                ApplianceProperties.BRIGHTNESS.value: 1,
+                ApplianceProperties.COLOR.value     : LightColor.WHITE
             }
 
     def setStateComponent(self, state_component, value):
-        self.state_components[state_component] = value
+        self.properties[state_component] = value

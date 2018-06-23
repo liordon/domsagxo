@@ -4,15 +4,15 @@ import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esp_lexer as lxr
-import library.atomic_types as tipo
-import library.management_components as esk
+import library.atomic_types as atypes
+import library.management_components as mcmps
 
 lxr.build()
 
 
 def parsed_value_of(ast, expr, state=None):
     if state is None:
-        state = esk.Domsagxo()
+        state = mcmps.Domsagxo()
     node = ast.parse(expr)
     return node.evaluate(state)[1]
 
@@ -171,7 +171,7 @@ class TestAstRandomGeneration(object):
 
 def evaluate_and_return_state(ast, statement, initial_state=None):
     if initial_state is None:
-        initial_state = esk.Domsagxo()  # so as not to put a mutable default
+        initial_state = mcmps.Domsagxo()  # so as not to put a mutable default
     state, nothing = ast.parse(statement).evaluate(initial_state)
     return state
 
@@ -184,28 +184,28 @@ class TestAstApplianceManagement(object):
 
     @pytest.fixture
     def manager(self):
-        return esk.Domsagxo()
+        return mcmps.Domsagxo()
 
     def test_canAddApplianceToSmartHomeViaCode(self, manager):
-        appliance = tipo.Appliance(tipo.ApplianceTypes.LIGHT, "shambalulu")
+        appliance = atypes.Appliance(atypes.ApplianceTypes.LIGHT, "shambalulu")
         manager.addAppliance(appliance)
         assert appliance.name in manager.variables.keys()
 
     def test_canTurnOnAllLights(self, ast):
         state = evaluate_and_return_state(ast, "sxaltu la lumojn")
         for appliance in state.variables.values():
-            if appliance.type is tipo.ApplianceTypes.LIGHT:
+            if appliance.type is atypes.ApplianceTypes.LIGHT:
                 assert appliance.isTurnedOn
 
     def test_nonLightAppliancesAreUnaffectedByLightsCommand(self, ast, manager):
-        manager.addAppliance(tipo.Appliance(tipo.ApplianceTypes.LIGHT, "shamba"))
-        manager.addAppliance(tipo.Appliance(tipo.ApplianceTypes.KNOB, "lulu"))
+        manager.addAppliance(atypes.Appliance(atypes.ApplianceTypes.LIGHT, "shamba"))
+        manager.addAppliance(atypes.Appliance(atypes.ApplianceTypes.KNOB, "lulu"))
 
         evaluate_and_return_state(ast, "sxaltu la lumojn", manager)
         for appliance in manager.variables.values():
-            if appliance.type is tipo.ApplianceTypes.LIGHT:
+            if appliance.type is atypes.ApplianceTypes.LIGHT:
                 assert appliance.isTurnedOn
-            elif appliance.type is not tipo.ApplianceTypes.LIGHT:
+            elif appliance.type is not atypes.ApplianceTypes.LIGHT:
                 assert not appliance.isTurnedOn
 
     def test_canAddAnonymousApplianceToSmartHomeViaSpeech(self, ast):
@@ -213,7 +213,7 @@ class TestAstApplianceManagement(object):
         assert 1 == len(manager.variables)
         assert "lumo" not in manager.variables.keys()
         assert "unua lumo" in manager.variables.keys()
-        assert manager.variables["unua lumo"].type is tipo.ApplianceTypes.LIGHT
+        assert manager.variables["unua lumo"].type is atypes.ApplianceTypes.LIGHT
 
     def test_whenAddingTwoAnonymousAppliancesOneReceivesSerialNumber(self, ast):
         manager = evaluate_and_return_state(ast, "aldonu lumon")
@@ -221,4 +221,30 @@ class TestAstApplianceManagement(object):
         assert 2 == len(manager.variables)
         assert "unua lumo" in manager.variables.keys()
         assert "dua lumo" in manager.variables.keys()
-        assert manager.variables["dua lumo"].type is tipo.ApplianceTypes.LIGHT
+        assert manager.variables["dua lumo"].type is atypes.ApplianceTypes.LIGHT
+
+
+class TestObjectOrientedActions(object):
+    @pytest.fixture
+    def parser(self):
+        abstract_syntax_tree = ast_bld.build(start=ast_bld.Var.STATEMENT.value)
+        return abstract_syntax_tree
+
+    @pytest.fixture
+    def smart_home(self):
+        smart_home = mcmps.Domsagxo()
+        light_bulb = atypes.Appliance(atypes.ApplianceTypes.LIGHT, "sxambalulo")
+        smart_home.addAppliance(light_bulb)
+        return smart_home
+
+    def test_canAccessColorFieldOfLightBulb(self, parser, smart_home):
+        ast = parser.parse("koloro de sxambalulo")
+        state, value = ast.evaluate(smart_home)
+        assert isinstance(value, atypes.LightColor)
+
+    def test_canChangeColorFieldOfLightBulb(self, parser, smart_home):
+        ast = parser.parse("koloro de sxambalulo estas rugxo")
+        # ast = parser.parse("sxambalulo estas rugxo")
+        smart_home, value = ast.evaluate(smart_home)
+        assert atypes.LightColor.RED.value == \
+               smart_home.variables["sxambalulo"].properties["koloro"]

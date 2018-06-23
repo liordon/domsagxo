@@ -68,11 +68,11 @@ class Domsagxo(object):
 
     def getPropertyOfAppliance(self, appliance_name, property_name):
         appliance = self.variables[appliance_name]
-        return appliance.state_components[property_name]
+        return appliance.properties[property_name]
 
     def setPropertyOfAppliance(self, appliance_name, property_name, value):
         appliance = self.variables[appliance_name]
-        appliance.state_components[property_name] = value
+        appliance.properties[property_name] = value
 
     def requestDeviceAddition(self, device_parameters):
         appliance_type = ApplianceTypes(device_parameters[0])
@@ -96,7 +96,7 @@ class Domsagxo(object):
 
     def requestChangeToDeviceProperty(self, devices_property_value):
         def setDeviceProperty(device):
-            device.state_components[devices_property_value[1]] = devices_property_value[2]
+            device.properties[devices_property_value[1]] = devices_property_value[2]
 
         self.performActionOnAllDevices([devices_property_value[0]], setDeviceProperty)
 
