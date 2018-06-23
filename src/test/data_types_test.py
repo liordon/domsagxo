@@ -189,11 +189,11 @@ class TestAstApplianceManagement(object):
     def test_canAddApplianceToSmartHomeViaCode(self, manager):
         appliance = tipo.Appliance(tipo.ApplianceTypes.LIGHT, "shambalulu")
         manager.addAppliance(appliance)
-        assert appliance.name in manager.appliances.keys()
+        assert appliance.name in manager.variables.keys()
 
     def test_canTurnOnAllLights(self, ast):
         state = evaluate_and_return_state(ast, "sxaltu la lumojn")
-        for appliance in state.appliances.values():
+        for appliance in state.variables.values():
             if appliance.type is tipo.ApplianceTypes.LIGHT:
                 assert appliance.isTurnedOn
 
@@ -202,23 +202,23 @@ class TestAstApplianceManagement(object):
         manager.addAppliance(tipo.Appliance(tipo.ApplianceTypes.KNOB, "lulu"))
 
         evaluate_and_return_state(ast, "sxaltu la lumojn", manager)
-        for appliance in manager.appliances.values():
+        for appliance in manager.variables.values():
             if appliance.type is tipo.ApplianceTypes.LIGHT:
                 assert appliance.isTurnedOn
             elif appliance.type is not tipo.ApplianceTypes.LIGHT:
                 assert not appliance.isTurnedOn
 
     def test_canAddAnonymousApplianceToSmartHomeViaSpeech(self, ast):
-        state = evaluate_and_return_state(ast, "aldonu lumon")
-        assert 1 == len(state.appliances)
-        assert "lumo" not in state.appliances.keys()
-        assert "unua lumo" in state.appliances.keys()
-        assert state.appliances["unua lumo"].type is tipo.ApplianceTypes.LIGHT
+        manager = evaluate_and_return_state(ast, "aldonu lumon")
+        assert 1 == len(manager.variables)
+        assert "lumo" not in manager.variables.keys()
+        assert "unua lumo" in manager.variables.keys()
+        assert manager.variables["unua lumo"].type is tipo.ApplianceTypes.LIGHT
 
     def test_whenAddingTwoAnonymousAppliancesOneReceivesSerialNumber(self, ast):
-        state = evaluate_and_return_state(ast, "aldonu lumon")
-        state = evaluate_and_return_state(ast, "aldonu lumon", state)
-        assert 2 == len(state.appliances)
-        assert "unua lumo" in state.appliances.keys()
-        assert "dua lumo" in state.appliances.keys()
-        assert state.appliances["dua lumo"].type is tipo.ApplianceTypes.LIGHT
+        manager = evaluate_and_return_state(ast, "aldonu lumon")
+        manager = evaluate_and_return_state(ast, "aldonu lumon", manager)
+        assert 2 == len(manager.variables)
+        assert "unua lumo" in manager.variables.keys()
+        assert "dua lumo" in manager.variables.keys()
+        assert manager.variables["dua lumo"].type is tipo.ApplianceTypes.LIGHT

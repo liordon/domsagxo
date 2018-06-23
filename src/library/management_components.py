@@ -25,13 +25,12 @@ class Domsagxo(object):
         self.groups = {}
         for appType in Domsagxo.appliance_type_group:
             self.groups[Domsagxo.appliance_type_group[appType]] = []
-        self.appliances = {}
         self.scheduler = scheduler
 
     def addAppliance(self, appliance):
-        if appliance.name in self.appliances:
+        if appliance.name in self.variables:
             raise ValueError("appliance named " + appliance.name + " already exists in this home.")
-        self.appliances[appliance.name] = appliance
+        self.variables[appliance.name] = appliance
         if appliance.type in Domsagxo.appliance_type_group:
             self.groups[Domsagxo.appliance_type_group[appliance.type]].append(appliance)
 
@@ -44,35 +43,35 @@ class Domsagxo(object):
         self.groups.pop(group_name)
 
     def recognizes(self, appliance_or_group_name):
-        return (appliance_or_group_name in self.appliances) or \
+        return (appliance_or_group_name in self.variables) or \
                (appliance_or_group_name in self.groups)
 
     def isApplianceName(self, appliance_name):
-        return appliance_name in self.appliances
+        return appliance_name in self.variables
 
     def isGroupName(self, group_name):
         return group_name in self.groups.keys()
 
     def getAppliance(self, appliance_name):
-        return self.appliances[appliance_name]
+        return self.variables[appliance_name]
 
     def getGroup(self, group_name):
         return self.groups[group_name]
 
     def addApplianceToGroup(self, appliance_name, group):
-        appliance = self.appliances[appliance_name]
+        appliance = self.variables[appliance_name]
         self.groups[group].append(appliance)
 
     def removeApplianceFromGroup(self, appliance_name, group):
-        appliance = self.appliances[appliance_name]
+        appliance = self.variables[appliance_name]
         self.groups[group].remove(appliance)
 
     def getPropertyOfAppliance(self, appliance_name, property_name):
-        appliance = self.appliances[appliance_name]
+        appliance = self.variables[appliance_name]
         return appliance.state_components[property_name]
 
     def setPropertyOfAppliance(self, appliance_name, property_name, value):
-        appliance = self.appliances[appliance_name]
+        appliance = self.variables[appliance_name]
         appliance.state_components[property_name] = value
 
     def requestDeviceAddition(self, device_parameters):
@@ -114,10 +113,10 @@ class Domsagxo(object):
     def renameAppliance(self, names):
         if self.recognizes(names[1]):
             raise KeyError("name " + names[1] + " is already taken")
-        appliance = self.appliances[names[0]]
+        appliance = self.variables[names[0]]
         appliance.name = names[1]
-        self.appliances[names[1]] = appliance
-        self.appliances.pop(names[0])
+        self.variables[names[1]] = appliance
+        self.variables.pop(names[0])
 
 
 class Horaro(object):

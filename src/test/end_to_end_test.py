@@ -68,16 +68,16 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
             ast, "dum malvero tiam kato estas sep. finu")
 
     def test_canDefineWhileLoopThatEvaluatesOnce(self, ast):
-        initial_state = mng_co.Domsagxo()
-        initial_state.variables["kato"] = 1
+        manager = mng_co.Domsagxo()
+        manager.variables["kato"] = 1
         assert {'kato': 0} == evaluate_and_return_state_variables(
-            ast, "dum kato estas pli granda ol nul tiam kato estas kato-1. finu", initial_state)
+            ast, "dum kato estas pli granda ol nul tiam kato estas kato-1. finu", manager)
 
     def test_canDefineWhileLoopThatEvaluatesFiveTimes(self, ast):
-        initial_state = mng_co.Domsagxo()
-        initial_state.variables["kato"] = 5
+        manager = mng_co.Domsagxo()
+        manager.variables["kato"] = 5
         assert {'kato': 0} == evaluate_and_return_state_variables(
-            ast, "dum kato estas pli granda ol nul tiam kato estas kato-1. finu", initial_state)
+            ast, "dum kato estas pli granda ol nul tiam kato estas kato-1. finu", manager)
 
 
 class TestTimedAstStatements(StatementLevelAstProvided):
@@ -90,35 +90,35 @@ class TestTimedAstStatements(StatementLevelAstProvided):
         return mng_co.Domsagxo(scheduler)
 
     @staticmethod
-    def fastForwardBy(smart_home, **time):
-        smart_home.scheduler.runSetTime(datetime.timedelta(**time))
+    def fastForwardBy(manager, **time):
+        manager.scheduler.runSetTime(datetime.timedelta(**time))
 
     @staticmethod
-    def fastForwardTo(smart_home, **time):
-        current_date = smart_home.scheduler.getDate()
-        smart_home.scheduler.runUntil(current_date.replace(**time))
+    def fastForwardTo(manager, **time):
+        current_date = manager.scheduler.getDate()
+        manager.scheduler.runUntil(current_date.replace(**time))
 
     def test_canUseDelayedActionToAddLight(self, ast, fake_timed_smart_home):
-        state, value = ast.parse("aldonu lumon post sekundo").evaluate(fake_timed_smart_home)
-        assert 0 == len(state.appliances)
+        manager, value = ast.parse("aldonu lumon post sekundo").evaluate(fake_timed_smart_home)
+        assert 0 == len(manager.variables)
         self.fastForwardBy(fake_timed_smart_home, seconds=1)
-        assert 1 == len(state.appliances)
+        assert 1 == len(manager.variables)
 
     def test_canUseScheduledActionToAddLight(self, ast, fake_timed_smart_home):
-        state, value = ast.parse("aldonu lumon je la sesa horo").evaluate(fake_timed_smart_home)
-        assert 0 == len(state.appliances)
+        manager, value = ast.parse("aldonu lumon je la sesa horo").evaluate(fake_timed_smart_home)
+        assert 0 == len(manager.variables)
         self.fastForwardBy(fake_timed_smart_home, seconds=1)
-        assert 0 == len(state.appliances)
+        assert 0 == len(manager.variables)
         self.fastForwardTo(fake_timed_smart_home, hour=6)
-        assert 1 == len(state.appliances)
+        assert 1 == len(manager.variables)
 
     def test_canUseRepeatedActionToAddLightTwice(self, ast, fake_timed_smart_home):
-        state, value = ast.parse("aldonu lumon cxiu minuto").evaluate(fake_timed_smart_home)
-        assert 0 == len(state.appliances)
+        manager, value = ast.parse("aldonu lumon cxiu minuto").evaluate(fake_timed_smart_home)
+        assert 0 == len(manager.variables)
         self.fastForwardBy(fake_timed_smart_home, minutes=1)
-        assert 1 == len(state.appliances)
+        assert 1 == len(manager.variables)
         self.fastForwardBy(fake_timed_smart_home, minutes=1)
-        assert 2 == len(state.appliances)
+        assert 2 == len(manager.variables)
 
 
 class TestAstPrograms(object):
@@ -139,21 +139,21 @@ class TestAstPrograms(object):
         ast.parse("12.")
 
     def test_consecutiveStatementsPropagateVariableValues(self, ast):
-        new_state = evaluate_and_return_state_variables(ast, '''kato=2+4*10.
+        new_manager = evaluate_and_return_state_variables(ast, '''kato=2+4*10.
                         hundo = kato/6.''')
-        assert {'kato': 42, 'hundo': 7} == new_state
+        assert {'kato': 42, 'hundo': 7} == new_manager
 
     def test_returnStatementReturnsItsDeclaredValue(self, ast):
         value = ast.parse('''revenu ses.''').evaluate(None)[1]
         assert 6 == value
 
     def test_returnStopsProgramFromContinuing(self, ast, initial_state):
-        new_state, value = ast.parse('''revenu ses. kato = 10.''').evaluate(initial_state)
+        new_manager, value = ast.parse('''revenu ses. kato = 10.''').evaluate(initial_state)
         assert 6 == value
-        assert {} == new_state.variables
+        assert {} == new_manager.variables
 
     def test_returnStopsWhileLoopFromContinuing(self, ast, initial_state):
-        state, value = ast.parse('''
+        manager, value = ast.parse('''
         kato estas naux.
         dum kato estas pli granda ol nul tiam
             kato estas kato-1.
@@ -162,5 +162,5 @@ class TestAstPrograms(object):
             finu.
         finu.
         ''').evaluate(initial_state)
-        assert {'kato': 3} == state.variables
+        assert {'kato': 3} == manager.variables
         assert 3 == value
