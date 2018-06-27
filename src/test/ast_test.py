@@ -61,9 +61,6 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
     def state(self):
         return test.mocks.Bunch(variables={})
 
-    def test_variableCanReturnASetterToItself(self, ast):
-        ast.parse("sxambalulo").setter
-
     def test_variableSetterCanBeUsedToChangeVariableValue(self, ast, state):
         variable_name = "sxambalulo"
         setter = ast.parse(variable_name).setter

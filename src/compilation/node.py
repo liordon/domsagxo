@@ -101,6 +101,7 @@ class Boolean(AstNode):
 class VariableName(AstNode):
     def __init__(self, variable_name):
         super(VariableName, self).__init__(variable_name)
+        self.variable_name = variable_name
 
     def _method(self, state, variable_name):
         if variable_name in state.variables:
@@ -110,35 +111,36 @@ class VariableName(AstNode):
         return state, variable_name
 
     def getContainedName(self):
-        return self.args[0]
+        return self.variable_name
 
     def setter(self, state, value):
-        state.variables[self.args[0]] = value
+        state.variables[self.variable_name] = value
 
     def getter(self, state):
-        return state.variables[self.args[0]]
+        return state.variables[self.variable_name]
 
 
 class Dereference(AstNode):
     def __init__(self, field_name, variable_name):
         super(Dereference, self).__init__(field_name, variable_name)
+        self.field_name = field_name
+        self.variable_name = variable_name
 
     def _method(self, state, field_name, variable_name):
         state, evaluated_var = variable_name.evaluate(state)
         return state, evaluated_var.properties[field_name.getContainedName()]
 
     def getContainedName(self):
-        return self.args[0].getContainedName()
+        return self.field_name.getContainedName()
 
     def _get_containing_object(self, state):
-        return self.args[1].getter(state)
+        return self.variable_name.getter(state)
 
     def setter(self, state, value):
         containing_object = self._get_containing_object(state)
-        name = self.getContainedName()
-        if name not in containing_object.properties:
+        if self.getContainedName() not in containing_object.properties:
             raise KeyError()
-        containing_object.properties[name] = value
+        containing_object.properties[self.getContainedName()] = value
 
     def getter(self, state):
         return self._get_containing_object(state).properties[self.getContainedName()]

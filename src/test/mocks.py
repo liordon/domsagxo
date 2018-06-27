@@ -1,6 +1,6 @@
 class Bunch:
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
+    def __init__(self, **keywords):
+        self.__dict__.update(keywords)
 
 
 class MockClock(object):
