@@ -11,8 +11,8 @@ class TimeManagerProvided(object):
     @pytest.fixture
     def scd(self):
         simulative_time = MockClock()
-        return Horaro(timefunc=simulative_time.get_current_time,
-                      delayfunc=simulative_time.increase_time)
+        return Horaro(time_function=simulative_time.get_current_time,
+                      delay_function=simulative_time.increase_time)
 
     @pytest.fixture
     def increaser(self):

@@ -83,6 +83,7 @@ class Domsagxo(object):
                 appliance_name = digitNames[numerator] + "a " + appliance_type.value
                 if not self.recognizes(appliance_name):
                     break
+        # noinspection PyUnboundLocalVariable
         if self.recognizes(appliance_name):
             raise KeyError("appliance " + appliance_name + " already exists.")
         appliance = Appliance(appliance_type, appliance_name)
@@ -121,10 +122,10 @@ class Domsagxo(object):
 
 class Horaro(object):
 
-    def __init__(self, timefunc, delayfunc):
+    def __init__(self, time_function, delay_function):
         """receives a function that tells the time in each invocation, and a function that
         enables a wait for desired amount of time. returns a Horaro scheduler"""
-        self.scheduler = sched.scheduler(timefunc, delayfunc)
+        self.scheduler = sched.scheduler(time_function, delay_function)
         self.time_check_interval = 1
 
     def currentTime(self):

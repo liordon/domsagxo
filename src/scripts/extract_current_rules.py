@@ -1,4 +1,5 @@
 import sys
+
 from compilation.abstract_syntax_tree import build, Var
 
 
@@ -20,9 +21,10 @@ def convert_name_to_token(token_name):
 
 def convert_raw_token_to_tex(raw_token):
     actual_token = convert_name_to_token(raw_token[1:])
-    return ("\\term{" + actual_token + "}" if raw_token.startswith('T') else actual_token)
+    return "\\term{" + actual_token + "}" if raw_token.startswith('T') else actual_token
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     print("building grammar")
     build(start=Var.PROGRAM.value)
 

@@ -15,7 +15,7 @@ def idList(token_enum):
 class UnalphabeticTerminal(Enum):
     PLUS = 'TPLUS'
     MINUS = 'TMINUS'
-    DELIM = 'TDELIM'
+    DELIMITER = 'TDELIM'
     COLON = 'TCOLON'
     TIMES = 'TTIMES'
     DIVIDE = 'TDIVIDE'
@@ -173,7 +173,7 @@ t_ignore_TCOMMENT = r'\#.*'
 
 
 def t_TNUMBER(t):
-    r'\d+'
+    r"""\d+"""
     t.value = int(t.value)
     return t
 
@@ -215,7 +215,7 @@ def parseDigit(name):
 
 
 def t_TWORD(t):
-    r'[a-z]+'
+    r"""[a-z]+"""
     if reserved_words.keys().__contains__(t.value):
         t.type = reserved_words[t.value]
     elif digitRe.fullmatch(t.value):
@@ -224,7 +224,7 @@ def t_TWORD(t):
     elif timeUnitRe.fullmatch(t.value):
         t.type = ReservedWord.TIME_INDICATION.value
     elif t.value in prepositions:
-        t.type = UnalphabeticTerminal.DELIM.value
+        t.type = UnalphabeticTerminal.DELIMITER.value
     else:
         t.value = re.sub(r'n$', "", t.value)
         if re.search(r'((o)|(oj))$', t.value):
@@ -249,7 +249,7 @@ t_ignore = ' \t'
 
 
 def t_newline(t):
-    r'\n+'
+    r"""\n+"""
     t.lexer.lineno += len(t.value)
 
 

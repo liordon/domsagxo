@@ -85,8 +85,8 @@ class TestTimedAstStatements(StatementLevelAstProvided):
     @pytest.fixture
     def fake_timed_smart_home(self):
         simulative_time = MockClock()
-        scheduler = mng_co.Horaro(timefunc=simulative_time.get_current_time,
-                                  delayfunc=simulative_time.increase_time)
+        scheduler = mng_co.Horaro(time_function=simulative_time.get_current_time,
+                                  delay_function=simulative_time.increase_time)
         return mng_co.Domsagxo(scheduler)
 
     @staticmethod

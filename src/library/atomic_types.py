@@ -36,6 +36,7 @@ class Appliance(object):
         self.isTurnedOn = False
         self.createStateComponents()
 
+    # noinspection PyAttributeOutsideInit
     def createStateComponents(self):
         if self.type is ApplianceTypes.LIGHT:
             self.properties = {

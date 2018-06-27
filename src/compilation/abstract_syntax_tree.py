@@ -17,7 +17,7 @@ class Var(Enum):
     BLOCK = 'Vblock'
     STATEMENT = 'Vstatement'
     IF_STATEMENT = 'VifStatement'
-    WHILELOOP = 'VwhileLoop'
+    WHILE_LOOP = 'VwhileLoop'
     DELAYED_STATEMENT = 'VdelayedStatement'
     SCHEDULED_STATEMENT = 'VscheduledStatement'
     REPEATING_STATEMENT = 'VrepeatingStatement'
@@ -60,6 +60,7 @@ def get_digit(number, digit):
 
 
 def build(start=None):
+    # noinspection PyUnusedLocal
     allTokenTypes = tokens  # just so the import will be considered meaningful.
 
     @RULE(Var.PROGRAM, [[Var.BLOCK]])
@@ -79,7 +80,7 @@ def build(start=None):
                           [Var.ASSIGN_STATEMENT],
                           [Var.RETURN_STATEMENT],
                           [Var.IF_STATEMENT],
-                          [Var.WHILELOOP],
+                          [Var.WHILE_LOOP],
                           [Var.DELAYED_STATEMENT],
                           [Var.SCHEDULED_STATEMENT],
                           [Var.REPEATING_STATEMENT]])
@@ -97,7 +98,7 @@ def build(start=None):
         else:
             p[0] = Node.ConditionalStatement(p[2], p[4], p[6])
 
-    @RULE(Var.WHILELOOP, [[ResWord.DURING, Var.EXPRESSION, ResWord.THEN, Var.BLOCK, ResWord.END]])
+    @RULE(Var.WHILE_LOOP, [[ResWord.DURING, Var.EXPRESSION, ResWord.THEN, Var.BLOCK, ResWord.END]])
     def p_whileLoop_loopBlock(p):
         p[0] = Node.LoopStatement(p[2], p[4])
 
@@ -164,7 +165,7 @@ def build(start=None):
 
     @RULE(Var.TERM, [[Var.TERM, UaTer.TIMES, Var.FACTOR],
                      [Var.TERM, ResWord.TIMES, Var.FACTOR]])
-    def p_term_mult(p):
+    def p_term_multiply(p):
         p[0] = Node.Multiply(p[1], p[3])
 
     @RULE(Var.TERM, [[Var.TERM, UaTer.DIVIDE, Var.FACTOR],
@@ -313,7 +314,7 @@ def build(start=None):
         p[0] = p[1]
 
     @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, Var.PARTIAL_TIME_SPAN]])
-    def p_time_spans_consequtive(p):
+    def p_time_spans_consecutive(p):
         p[0] = Node.TimeUnion(p[1], p[2])
 
     @RULE(Var.PARTIAL_TIME_SPAN, [[ResWord.TIME_INDICATION],
@@ -353,7 +354,7 @@ def build(start=None):
 
     @RULE(Var.FUNCTION_ARGUMENTS, [[Var.FUNCTION_ARGUMENT],
                                    [Var.FUNCTION_ARGUMENTS, ResWord.AND, Var.FUNCTION_ARGUMENT],
-                                   [Var.FUNCTION_ARGUMENTS, UaTer.DELIM, Var.FUNCTION_ARGUMENT]])
+                                   [Var.FUNCTION_ARGUMENTS, UaTer.DELIMITER, Var.FUNCTION_ARGUMENT]])
     def p_function_arguments(p):
         if len(p) == 2:
             p[0] = [p[1]]
@@ -366,7 +367,7 @@ def build(start=None):
 
     @RULE(Var.INPUT_ARGUMENTS, [[Var.NAME],
                                 [Var.INPUT_ARGUMENTS, ResWord.AND, Var.NAME],
-                                [Var.INPUT_ARGUMENTS, UaTer.DELIM, Var.NAME]])
+                                [Var.INPUT_ARGUMENTS, UaTer.DELIMITER, Var.NAME]])
     def p_inputArg_NOUN(p):
         if len(p) == 2:
             p[0] = [p[1]]
@@ -383,6 +384,7 @@ def build(start=None):
         p[0] = Node.FunctionDefinition(p[1][:-1] + "u", p[2], p[4])
 
     # Error rule for syntax errors
+    # noinspection PyUnusedLocal
     def p_error(p):
         raise EsperantoSyntaxError("Syntax error in input: " + str(p))
 
