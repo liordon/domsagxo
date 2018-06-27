@@ -59,7 +59,7 @@ class ReservedWord(Enum):
     TIMES = 'Tfojoj'
     TO = 'Tal'
     TRUE = 'Tvero'
-    VERBAL_DIGIT = 'Tparolcifero'
+    VERBAL_DIGIT = 'VverbalDigit'
     WORD = 'Tvorto'
 
 

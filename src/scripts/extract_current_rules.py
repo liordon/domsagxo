@@ -19,8 +19,8 @@ def convert_name_to_token(token_name):
 
 
 def convert_raw_token_to_tex(raw_token):
-    return ("\\texttt{" if raw_token.startswith('T') else "\\textit{") + convert_name_to_token(
-        raw_token[1:]) + "}"
+    actual_token = convert_name_to_token(raw_token[1:])
+    return ("\\term{" + actual_token + "}" if raw_token.startswith('T') else actual_token)
 
 if __name__=="__main__":
     print("building grammar")
@@ -36,19 +36,20 @@ if __name__=="__main__":
                 lhs = convert_raw_token_to_tex(line_parts[2])
                 rhs = [convert_raw_token_to_tex(token) for token in line_parts[4:]]
                 if lhs not in parse_rules:
-                    parse_rules[lhs] = [" ".join(rhs)]
+                    parse_rules[lhs] = [" \\gspace ".join(rhs)]
                 else:
-                    parse_rules[lhs] += [" ".join(rhs)]
+                    parse_rules[lhs] += [" \\gspace ".join(rhs)]
 
     new_grammar_file = "Manuscripts/MscThesis/raw-grammar-rules.tex"
     print("writing new grammar rules to: " + new_grammar_file)
     should_print_result = "-p" in sys.argv[1:]
     with open(new_grammar_file, 'w') as output_file:
         for lhs in parse_rules:
-            output_file.write("\n")
-            output_file.write(lhs + " = " + parse_rules[lhs][0] + "\\\\\n")
+            output_file.write("\n\\begin{IEEEeqnarray}{lCl}\n")
+            output_file.write(lhs + " &=& " + parse_rules[lhs][0])
             for other_derivative in parse_rules[lhs][1:]:
-                output_file.write("\\-\\hspace{2cm}\\textbar\\-\\hspace{0.5cm}" + other_derivative + "\\\\\n")
+                output_file.write(" \\\\\n\t&|& " + other_derivative + " \\nonumber")
+            output_file.write("\n\\end{IEEEeqnarray}\n")
 
     if should_print_result:
         with open(new_grammar_file, 'r') as output_file:
