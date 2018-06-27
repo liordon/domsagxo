@@ -400,7 +400,7 @@ if __name__ == "__main__":
 
     lxr.build()
 
-    if sys.argv[0] == "-c":
+    if "-c" in sys.argv:
         ast = build(start=Var.PROGRAM.value)
     else:
         ast = build(start=Var.STATEMENT.value)
