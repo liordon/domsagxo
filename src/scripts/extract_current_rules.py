@@ -36,6 +36,8 @@ if __name__ == "__main__":
             if line.startswith("Rule "):
                 line_parts = line.split()
                 lhs = convert_raw_token_to_tex(line_parts[2])
+                if lhs.startswith("S'"):
+                    continue
                 rhs = [convert_raw_token_to_tex(token) for token in line_parts[4:]]
                 if lhs not in parse_rules:
                     parse_rules[lhs] = [" \\gspace ".join(rhs)]
