@@ -19,6 +19,7 @@ class Var(Enum):
     IF_STATEMENT = 'VifStatement'
     WHILE_LOOP = 'VwhileLoop'
     DELAYED_STATEMENT = 'VdelayedStatement'
+    DELIMITER = 'Vdelimiter'
     SCHEDULED_STATEMENT = 'VscheduledStatement'
     REPEATING_STATEMENT = 'VrepeatingStatement'
     RETURN_STATEMENT = 'VreturnStatement'
@@ -353,8 +354,7 @@ def build(start=None):
         p[0] = Node.FunctionInvocation(p[1], p[2])
 
     @RULE(Var.FUNCTION_ARGUMENTS, [[Var.FUNCTION_ARGUMENT],
-                                   [Var.FUNCTION_ARGUMENTS, ResWord.AND, Var.FUNCTION_ARGUMENT],
-                                   [Var.FUNCTION_ARGUMENTS, UaTer.DELIMITER, Var.FUNCTION_ARGUMENT]])
+                                   [Var.FUNCTION_ARGUMENTS, Var.DELIMITER, Var.FUNCTION_ARGUMENT]])
     def p_function_arguments(p):
         if len(p) == 2:
             p[0] = [p[1]]
@@ -366,8 +366,7 @@ def build(start=None):
         p[0] = p[1]
 
     @RULE(Var.INPUT_ARGUMENTS, [[Var.NAME],
-                                [Var.INPUT_ARGUMENTS, ResWord.AND, Var.NAME],
-                                [Var.INPUT_ARGUMENTS, UaTer.DELIMITER, Var.NAME]])
+                                [Var.INPUT_ARGUMENTS, Var.DELIMITER, Var.NAME]])
     def p_inputArg_NOUN(p):
         if len(p) == 2:
             p[0] = [p[1]]
@@ -382,6 +381,13 @@ def build(start=None):
           [[POS.V_INF, Var.INPUT_ARGUMENTS, ResWord.THIS_WAY, Var.BLOCK, ResWord.END]])
     def p_funcDef_nameAndArgs(p):
         p[0] = Node.FunctionDefinition(p[1][:-1] + "u", p[2], p[4])
+
+    @RULE(Var.DELIMITER, [[UaTer.DELIMITER],
+                          [POS.PREPOSITION],
+                          [ResWord.TO],
+                          [ResWord.AND]])
+    def p_delimiter_prepositionOrComma(p):
+        p[0] = p[1]
 
     # Error rule for syntax errors
     # noinspection PyUnusedLocal

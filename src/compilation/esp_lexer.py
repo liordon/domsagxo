@@ -224,7 +224,7 @@ def t_TWORD(t):
     elif timeUnitRe.fullmatch(t.value):
         t.type = ReservedWord.TIME_INDICATION.value
     elif t.value in prepositions:
-        t.type = UnalphabeticTerminal.DELIMITER.value
+        t.type = PartOfSpeech.PREPOSITION.value
     else:
         t.value = re.sub(r'n$', "", t.value)
         if re.search(r'((o)|(oj))$', t.value):

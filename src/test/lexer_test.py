@@ -62,9 +62,9 @@ class TestReservedWords(LexerProvided):
         lexer.input("kaj")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.AND)
 
-    def test_kunIsADelimiterAndNotAnAccusativeImperativeVerb(self, lexer):
+    def test_kunIsAPrepositionAndNotAnAccusativeImperativeVerb(self, lexer):
         lexer.input("kun")
-        self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.DELIMITER)
+        self.assertPartOfSpeechForNextToken(lexer, PartOfSpeech.PREPOSITION)
 
     def test_reservedWordLa(self, lexer):
         lexer.input("la")
