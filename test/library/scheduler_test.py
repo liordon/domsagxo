@@ -3,7 +3,7 @@ import datetime
 import pytest
 
 from library.management_components import Horaro
-from test.mocks import MockClock
+from test_utils.mocks import MockClock
 
 
 class TimeManagerProvided(object):

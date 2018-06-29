@@ -5,7 +5,7 @@ import pytest
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esp_lexer as lxr
 import library.management_components as mng_co
-from test.mocks import MockClock
+from test_utils.mocks import MockClock
 
 lxr.build()
 

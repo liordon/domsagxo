@@ -3,7 +3,7 @@ import pytest
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esp_lexer as lxr
 import compilation.node as Node
-import test.mocks
+from test_utils import mocks
 
 lxr.build()
 
@@ -59,7 +59,7 @@ class TestBasicAstNodes(ExpressionLevelAstProvided):
 class TestReferenceSemantics(ExpressionLevelAstProvided):
     @pytest.fixture
     def state(self):
-        return test.mocks.Bunch(variables={})
+        return mocks.Bunch(variables={})
 
     def test_variableSetterCanBeUsedToChangeVariableValue(self, ast, state):
         variable_name = "sxambalulo"
@@ -70,15 +70,15 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
     def test_dereferenceSetterCanBeUsedToChangeVariableValue(self, ast, state):
         variable_name = "sxambo de lulo"
         setter = ast.parse(variable_name).setter
-        state.variables["lulo"] = test.mocks.Bunch(properties={"sxambo": 0})
+        state.variables["lulo"] = mocks.Bunch(properties={"sxambo": 0})
         setter(state, 2)
         assert 2 == state.variables["lulo"].properties["sxambo"]
 
     def test_recursiveDereferenceSettersCanStillBeUsedToChangeValue(self, ast, state):
         variable_name = "sxambo de lulo de kahxolo"
         setter = ast.parse(variable_name).setter
-        state.variables["kahxolo"] = test.mocks.Bunch(properties={
-            "lulo": test.mocks.Bunch(properties={"sxambo": 0})
+        state.variables["kahxolo"] = mocks.Bunch(properties={
+            "lulo": mocks.Bunch(properties={"sxambo": 0})
         })
         setter(state, 3)
         assert 3 == state.variables["kahxolo"].properties["lulo"].properties["sxambo"]
@@ -87,7 +87,7 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
         with pytest.raises(KeyError):
             variable_name = "sxambo de lulo"
             setter = ast.parse(variable_name).setter
-            state.variables["lulo"] = test.mocks.Bunch(properties={})
+            state.variables["lulo"] = mocks.Bunch(properties={})
             setter(state, 3)
 
 
