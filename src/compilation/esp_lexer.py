@@ -55,11 +55,11 @@ class ReservedWord(Enum):
     THE = 'Tla'
     THEN = 'Ttiam'
     THIS_WAY = 'Ttiel'
-    TIME_INDICATION = 'VtimeUnit'
+    TIME_INDICATION = 'Vtime_unit'
     TIMES = 'Tfojoj'
     TO = 'Tal'
     TRUE = 'Tvero'
-    VERBAL_DIGIT = 'VverbalDigit'
+    VERBAL_DIGIT = 'Vdigit_literal'
     WORD = 'Tvorto'
 
 
@@ -70,9 +70,9 @@ class PartOfSpeech(Enum):
     NUMERATOR = "Pnumerator"
     OTHER = "Pother"
     PREPOSITION = "Ppreposition"
-    V_INF = 'Pv_inf'
-    V_PRES = 'Pv_pres'
-    V_IMP = 'Pv_imp'
+    V_INF = 'Pinfinitive_verb'
+    V_PRES = 'Ppresent_verb'
+    V_IMP = 'Pimperative_verb'
 
 
 reserved_words = {

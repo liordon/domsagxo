@@ -20,7 +20,7 @@ def convert_name_to_token(token_name):
 
 
 def convert_raw_token_to_tex(raw_token):
-    actual_token = convert_name_to_token(raw_token[1:])
+    actual_token = convert_name_to_token(raw_token[1:]).replace("_", " ")
     return "\\term{" + actual_token + "}" if raw_token.startswith('T') else actual_token
 
 
