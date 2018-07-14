@@ -38,7 +38,7 @@ if [[ $successFlag -ne 0 ]] ; then
 	exit $successFlag
 fi
 
-python $sourceDir/scripts/extract_current_rules.py
+python $sourceDir/scripts/extract_current_rules.py -w
 git add $gitRoot/Manuscripts/MscThesis/raw-grammar-rules.tex
 
 git stash pop

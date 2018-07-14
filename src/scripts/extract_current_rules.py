@@ -21,7 +21,7 @@ def convert_name_to_token(token_name):
 
 def convert_raw_token_to_tex(raw_token):
     actual_token = convert_name_to_token(raw_token[1:]).replace("_", " ")
-    return "\\term{" + actual_token + "}" if raw_token.startswith('T') else actual_token
+    return "\\term{" + actual_token + "}" if raw_token.startswith('T') else "\\var{" + actual_token + "}"
 
 
 if __name__ == "__main__":
@@ -35,9 +35,9 @@ if __name__ == "__main__":
         for line in input_file.readlines():
             if line.startswith("Rule "):
                 line_parts = line.split()
-                lhs = convert_raw_token_to_tex(line_parts[2])
-                if lhs.startswith("S'"):
+                if line_parts[2].startswith("S'"):
                     continue
+                lhs = convert_raw_token_to_tex(line_parts[2])
                 rhs = [convert_raw_token_to_tex(token) for token in line_parts[4:]]
                 if lhs not in parse_rules:
                     parse_rules[lhs] = [" \\gspace ".join(rhs)]
@@ -47,13 +47,15 @@ if __name__ == "__main__":
     new_grammar_file = "Manuscripts/MscThesis/raw-grammar-rules.tex"
     print("writing new grammar rules to: " + new_grammar_file)
     should_print_result = "-p" in sys.argv[1:]
-    with open(new_grammar_file, 'w') as output_file:
-        for lhs in parse_rules:
-            output_file.write("\n\\begin{IEEEeqnarray}{lCl}\n")
-            output_file.write(lhs + " &=& " + parse_rules[lhs][0])
-            for other_derivative in parse_rules[lhs][1:]:
-                output_file.write(" \\\\\n\t&|& " + other_derivative + " \\nonumber")
-            output_file.write("\n\\end{IEEEeqnarray}\n")
+    should_save_result = "-w" in sys.argv[1:]
+    if should_save_result:
+        with open(new_grammar_file, 'w') as output_file:
+            for lhs in parse_rules:
+                output_file.write("\n\\begin{IEEEeqnarray}{lCl}\n")
+                output_file.write(lhs + " &=& " + parse_rules[lhs][0])
+                for other_derivative in parse_rules[lhs][1:]:
+                    output_file.write(" \\\\\n\t&|& " + other_derivative + " \\nonumber")
+                output_file.write("\n\\end{IEEEeqnarray}\n")
 
     if should_print_result:
         with open(new_grammar_file, 'r') as output_file:
