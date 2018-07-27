@@ -54,7 +54,7 @@ class ReservedWord(Enum):
     THAN = 'Tol'
     THE = 'Tla'
     THEN = 'Ttiam'
-    THIS_WAY = 'Ttiel'
+    THIS_WAY = 'Tsignifas'
     TIME_INDICATION = 'Vtime_unit'
     TIMES = 'Tfojoj'
     TO = 'Tal'

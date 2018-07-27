@@ -33,13 +33,13 @@ class Var(Enum):
     TERM = 'Vterm'
     FACTOR = 'Vfactor'
     FUNCTION_CALL = 'Vfunction_call'
-    VERBAL_NUMBER = 'Vnumber_literal'
+    NUMBER_LITERAL = 'Vnumber_literal'
     HOUR_NUMERATOR = 'Vhour_numerator'
-    PARTIAL_TIME_SPAN = 'VpartTime_span'
+    PARTIAL_TIME_SPAN = 'Vpartial_time_span'
     FUNCTION_ARGUMENTS = 'Vfunction_arguments'
     FUNCTION_ARGUMENT = 'Vfunction_argument'
     INPUT_ARGUMENTS = 'Vinput_arguments'
-    FUNCTION_DEFINITION = 'Vfunc_definition'
+    FUNCTION_DEFINITION = 'Vfunction_definition'
     RELATION = 'Vrelation'
 
 
@@ -191,12 +191,12 @@ def build(start=None):
         p[0] = p[1]
 
     @RULE(Var.FACTOR, [[UaTer.NUMBER],
-                       [Var.VERBAL_NUMBER]])
+                       [Var.NUMBER_LITERAL]])
     def p_factor_num(p):
         p[0] = Node.Number(p[1])
 
-    @RULE(Var.VERBAL_NUMBER, [[ResWord.VERBAL_DIGIT],
-                              [Var.VERBAL_NUMBER, ResWord.VERBAL_DIGIT]])
+    @RULE(Var.NUMBER_LITERAL, [[ResWord.VERBAL_DIGIT],
+                               [Var.NUMBER_LITERAL, ResWord.VERBAL_DIGIT]])
     def p_verbal_number(p):
         if len(p) == 2:
             p[0] = p[1]
@@ -258,7 +258,7 @@ def build(start=None):
     def p_expression_booleanNot(p):
         p[0] = Node.LogicNot(p[2])
 
-    # ----------------------------   expression constants    ------------------------- #
+    # ----------------------------   literals and constants    ------------------------- #
     @RULE(Var.EXPRESSION, [[ResWord.NONE]])
     def p_factor_none(p):
         p[0] = Node.NoneNode()
@@ -271,8 +271,7 @@ def build(start=None):
     def p_expression_false(p):
         p[0] = Node.Boolean(False)
 
-    # -------------------------    constructors for special types  --------------------- #
-    @RULE(Var.TIME_POINT, [[Var.HOUR_NUMERATOR, ResWord.AND, Var.VERBAL_NUMBER]])
+    @RULE(Var.TIME_POINT, [[Var.HOUR_NUMERATOR, ResWord.AND, Var.NUMBER_LITERAL]])
     def p_time_point(p):
         p[0] = p[1]
         if p[3] < 1:
@@ -289,7 +288,7 @@ def build(start=None):
         p[0] = Node.TimePoint(hour=p[1])
 
     @RULE(Var.HOUR_NUMERATOR, [[ResWord.THE, POS.NUMERATOR],
-                               [ResWord.THE, Var.VERBAL_NUMBER, POS.NUMERATOR]])
+                               [ResWord.THE, Var.NUMBER_LITERAL, POS.NUMERATOR]])
     def p_hour_numerator(p):
         p[0] = p[2]
         if len(p) > 3:
@@ -303,7 +302,7 @@ def build(start=None):
     def p_time_span_kaj_time_span(p):
         p[0] = Node.TimeUnion(p[1], p[3])
 
-    @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, ResWord.AND, Var.VERBAL_NUMBER]])
+    @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, ResWord.AND, Var.NUMBER_LITERAL]])
     def p_time_fractions(p):
         if p[3] >= 1:
             raise EsperantoSyntaxError("Illegal time span format, recieved: "
@@ -319,7 +318,7 @@ def build(start=None):
         p[0] = Node.TimeUnion(p[1], p[2])
 
     @RULE(Var.PARTIAL_TIME_SPAN, [[ResWord.TIME_INDICATION],
-                                  [Var.VERBAL_NUMBER, ResWord.TIME_INDICATION]])
+                                  [Var.NUMBER_LITERAL, ResWord.TIME_INDICATION]])
     def p_time_span(p):
         if len(p) > 2:
             time_unit = p[2]

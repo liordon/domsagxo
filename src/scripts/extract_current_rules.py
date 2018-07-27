@@ -52,7 +52,7 @@ if __name__ == "__main__":
         with open(new_grammar_file, 'w') as output_file:
             for lhs in parse_rules:
                 output_file.write("\n\\begin{IEEEeqnarray}{lCl}\n")
-                output_file.write(lhs + " &=& " + parse_rules[lhs][0])
+                output_file.write(lhs + " &\\gderive& " + parse_rules[lhs][0])
                 for other_derivative in parse_rules[lhs][1:]:
                     output_file.write(" \\\\\n\t&|& " + other_derivative + " \\nonumber")
                 output_file.write("\n\\end{IEEEeqnarray}\n")
