@@ -16,14 +16,14 @@ class Var(Enum):
     PROGRAM = 'Vprogram'
     BLOCK = 'Vblock'
     STATEMENT = 'Vstatement'
-    IF_STATEMENT = 'Vif_statement'
+    IF_STATEMENT = 'Vif'
     WHILE_LOOP = 'Vwhile_loop'
     DELAYED_STATEMENT = 'Vdelayed_statement'
-    DELIMITER = 'Vdelimiter'
+    DELIMITER = 'Vseparator'
     SCHEDULED_STATEMENT = 'Vscheduled_statement'
     REPEATING_STATEMENT = 'Vrepeating_statement'
-    RETURN_STATEMENT = 'Vreturn_statement'
-    ASSIGN_STATEMENT = 'Vassign_statement'
+    RETURN_STATEMENT = 'Vreturn'
+    ASSIGN_STATEMENT = 'Vassign'
     EXPRESSION = 'Vexpression'
     TIME_SPAN = 'Vtime_span'
     TIME_POINT = 'Vtime_point'
@@ -32,13 +32,13 @@ class Var(Enum):
     ADJECTIVE = 'Vadjective'
     TERM = 'Vterm'
     FACTOR = 'Vfactor'
-    FUNCTION_CALL = 'Vfunction_call'
+    FUNCTION_INVOCATION = 'Vfunction_invocation'
     NUMBER_LITERAL = 'Vnumber_literal'
     HOUR_NUMERATOR = 'Vhour_numerator'
     PARTIAL_TIME_SPAN = 'Vpartial_time_span'
-    FUNCTION_ARGUMENTS = 'Vfunction_arguments'
-    FUNCTION_ARGUMENT = 'Vfunction_argument'
-    INPUT_ARGUMENTS = 'Vinput_arguments'
+    FUNCTION_ARGUMENTS = 'Varguments'
+    FUNCTION_ARGUMENT = 'Vsingle_argument'
+    PARAMETERS = 'Vparameters'
     FUNCTION_DEFINITION = 'Vfunction_definition'
     RELATION = 'Vrelation'
 
@@ -182,7 +182,7 @@ def build(start=None):
     @RULE(Var.EXPRESSION, [[Var.TERM],
                            [Var.TIME_POINT],
                            [Var.TIME_SPAN],
-                           [Var.FUNCTION_CALL]])
+                           [Var.FUNCTION_INVOCATION]])
     def p_expression_term(p):
         p[0] = p[1]
 
@@ -348,7 +348,7 @@ def build(start=None):
                              Node.Number(seconds))
 
     # ------------------------    function invocation and definition   --------------------- #
-    @RULE(Var.FUNCTION_CALL, [[POS.V_IMP, Var.FUNCTION_ARGUMENTS]])
+    @RULE(Var.FUNCTION_INVOCATION, [[POS.V_IMP, Var.FUNCTION_ARGUMENTS]])
     def p_function_call(p):
         p[0] = Node.FunctionInvocation(p[1], p[2])
 
@@ -364,20 +364,20 @@ def build(start=None):
     def p_first_function_argument(p):
         p[0] = p[1]
 
-    @RULE(Var.INPUT_ARGUMENTS, [[Var.NAME],
-                                [Var.INPUT_ARGUMENTS, Var.DELIMITER, Var.NAME]])
+    @RULE(Var.PARAMETERS, [[Var.NAME],
+                           [Var.PARAMETERS, Var.DELIMITER, Var.NAME]])
     def p_inputArg_NOUN(p):
         if len(p) == 2:
             p[0] = [p[1]]
         else:
             p[0] = p[1] + [p[3]]
 
-    @RULE(Var.INPUT_ARGUMENTS, [[]])
+    @RULE(Var.PARAMETERS, [[]])
     def p_inputArg_nothing(p):
         p[0] = []
 
     @RULE(Var.FUNCTION_DEFINITION,
-          [[POS.V_INF, Var.INPUT_ARGUMENTS, ResWord.THIS_WAY, Var.BLOCK, ResWord.END]])
+          [[POS.V_INF, Var.PARAMETERS, ResWord.THIS_WAY, Var.BLOCK, ResWord.END]])
     def p_funcDef_nameAndArgs(p):
         p[0] = Node.FunctionDefinition(p[1][:-1] + "u", p[2], p[4])
 

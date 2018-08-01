@@ -134,7 +134,7 @@ class TestAstTimePoints(object):
 class TestAstRandomGeneration(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.Var.FUNCTION_CALL.value)
+        return ast_bld.build(start=ast_bld.Var.FUNCTION_INVOCATION.value)
 
     def test_canGenerateRandomNumber(self, ast):
         parsed_value_of(ast, "hazardu nombro")
@@ -179,7 +179,7 @@ def evaluate_and_return_state(ast, statement, initial_state=None):
 class TestAstApplianceManagement(object):
     @pytest.fixture
     def ast(self):
-        abstract_syntax_tree = ast_bld.build(start=ast_bld.Var.FUNCTION_CALL.value)
+        abstract_syntax_tree = ast_bld.build(start=ast_bld.Var.FUNCTION_INVOCATION.value)
         return abstract_syntax_tree
 
     @pytest.fixture
