@@ -1,3 +1,4 @@
+# coding=utf8
 from pygments import highlight
 from pygments.formatters.latex import LatexFormatter
 from pygments.lexer import RegexLexer

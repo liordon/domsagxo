@@ -1,18 +1,13 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="domsagxo",
-    entry_points="""
-        [pygments.lexers]
-        domsagxoLexer = pygment_lexer:KeywordLexer
-        [pygments.styles]
-        domsagxoStyle = pygment_style:DomsagxoStyle
-    """
+    packages=find_packages(),
 
-    # entry_points="""
-    #     [pygments.lexers]
-    #     domsagxoLexer = syntax_high_light:pygment_lexer
-    #     [pygments.styles]
-    #     domsagxoStyle = syntax_high_light:pygment_style
-    # """
+     entry_points="""
+         [pygments.lexers]
+         domsagxoLexer = syntax_high_light.pygment_lexer:KeywordLexer
+         [pygments.styles]
+         domsagxoStyle = syntax_high_light.pygment_style:DomsagxoStyle
+     """
 )
