@@ -6,7 +6,7 @@ setup(
 
      entry_points="""
          [pygments.lexers]
-         domsagxoLexer = syntax_high_light.pygment_lexer:KeywordLexer
+         domsaLex = syntax_high_light.pygment_lexer:domsaLex
          [pygments.styles]
          domsagxoStyle = syntax_high_light.pygment_style:DomsagxoStyle
      """

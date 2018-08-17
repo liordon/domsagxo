@@ -17,7 +17,7 @@ eo_uppercase = r'[A-Z]|Ĉ|Ĝ|Ĥ|Ĵ|Ŝ|Ŭ'
 eo_letters = r'(%s|%s)' % (eo_lowercase, eo_uppercase)
 
 
-class KeywordLexer(RegexLexer):
+class domsaLex(RegexLexer):
     """All your lexer code goes here!"""
     name = "Domsagxo Keyword Lexer"
     aliases = ['domsaLex']
@@ -41,7 +41,7 @@ class KeywordLexer(RegexLexer):
 
 if __name__ == "__main__":
     print("started")
-    lexer = KeywordLexer()
+    lexer = domsaLex()
     # lexer = IdentifierLexer()
     # lexer = CompleteLexer()
     # lexer = SimplestLexer({
