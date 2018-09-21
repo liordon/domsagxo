@@ -25,16 +25,47 @@ class DomsagxoLexer(RegexLexer):
     tokens = {
         'root': [
             (r'\s+', Whitespace),
+            (r'\|\s*\|', Comment),
             (digitRe.pattern, Number),
-            (r'maldekstra citilo (' + eo_letters + '|\s)* dekstra citilo', String),
+            (r'maldekstra citilo', Keyword, 'string'),
             (timeUnitRe.pattern, Generic.TypeIndicator),
-            (r'\bkaj\b|,', Generic.Separator),
+            (r'\bkaj\b|,|\.', Generic.Separator),
             (regexFromWordList(prepositions), Generic.Separator),
             (regexFromWordList(reserved_words), Keyword),
             (eo_letters + r'+oj?n?\b', Name),
             (eo_letters + r'+a\b', Name),
             (eo_letters + r'+u\b', Name.Function),
             (eo_letters + r'+i\b', Name.Function),
+        ],
+        'string' : [
+            ('dekstra citilo',Keyword, '#pop'),
+            ('((' + eo_letters + ')+)', String),
+            (r'\s+', Whitespace),
+        ]
+    }
+
+class EngluentoLexer(RegexLexer):
+    english_keywords = [ 'like','so','means',
+            'if','while','then','true','false','greater','equal','not','return','end',
+            'at','is','of','than' ]
+    english_prepositions = ['between','to' ]
+    name = "Engluento Keyword Lexer"
+    aliases = ['engluento']
+    filenames = ['*.englu']
+    tokens = {
+        'root': [
+            (r'\s+', Whitespace),
+            (r'"', Keyword, 'string'),
+            (r'((hour)|(minute)|(second))s?', Generic.TypeIndicator),
+            (r'\band\b|,|\.', Generic.Separator),
+            (regexFromWordList(english_prepositions), Generic.Separator),
+            (regexFromWordList(english_keywords), Keyword),
+            (eo_letters + r'+-?((ation)|(ate)|(ify)|(ing))\b', Name.Function),
+        ],
+        'string' : [
+            ('"',Keyword, '#pop'),
+            ('(\w+)', String),
+            (r'\s+', Whitespace),
         ]
     }
 
@@ -42,14 +73,6 @@ class DomsagxoLexer(RegexLexer):
 if __name__ == "__main__":
     print("started")
     lexer = DomsagxoLexer()
-    # lexer = IdentifierLexer()
-    # lexer = CompleteLexer()
-    # lexer = SimplestLexer({
-    #     re.compile(r'[a-z]+o'): Other.Noun,
-    #     re.compile(r'[a-z]+a'): Other.Adjective,
-    #     re.compile(r'[a-z]+i'): Other.Infinity,
-    #     re.compile(r'[a-z]+u'): Other.Imperative,
-    # })
     print("created lexer")
     code = """ŝambaluli en la nokton signifas dudek horoj estas egala al la kato en domsaĝo finu"""
     formatter = LatexFormatter(style=DomsagxoStyle)
