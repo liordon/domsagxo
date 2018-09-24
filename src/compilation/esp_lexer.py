@@ -193,7 +193,7 @@ digitNames = {
 }
 
 digitRe = re.compile(
-    "((nul|unu)|((du|tri|kvar|kvin|ses|sep|ok|naux)(dek|cent|ono)?)|(dek|cent|mil))\b")
+    r"((nul|unu)|((du|tri|kvar|kvin|ses|sep|ok|naux)(dek|cent|ono)?)|(dek|cent|mil))\b")
 
 timeUnitRe = re.compile("(jaro|monato|semajno|tago|horo|minuto|sekundo)j?")
 

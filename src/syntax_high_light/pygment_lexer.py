@@ -9,13 +9,9 @@ from syntax_high_light.pygment_style import DomsagxoStyle
 
 
 def regexFromWordList(words):
-    return "(" + "|".join(words) + r')\b'
+    return r"(?i)(\b(" + "|".join(words) + r")\b)"
 
-
-eo_lowercase = r'[a-z]|ĉ|ĝ|ĥ|ĵ|ŝ|ŭ'
-eo_uppercase = r'[A-Z]|Ĉ|Ĝ|Ĥ|Ĵ|Ŝ|Ŭ'
-eo_letters = r'(%s|%s)' % (eo_lowercase, eo_uppercase)
-
+alphabet=r'[^\W\d_]'
 
 class DomsagxoLexer(RegexLexer):
     """All your lexer code goes here!"""
@@ -25,21 +21,22 @@ class DomsagxoLexer(RegexLexer):
     tokens = {
         'root': [
             (r'\s+', Whitespace),
-            (r'\|\s*\|', Comment),
+            (r'#.*\n', Comment),
+            (r'\bla\b', Comment),
             (digitRe.pattern, Number),
             (r'maldekstra citilo', Keyword, 'string'),
             (timeUnitRe.pattern, Generic.TypeIndicator),
             (r'\bkaj\b|,|\.', Generic.Separator),
             (regexFromWordList(prepositions), Generic.Separator),
             (regexFromWordList(reserved_words), Keyword),
-            (eo_letters + r'+oj?n?\b', Name),
-            (eo_letters + r'+a\b', Name),
-            (eo_letters + r'+u\b', Name.Function),
-            (eo_letters + r'+i\b', Name.Function),
+            (alphabet + r'+oj?n?\b', Name),
+            (alphabet + r'+a\b', Name),
+            (alphabet + r'+u\b', Name.Function),
+            (alphabet + r'+i\b', Name.Function),
         ],
         'string' : [
             ('dekstra citilo',Keyword, '#pop'),
-            ('((' + eo_letters + ')+)', String),
+            ('((' + alphabet + ')+)', String),
             (r'\s+', Whitespace),
         ]
     }
@@ -55,12 +52,16 @@ class EngluentoLexer(RegexLexer):
     tokens = {
         'root': [
             (r'\s+', Whitespace),
+            (r'[\+\-\=\*\\/]', Operator),
             (r'"', Keyword, 'string'),
+            (r'#.*\n', Comment),
+            (r'\b(a|(the))\b', Comment),
+            (r'\d+', Number),
             (r'((hour)|(minute)|(second))s?', Generic.TypeIndicator),
-            (r'\band\b|,|\.', Generic.Separator),
+            (r'\band\b|,|\.|:', Generic.Separator),
             (regexFromWordList(english_prepositions), Generic.Separator),
             (regexFromWordList(english_keywords), Keyword),
-            (eo_letters + r'+-?((ation)|(ate)|(ify)|(ing))\b', Name.Function),
+            (alphabet + r'+-?((ation)|(ate)|(ify)|(ing))\b', Name.Function),
         ],
         'string' : [
             ('"',Keyword, '#pop'),
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     # )
     # for token in lexer.get_tokens_unprocessed(code):
     #     print(token)
-    # so_called_regex = re.compile(r"(" + eo_letters + ")+" + gobble_spaces)
+    # so_called_regex = re.compile(r"(" + alphabet + ")+" + gobble_spaces)
     # # print(so_called_regex.pattern)
     # while 1:
     #     exp = input(">")
