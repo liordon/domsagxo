@@ -1,36 +1,12 @@
 import pytest
+import syntax_high_light.pygment_lexer as lxr
 from pygments.token import *
 
-import syntax_high_light.pygment_lexer as lxr
-
-
-#
-# # Special token types
-# Text = Token.Text
-# Whitespace = Text.Whitespace
-# Escape = Token.Escape
-# Error = Token.Error
-# # Text that doesn't belong to this lexer (e.g. HTML in PHP)
-# Other = Token.Other
-#
-# # Common token types for source code
-# Keyword = Token.Keyword
-# Name = Token.Name
-# Literal = Token.Literal
-# String = Literal.String
-# Number = Literal.Number
-# Punctuation = Token.Punctuation
-# Operator = Token.Operator
-# Comment = Token.Comment
-#
-# # Generic types for non-source code
-# Generic = Token.Generic
-#
 
 class LexerProvided(object):
     @pytest.fixture
     def lexer(self):
-        return lxr.KeywordLexer()
+        return lxr.DomsagxoLexer()
 
     @staticmethod
     def assertNoErrorTokensInList(token_list):
