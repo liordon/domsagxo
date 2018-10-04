@@ -31,9 +31,10 @@ class KeywordLexer(RegexLexer):
             (regexFromWordList(prepositions), Generic.Separator),
             (regexFromWordList(reserved_words), Keyword),
             (eo_letters + r'+oj?n?\b', Name),
-            (eo_letters + r'+a\b', Name),
+            (eo_letters + r'+aj?n?\b', Name),
             (eo_letters + r'+u\b', Name.Function),
             (eo_letters + r'+i\b', Name.Function),
+            (eo_letters + r'+as\b', Name.Function),
         ]
     }
 

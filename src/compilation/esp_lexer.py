@@ -78,8 +78,11 @@ class PartOfSpeech(Enum):
 reserved_words = {
     "al"       : ReservedWord.TO.value,
     "alie"     : ReservedWord.ELSE.value,
+    "ambaŭ"   : ReservedWord.BOTH.value,
     "ambaux"   : ReservedWord.BOTH.value,
+    "aŭ"      : ReservedWord.OR.value,
     "aux"      : ReservedWord.OR.value,
+    "ĉiu"     : ReservedWord.EVERY.value,
     "cxiu"     : ReservedWord.EVERY.value,
     "dum"      : ReservedWord.DURING.value,
     "de"       : ReservedWord.OF.value,
@@ -110,10 +113,14 @@ reserved_words = {
 
 prepositions = {
     "al",
+    "anstataŭ",
     "anstataux",
+    "antaŭ",
     "antaux",
     "apud",
+    "ĉe",
     "cxe",
+    "ĉirkaŭ",
     "cxirkaux",
     "de",
     "dum",
@@ -122,14 +129,18 @@ prepositions = {
     "eksteren",
     "el",
     "en",
+    "ĝis",
     "gxis",
     "inter",
     "kiel",
+    "kontraŭ",
     "kontraux",
     "krom",
     "kun",
+    "laŭ",
     "laux",
     "mala",
+    "malgraŭ",
     "malgraux",
     "malkiel",
     "malsupren",
@@ -188,14 +199,15 @@ digitNames = {
     "ses" : 6,
     "sep" : 7,
     "ok"  : 8,
+    "naŭ": 9,
     "naux": 9,
     ""    : 1
 }
 
 digitRe = re.compile(
-    "(nul|unu)|((du|tri|kvar|kvin|ses|sep|ok|naux)(dek|cent|ono)?)|(dek|cent|mil)")
+    r"(nul|unu)|((du|tri|kvar|kvin|ses|sep|ok|naux|naŭ)(dek|cent|ono)?)|(dek|cent|mil)\b")
 
-timeUnitRe = re.compile("(jaro|monato|semajno|tago|horo|minuto|sekundo)j?")
+timeUnitRe = re.compile(r"(jaro|monato|semajno|tago|horo|minuto|sekundo)j?\b")
 
 
 def parseDigit(name):
