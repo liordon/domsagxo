@@ -6,6 +6,7 @@ from pygments.token import *
 
 from compilation.esp_lexer import reserved_words, prepositions, digitRe, timeUnitRe
 from syntax_high_light.pygment_style import DomsagxoStyle
+import syntax_high_light.engluento as engluento
 
 
 def regexFromWordList(words):
@@ -43,26 +44,29 @@ class DomsagxoLexer(RegexLexer):
     }
 
 class EngluentoLexer(RegexLexer):
-    english_keywords = [ 'like','so','means',
-            'if','while','then','true','false','greater','equal','not','return','end',
-            'at','is','of','than' ]
-    english_prepositions = ['between','to' ]
     name = "Engluento Keyword Lexer"
     aliases = ['engluento']
     filenames = ['*.englu']
     tokens = {
         'root': [
+            (alphabet + r'+-?((ation)|(ate)|(ify)|(ing))\b', Name.Function),
+            (regexFromWordList(
+                engluento.fractions + engluento.digits + engluento.teens +
+                engluento.decades + engluento.largeAmounts ), Number),
+            (regexFromWordList(engluento.nouns), Name),
+            (regexFromWordList(engluento.adjectives), Name),
             (r'\s+', Whitespace),
-            (r'[\+\-\=\*\\/]', Operator),
+            (r'\b\'s\b', Operator),
             (r'"', Keyword, 'string'),
             (r'#.*\n', Comment),
-            (r'\b(a|(the))\b', Comment),
+            (r'(?i)\b(a|(the))\b', Comment),
             (r'\d+', Number),
-            (r'((hour)|(minute)|(second))s?', Generic.TypeIndicator),
+            (r'(week|day|hour|minute|second)s?', Generic.TypeIndicator),
             (r'\band\b|,|\.|:', Generic.Separator),
-            (regexFromWordList(english_prepositions), Generic.Separator),
-            (regexFromWordList(english_keywords), Keyword),
-            (alphabet + r'+-?((ation)|(ate)|(ify)|(ing))\b', Name.Function),
+            (regexFromWordList(engluento.prepositions), Generic.Separator),
+            (regexFromWordList(engluento.keywords), Keyword),
+            (regexFromWordList(engluento.verbs), Name.Function),
+            (r'[\+\-\=\*\\/]', Operator),
         ],
         'string' : [
             ('"',Keyword, '#pop'),
