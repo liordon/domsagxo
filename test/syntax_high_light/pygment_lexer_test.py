@@ -16,9 +16,18 @@ class LexerProvided(object):
     @staticmethod
     def assertAllTokensOfSameType(token_list, desired_type):
         for token_type, content in token_list:
-            if token_type == Whitespace:
+            if Whitespace == token_type:
                 continue
-            assert token_type == desired_type
+            assert desired_type == token_type
+
+    @staticmethod
+    def assertTokensTypeSequence(token_list, types_list):
+        current_type = 0
+        for token_type, content in token_list:
+            if Whitespace == token_type:
+                continue
+            assert types_list[current_type] == token_type
+            current_type += 1
 
 
 class TestLiterals(LexerProvided):
@@ -29,7 +38,7 @@ class TestLiterals(LexerProvided):
 
     def test_strings(self, lexer):
         tokens = lexer.get_tokens("maldekstra citilo mi nomigxas lioro dekstra citilo")
-        self.assertAllTokensOfSameType(tokens, String)
+        self.assertTokensTypeSequence(tokens, [Keyword] + [String]*3 + [Keyword])
 
     def test_timePoints_timeSpans(self, lexer):
         tokens = lexer.get_tokens("horo minutoj jaro sekundoj")

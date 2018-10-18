@@ -1,18 +1,20 @@
 # coding=utf8
+import syntax_high_light.engluento as engluento
 from pygments import highlight
 from pygments.formatters.latex import LatexFormatter
 from pygments.lexer import RegexLexer
 from pygments.token import *
+from syntax_high_light.pygment_style import DomsagxoStyle
 
 from compilation.esp_lexer import reserved_words, prepositions, digitRe, timeUnitRe
-from syntax_high_light.pygment_style import DomsagxoStyle
-import syntax_high_light.engluento as engluento
 
 
 def regexFromWordList(words):
     return r"(?i)(\b(" + "|".join(words) + r")\b)"
 
-alphabet=r'[^\W\d_]'
+
+alphabet = r'[^\W\d_]'
+
 
 class DomsagxoLexer(RegexLexer):
     """All your lexer code goes here!"""
@@ -20,7 +22,7 @@ class DomsagxoLexer(RegexLexer):
     aliases = ['domsagxo']
     filenames = ['*.domsa']
     tokens = {
-        'root': [
+        'root'  : [
             (r'\s+', Whitespace),
             (r'#.*\n', Comment),
             (r'\bla\b', Comment),
@@ -36,23 +38,24 @@ class DomsagxoLexer(RegexLexer):
             (alphabet + r'+i\b', Name.Function),
             (alphabet + r'+as\b', Name.Function),
         ],
-        'string' : [
-            ('dekstra citilo',Keyword, '#pop'),
+        'string': [
+            ('dekstra citilo', Keyword, '#pop'),
             ('((' + alphabet + ')+)', String),
             (r'\s+', Whitespace),
         ]
     }
+
 
 class EngluentoLexer(RegexLexer):
     name = "Engluento Keyword Lexer"
     aliases = ['engluento']
     filenames = ['*.englu']
     tokens = {
-        'root': [
+        'root'  : [
             (alphabet + r'+-?((ation)|(ate)|(ify)|(ing))\b', Name.Function),
             (regexFromWordList(
                 engluento.fractions + engluento.digits + engluento.teens +
-                engluento.decades + engluento.largeAmounts ), Number),
+                engluento.decades + engluento.largeAmounts), Number),
             (regexFromWordList(engluento.nouns), Name),
             (regexFromWordList(engluento.adjectives), Name),
             (r'\s+', Whitespace),
@@ -68,8 +71,8 @@ class EngluentoLexer(RegexLexer):
             (regexFromWordList(engluento.verbs), Name.Function),
             (r'[\+\-\=\*\\/]', Operator),
         ],
-        'string' : [
-            ('"',Keyword, '#pop'),
+        'string': [
+            ('"', Keyword, '#pop'),
             ('(\w+)', String),
             (r'\s+', Whitespace),
         ]
