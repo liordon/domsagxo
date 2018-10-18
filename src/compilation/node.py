@@ -30,6 +30,9 @@ class NoneNode(AstNode):
     def _method(self, state):
         return state, None
 
+    def getContainedAdjectives(self):
+        return []
+
 
 class BinaryOp(AstNode):
 
@@ -99,16 +102,17 @@ class Boolean(AstNode):
 
 
 class VariableName(AstNode):
-    def __init__(self, variable_name):
+    def __init__(self, variable_name, variable_descriptor):
         super(VariableName, self).__init__(variable_name)
-        self.variable_name = variable_name
+        self.variable_name = " ".join(
+            variable_descriptor.getContainedAdjectives() + [variable_name])
 
     def _method(self, state, variable_name):
-        if variable_name in state.variables:
-            return state, state.variables[variable_name]
+        if self.variable_name in state.variables:
+            return state, state.variables[self.variable_name]
         # else:
         #     raise NameError("name " + variable_name + " is not defined")
-        return state, variable_name
+        return state, self.variable_name
 
     def getContainedName(self):
         return self.variable_name
@@ -118,6 +122,21 @@ class VariableName(AstNode):
 
     def getter(self, state):
         return state.variables[self.variable_name]
+
+
+class Description(AstNode):
+    def __init__(self, descriptor, additional_descriptor=NoneNode()):
+        super(Description, self).__init__(descriptor, additional_descriptor)
+        self.adjectives = [descriptor] + additional_descriptor.getContainedAdjectives()
+
+    def _method(self, state, descriptor, additional_descriptor):
+        variable_name = " ".join(self.adjectives)[:-1] + "o"
+        if variable_name in state.variables:
+            return state, state.variables[variable_name]
+        return state, variable_name
+
+    def getContainedAdjectives(self):
+        return self.adjectives
 
 
 class Dereference(AstNode):
@@ -144,6 +163,29 @@ class Dereference(AstNode):
 
     def getter(self, state):
         return self._get_containing_object(state).properties[self.getContainedName()]
+
+
+class ArrayAccess(AstNode):
+    def __init__(self, numerator, variable_name):
+        super(ArrayAccess, self).__init__(numerator, variable_name)
+        self.numerator = numerator
+        self.variable_name = variable_name
+
+    def _method(self, state, numerator, variable_name):
+        state, evaluated_index = numerator.evaluate(state)
+        state, evaluated_var = variable_name.evaluate(state)
+        return state, evaluated_var[evaluated_index-1]
+
+    def _get_containing_object(self, state):
+        return self.variable_name.getter(state)
+
+    def setter(self, state, value):
+        # state, evaluated_index = self.numerator.evaluate(state)
+        containing_object = self._get_containing_object(state)
+        containing_object[self.numerator - 1] = value
+
+    def getter(self, state):
+        return self._get_containing_object(state)[self.numerator - 1]
 
 
 class VariableAssignment(AstNode):

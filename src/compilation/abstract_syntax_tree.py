@@ -129,18 +129,26 @@ def build(start=None):
     def p_name_dereference(p):
         p[0] = Node.Dereference(p[1], p[3])
 
+    @RULE(Var.NAME, [[Var.PARTIAL_NAME, ResWord.OF, Var.NAME],
+                     [POS.NUMERATOR, ResWord.OF, Var.NAME]])
+    def p_name_arrayAccess(p):
+        p[0] = Node.ArrayAccess(p[1], p[3])
+
     @RULE(Var.NAME, [[POS.NOUN],
                      [Var.PARTIAL_NAME, POS.NOUN]])
     def p_name_partialNameAndNoun(p):
-        p[0] = Node.VariableName(p[1] + (p[2] if len(p) == 3 else ""))
+        if len(p) == 3:
+            p[0] = Node.VariableName(p[2] , p[1])
+        else:
+            p[0] = Node.VariableName(p[1], Node.NoneNode())
 
     @RULE(Var.PARTIAL_NAME, [[Var.PARTIAL_NAME, Var.ADJECTIVE],
                              [Var.ADJECTIVE]])
     def p_partialName_partialNameAndAdjective(p):
         if len(p) == 3:
-            p[0] = p[1] + p[2] + " "
+            p[0] = Node.Description(p[2], p[1])
         else:
-            p[0] = p[1] + " "
+            p[0] = Node.Description(p[1])
 
     @RULE(Var.ADJECTIVE, [[ResWord.GREATER],
                           [ResWord.SMALLER],
@@ -151,7 +159,7 @@ def build(start=None):
 
     @RULE(Var.PARTIAL_NAME, [[ResWord.THE]])
     def p_partialName_la(p):
-        p[0] = ""
+        p[0] = Node.NoneNode()
 
     # -------------------------   mathematical calculations   -----------------------------#
     @RULE(Var.EXPRESSION, [[Var.EXPRESSION, UaTer.PLUS, Var.TERM],

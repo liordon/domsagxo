@@ -8,17 +8,39 @@ from test_utils import mocks
 lxr.build()
 
 
+class CanAssertNodeType(object):
+    @staticmethod
+    def assertThatExpressionIsOfNodeType(ast, expr, nodeType):
+        assert isinstance(ast.parse(expr), nodeType)
+
+
+class PartialNameLevelAstProvided(object):
+    @pytest.fixture
+    def ast(self):
+        return ast_bld.build(start=ast_bld.Var.PARTIAL_NAME.value)
+
+
+class TestNameAndNumeratorAstNodes(PartialNameLevelAstProvided, CanAssertNodeType):
+    def test_parsedAdjectiveReturnsDescriptionNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "bela", Node.Description)
+
+    def test_parsedKeywordLaReturnsNoneNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "la", Node.NoneNode)
+
+    def test_twoParsedAdjectivesReturnsDescriptionNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "bela bona", Node.Description)
+
+    def test_parsedDigitalNumeratorReturnsDescriptionNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "unua", Node.Description)
+
+
 class ExpressionLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
         return ast_bld.build(start=ast_bld.Var.EXPRESSION.value)
 
 
-class TestBasicAstNodes(ExpressionLevelAstProvided):
-
-    @staticmethod
-    def assertThatExpressionIsOfNodeType(ast, expr, nodeType):
-        assert isinstance(ast.parse(expr), nodeType)
+class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType):
 
     def test_parsedNumberReturnsNumberNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "1", Node.Number)
@@ -55,6 +77,9 @@ class TestBasicAstNodes(ExpressionLevelAstProvided):
     def test_fieldAccessReturnsDereferenceNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "sxa mbo de lulo", Node.Dereference)
 
+    def test_useOfNumeratorReturnsArrayAccessNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "sxa mba de lulo", Node.ArrayAccess)
+
 
 class TestReferenceSemantics(ExpressionLevelAstProvided):
     @pytest.fixture
@@ -78,17 +103,49 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
         variable_name = "sxambo de lulo de kahxolo"
         setter = ast.parse(variable_name).setter
         state.variables["kahxolo"] = mocks.Bunch(properties={
-            "lulo": mocks.Bunch(properties={"sxambo": 0})
+            "lulo": mocks.Bunch(properties={
+                "sxambo": 0
+            })
         })
         setter(state, 3)
         assert 3 == state.variables["kahxolo"].properties["lulo"].properties["sxambo"]
 
     def test_cannotUseSetterToSetNonExistingProperty(self, ast, state):
+        variable_name = "sxambo de lulo"
+        setter = ast.parse(variable_name).setter
+        state.variables["lulo"] = mocks.Bunch(properties={})
         with pytest.raises(KeyError):
-            variable_name = "sxambo de lulo"
-            setter = ast.parse(variable_name).setter
-            state.variables["lulo"] = mocks.Bunch(properties={})
             setter(state, 3)
+
+    def test_cannotUseArrayAccessOnNonIterable(self, ast, state):
+        variable_name = "unua de ampoloj"
+        setter = ast.parse(variable_name).setter
+        state.variables["ampoloj"] = 3
+        with pytest.raises(TypeError):
+            setter(state, 3)
+
+    def test_outOfBoundsArrayAccessThrowsIndexError(self, ast, state):
+        variable_name = "sesa de ampoloj"
+        setter = ast.parse(variable_name).setter
+        state.variables["ampoloj"] = [1, 2, 3]
+        with pytest.raises(IndexError):
+            setter(state, 6)
+
+    def test_arrayNumerationStartsAtOneAndNotZero(self, ast, state):
+        variable_name = "unua de ampoloj"
+        state.variables["ampoloj"] = [1]
+        assert 1 == state.variables["ampoloj"][0]
+        assert 1 == ast.parse(variable_name).getter(state)
+        ast.parse(variable_name).setter(state, 6)
+        assert 6 == state.variables["ampoloj"][0]
+
+    def test_canAssignIntoIndexOfExistingArray(self, ast, state):
+        variable_name = "dua de ampoloj"
+        setter = ast.parse(variable_name).setter
+        state.variables["ampoloj"] = [1, 2, 3]
+        setter(state, 6)
+        assert 6 == ast.parse(variable_name).getter(state)
+        assert 6 == state.variables["ampoloj"][1]
 
 
 def parsed_value_of(ast, expr, state=None):
@@ -98,25 +155,31 @@ def parsed_value_of(ast, expr, state=None):
 
 class TestAstMathExpressions(ExpressionLevelAstProvided):
 
-    def test_capableOfAddition(self, ast):
-        assert 2 == (parsed_value_of(ast, "1+1"))
-
-    def test_capableOfSubtraction(self, ast):
-        assert -2 == (parsed_value_of(ast, "5-7"))
-
-    def test_unaryMinusInvertsNumberValue(self, ast):
-        assert -1 == parsed_value_of(ast, "-1")
-
-    def test_capableOfMultiplication(self, ast):
-        assert 42 == parsed_value_of(ast, "7*6")
-
-    def test_unaryMinusDoesNotNeedParentheses(self, ast):
-        assert -42 == parsed_value_of(ast, "7*-6")
-        assert 1 == parsed_value_of(ast, "7+-6")
-
     def test_capableVerbalNumberParsing(self, ast):
         assert 926 == parsed_value_of(ast, "nauxcent dudek ses")
         assert 102 == parsed_value_of(ast, "cent du")
+
+    def test_capableOfAddition(self, ast):
+        assert 2 == (parsed_value_of(ast, "1+1"))
+        assert 2 == (parsed_value_of(ast, "unu pli unu"))
+
+    def test_capableOfSubtraction(self, ast):
+        assert -2 == (parsed_value_of(ast, "5-7"))
+        assert -2 == (parsed_value_of(ast, "kvin malpli sep"))
+
+    def test_unaryMinusInvertsNumberValue(self, ast):
+        assert -1 == parsed_value_of(ast, "-1")
+        assert -1 == parsed_value_of(ast, "malpli unu")
+
+    def test_capableOfMultiplication(self, ast):
+        assert 42 == parsed_value_of(ast, "7*6")
+        assert 42 == parsed_value_of(ast, "sep fojoj ses")
+
+    def test_unaryMinusDoesNotNeedParentheses(self, ast):
+        assert -42 == parsed_value_of(ast, "7*-6")
+        assert -42 == parsed_value_of(ast, "sep fojoj malpli ses")
+        assert 1 == parsed_value_of(ast, "7+-6")
+        assert 1 == parsed_value_of(ast, "sep pli malpli ses")
 
     def test_sameDigitCannotBeSpecifiedTwice(self, ast):
         with pytest.raises(ast_bld.EsperantoSyntaxError):

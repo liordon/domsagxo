@@ -67,17 +67,26 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         assert {} == evaluate_and_return_state_variables(
             ast, "dum malvero tiam kato estas sep. finu")
 
+    @pytest.mark.timeout(1)
     def test_canDefineWhileLoopThatEvaluatesOnce(self, ast):
         manager = mng_co.Domsagxo()
         manager.variables["kato"] = 1
         assert {'kato': 0} == evaluate_and_return_state_variables(
             ast, "dum kato estas pli granda ol nul tiam kato estas kato-1. finu", manager)
 
+    @pytest.mark.timeout(5)
     def test_canDefineWhileLoopThatEvaluatesFiveTimes(self, ast):
         manager = mng_co.Domsagxo()
         manager.variables["kato"] = 5
         assert {'kato': 0} == evaluate_and_return_state_variables(
             ast, "dum kato estas pli granda ol nul tiam kato estas kato-1. finu", manager)
+
+    def test_canUseTurnVariablesIntoNumeratorsViaChangeFromNounToAdjective(self, ast):
+        manager = mng_co.Domsagxo()
+        manager.variables["indekso"] = 2
+        manager.variables["ampoloj"] = [1, 2, 3]
+        assert 2 == evaluate_and_return_state_variables(
+            ast, "kato estas indeksa de ampoloj", manager)['kato']
 
 
 class TestTimedAstStatements(StatementLevelAstProvided):
