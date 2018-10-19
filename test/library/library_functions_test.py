@@ -11,7 +11,7 @@ class SmartHomeManagerProvided(object):
 
     @staticmethod
     def assertNumberOfNewAppliances(number, state):
-        assert number == len(state.variables) - Domsagxo.number_of_reserved_words
+        assert number == len(state.variables) - state.number_of_reserved_words
 
 
 app_nm1 = "sxambalulo"
@@ -160,16 +160,6 @@ class TestApplianceManagement(SmartHomeManagerProvided):
         with pytest.raises(KeyError):
             manager.addApplianceToGroup(app_nm1, group_nm1)
 
-    # def test_canMoveApplianceFrom1GroupToAnother(self, manager):
-    #     appliance = Appliance(ApplianceTypes.LIGHT, app_nm1)
-    #     manager.addAppliance(appliance)
-    #     manager.variables[group_nm1] = [appliance]
-    #     manager.variables[group_nm2] = []
-    #
-    #     moveAppliance([app_nm1, group_nm1, group_nm2], manager)
-    #     assert appliance not in manager.variables[group_nm1]
-    #     assert appliance in manager.variables[group_nm2]
-
 
 class TestApplianceCommands(SmartHomeManagerProvided):
 
@@ -181,11 +171,11 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         manager.addApplianceToGroup(app_nm1, group_nm1)
         manager.addApplianceToGroup(app_nm2, group_nm1)
 
-        manager.requestDeviceActivation(manager.getGroup(group_nm1))
+        manager.requestDeviceActivation(manager.variables[group_nm1])
 
-        assert manager.getAppliance(app_nm1).isTurnedOn
-        assert manager.getAppliance(app_nm2).isTurnedOn
-        assert not manager.getAppliance(app_nm3).isTurnedOn
+        assert manager.variables[app_nm1].isTurnedOn
+        assert manager.variables[app_nm2].isTurnedOn
+        assert not manager.variables[app_nm3].isTurnedOn
 
     def test_canTurnOnSeveralAppliancesAtOnce(self, manager):
         manager.addAppliance(Appliance(ApplianceTypes.SWITCH, app_nm1))
@@ -193,11 +183,11 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         manager.addAppliance(Appliance(ApplianceTypes.CAMERA, app_nm3))
 
         manager.requestDeviceActivation(
-            [manager.getAppliance(app_nm2), manager.getAppliance(app_nm3)])
+            [manager.variables[app_nm2], manager.variables[app_nm3]])
 
-        assert not manager.getAppliance(app_nm1).isTurnedOn
-        assert manager.getAppliance(app_nm2).isTurnedOn
-        assert manager.getAppliance(app_nm3).isTurnedOn
+        assert not manager.variables[app_nm1].isTurnedOn
+        assert manager.variables[app_nm2].isTurnedOn
+        assert manager.variables[app_nm3].isTurnedOn
 
     def test_canTurnOnBothAppliancesAndGroupsAtOnce(self, manager):
         manager.addAppliance(Appliance(ApplianceTypes.SWITCH, app_nm1))
@@ -208,11 +198,11 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         manager.addApplianceToGroup(app_nm2, group_nm1)
 
         manager.requestDeviceActivation(
-            [manager.getGroup(group_nm1), manager.getAppliance(app_nm3)])
+            [manager.variables[group_nm1], manager.variables[app_nm3]])
 
-        assert manager.getAppliance(app_nm1).isTurnedOn
-        assert manager.getAppliance(app_nm2).isTurnedOn
-        assert manager.getAppliance(app_nm3).isTurnedOn
+        assert manager.variables[app_nm1].isTurnedOn
+        assert manager.variables[app_nm2].isTurnedOn
+        assert manager.variables[app_nm3].isTurnedOn
 
     def test_canQueryLightForItsBrightness(self, manager):
         manager.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
@@ -233,7 +223,7 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         manager.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm2))
         manager.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm3))
 
-        group_of_all_lights = manager.getGroup(ApplianceTypes.LIGHT.value + "j")
+        group_of_all_lights = manager.variables[ApplianceTypes.LIGHT.value + "j"]
         manager.requestChangeToDeviceProperty(
             group_of_all_lights, ApplianceProperties.BRIGHTNESS.value, .15)
 

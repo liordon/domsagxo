@@ -188,7 +188,7 @@ class TestAstApplianceManagement(object):
 
     @staticmethod
     def assertNumberOfNewAppliances(number, state):
-        assert number == len(state.variables) - mcmps.Domsagxo.number_of_reserved_words
+        assert number == len(state.variables) - state.number_of_reserved_words
 
     def test_canAddApplianceToSmartHomeViaCode(self, manager):
         appliance = atypes.Appliance(atypes.ApplianceTypes.LIGHT, "shambalulu")

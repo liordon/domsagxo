@@ -29,11 +29,9 @@ class Domsagxo(object):
             for predefined_word in enum:
                 self.variables[predefined_word.value] = predefined_word.value
 
-        # for appType in Domsagxo.appliance_type_group:
-        #     self.variables[Domsagxo.appliance_type_group[appType]] = []
         for appType in library.predefined_values.ApplianceTypes:
             self.variables[appType.value + "j"] = []
-        Domsagxo.number_of_reserved_words = len(self.variables)
+        self.number_of_reserved_words = len(self.variables)
         self.scheduler = scheduler
 
     def addAppliance(self, appliance):
@@ -41,7 +39,6 @@ class Domsagxo(object):
             raise ValueError("appliance named " + appliance.name + " already exists in this home.")
         self.variables[appliance.name] = appliance
         if appliance.type in Domsagxo.appliance_type_group:
-            # self.variables[Domsagxo.appliance_type_group[appliance.type]].append(appliance)
             self.variables[Domsagxo.appliance_type_group[appliance.type]].append(appliance)
 
     def addGroup(self, group_name):
@@ -53,20 +50,14 @@ class Domsagxo(object):
         self.variables.pop(group_name)
 
     def recognizes(self, appliance_or_group_name):
-        return (appliance_or_group_name in self.variables) or \
-               (appliance_or_group_name in self.variables)
+        return appliance_or_group_name in self.variables
 
     def isApplianceName(self, appliance_name):
-        return appliance_name in self.variables
+        return appliance_name in self.variables and \
+               isinstance(self.variables[appliance_name], Appliance)
 
     def isGroupName(self, group_name):
-        return group_name in self.variables.keys()
-
-    def getAppliance(self, appliance_name):
-        return self.variables[appliance_name]
-
-    def getGroup(self, group_name):
-        return self.variables[group_name]
+        return group_name in self.variables and isinstance(self.variables[group_name], list)
 
     def addApplianceToGroup(self, appliance_name, group):
         appliance = self.variables[appliance_name]
@@ -101,13 +92,14 @@ class Domsagxo(object):
 
         self.performActionOnAllDevices(devices, turnOnDevice)
 
-    def requestChangeToDeviceProperty(self, device, property, value):
-        def setDeviceProperty(device):
-            device.properties[property] = value
+    def requestChangeToDeviceProperty(self, device, property_to_change, value):
+        def setDeviceProperty(specific_device):
+            specific_device.properties[property_to_change] = value
 
         self.performActionOnAllDevices(device, setDeviceProperty)
 
-    def performActionOnAllDevices(self, devices, action):
+    @staticmethod
+    def performActionOnAllDevices(devices, action):
         for d in devices:
             if isinstance(d, Appliance):
                 # if self.isApplianceName(d):

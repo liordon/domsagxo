@@ -112,7 +112,6 @@ class VariableName(AstNode):
             return state, state.variables[self.variable_name]
         else:
             raise NameError("name " + variable_name + " is not defined")
-        # return state, self.variable_name
 
     def getContainedName(self):
         return self.variable_name
@@ -180,7 +179,6 @@ class ArrayAccess(AstNode):
         return self.variable_name.getter(state)
 
     def setter(self, state, value):
-        # state, evaluated_index = self.numerator.evaluate(state)
         containing_object = self._get_containing_object(state)
         containing_object[self.numerator - 1] = value
 
@@ -239,7 +237,6 @@ class TimeFractionAddition(AstNode):
     def _method(self, state, span, fraction):
         state, evaluated_span = span.evaluate(state)
         state, evaluated_fraction = fraction.evaluate(state)
-        # return state, evaluated_span.addFraction(evaluated_fraction)
         return state, evaluated_span * (1 + evaluated_fraction)
 
 
@@ -295,9 +292,7 @@ class FunctionDefinition(AstNode):
         return subtree_function
 
     def _method(self, state, function_name, argument_names, command_subtree):
-        # evaluated_names = [node.getContainedName() for node in argument_names]
         state.method_dict[function_name] = self.turn_ast_into_function(
-            # state, function_name, evaluated_names, command_subtree)
             state, function_name, argument_names, command_subtree)
         return state, None
 

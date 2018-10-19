@@ -126,7 +126,7 @@ class TestTimedAstStatements(StatementLevelAstProvided):
 
     @staticmethod
     def assertNumberOfNewAppliances(number, state):
-        assert number == len(state.variables) - mng_co.Domsagxo.number_of_reserved_words
+        assert number == len(state.variables) - state.number_of_reserved_words
 
     def test_canUseDelayedActionToAddLight(self, ast, fake_timed_smart_home):
         manager, value = ast.parse("aldonu lumon post sekundo").evaluate(fake_timed_smart_home)
