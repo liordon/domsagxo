@@ -1,13 +1,7 @@
 import datetime
 from random import randrange
 
-from library.atomic_types import *
-
-
-class Generate(Enum):
-    TIME_POINT = 'horo'
-    TIME_SPAN = 'tempo'
-
+from library.predefined_values import *
 
 digitNames = {
     1: "unu",
@@ -22,28 +16,29 @@ digitNames = {
 }
 
 
-def generateRandom(argList):
-    if argList[0] == Generate.TIME_POINT.value:
-        if len(argList) > 1:
-            hour_range = argList[2].hour - argList[1].hour
-            minute_range = argList[2].minute - argList[1].minute
+def generateRandom(type_to_generate, lower_bound=None, upper_bound=None):
+    both_bounds_were_given = lower_bound is not None and upper_bound is not None
+    if type_to_generate == RandomizableType.TIME_POINT.value:
+        if both_bounds_were_given:
+            hour_range = upper_bound.hour - lower_bound.hour
+            minute_range = upper_bound.minute - lower_bound.minute
             random_total_minutes = randrange(hour_range * 60 + minute_range)
-            random_hour = (random_total_minutes + argList[1].minute) // 60 + argList[1].hour
-            random_minute = (random_total_minutes + argList[1].minute) % 60
+            random_hour = (random_total_minutes + lower_bound.minute) // 60 + lower_bound.hour
+            random_minute = (random_total_minutes + lower_bound.minute) % 60
         else:
             random_hour = randrange(0, 24)
             random_minute = randrange(0, 60)
         return datetime.time(hour=random_hour, minute=random_minute)
 
-    elif argList[0] == Generate.TIME_SPAN.value:
-        if len(argList) > 1:
-            return generateConstrainedTimeSpan(argList[1], argList[2])
+    elif type_to_generate == RandomizableType.TIME_SPAN.value:
+        if both_bounds_were_given:
+            return generateConstrainedTimeSpan(lower_bound, upper_bound)
         return datetime.timedelta(hours=randrange(0, 24),
                                   minutes=randrange(0, 60),
                                   seconds=randrange(0, 60))
 
-    if len(argList) > 1:
-        return randrange(argList[1], argList[2])
+    if both_bounds_were_given:
+        return randrange(lower_bound, upper_bound)
     else:
         return randrange(100)
 

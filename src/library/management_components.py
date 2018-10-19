@@ -1,5 +1,7 @@
 import sched
 
+import library.predefined_values
+from library.atomic_types import Appliance
 from library.predefined_functions import *
 
 
@@ -12,7 +14,7 @@ class Domsagxo(object):
         ApplianceTypes.KNOB      : "agordoj",
         ApplianceTypes.LIGHT     : "lumoj",
         ApplianceTypes.THERMOSTAT: "termostatoj",
-        ApplianceTypes.CAMERA    : "bildiloj"
+        ApplianceTypes.CAMERA    : "fotiloj"
     }
 
     def __init__(self, scheduler=None):
@@ -22,9 +24,16 @@ class Domsagxo(object):
             "sxaltu" : self.requestDeviceActivation,
             "aldonu" : self.requestDeviceAddition
         }
-        self.groups = {}
-        for appType in Domsagxo.appliance_type_group:
-            self.groups[Domsagxo.appliance_type_group[appType]] = []
+        self.variables = {}
+        for enum in [cls for cls in library.predefined_values.all_categories]:
+            for predefined_word in enum:
+                self.variables[predefined_word.value] = predefined_word.value
+
+        # for appType in Domsagxo.appliance_type_group:
+        #     self.variables[Domsagxo.appliance_type_group[appType]] = []
+        for appType in library.predefined_values.ApplianceTypes:
+            self.variables[appType.value + "j"] = []
+        Domsagxo.number_of_reserved_words = len(self.variables)
         self.scheduler = scheduler
 
     def addAppliance(self, appliance):
@@ -32,39 +41,40 @@ class Domsagxo(object):
             raise ValueError("appliance named " + appliance.name + " already exists in this home.")
         self.variables[appliance.name] = appliance
         if appliance.type in Domsagxo.appliance_type_group:
-            self.groups[Domsagxo.appliance_type_group[appliance.type]].append(appliance)
+            # self.variables[Domsagxo.appliance_type_group[appliance.type]].append(appliance)
+            self.variables[Domsagxo.appliance_type_group[appliance.type]].append(appliance)
 
     def addGroup(self, group_name):
         if self.isGroupName(group_name):
             raise KeyError("group name " + group_name + " is already taken")
-        self.groups[group_name] = []
+        self.variables[group_name] = []
 
     def removeGroup(self, group_name):
-        self.groups.pop(group_name)
+        self.variables.pop(group_name)
 
     def recognizes(self, appliance_or_group_name):
         return (appliance_or_group_name in self.variables) or \
-               (appliance_or_group_name in self.groups)
+               (appliance_or_group_name in self.variables)
 
     def isApplianceName(self, appliance_name):
         return appliance_name in self.variables
 
     def isGroupName(self, group_name):
-        return group_name in self.groups.keys()
+        return group_name in self.variables.keys()
 
     def getAppliance(self, appliance_name):
         return self.variables[appliance_name]
 
     def getGroup(self, group_name):
-        return self.groups[group_name]
+        return self.variables[group_name]
 
     def addApplianceToGroup(self, appliance_name, group):
         appliance = self.variables[appliance_name]
-        self.groups[group].append(appliance)
+        self.variables[group].append(appliance)
 
     def removeApplianceFromGroup(self, appliance_name, group):
         appliance = self.variables[appliance_name]
-        self.groups[group].remove(appliance)
+        self.variables[group].remove(appliance)
 
     def getPropertyOfAppliance(self, appliance_name, property_name):
         appliance = self.variables[appliance_name]
@@ -74,19 +84,15 @@ class Domsagxo(object):
         appliance = self.variables[appliance_name]
         appliance.properties[property_name] = value
 
-    def requestDeviceAddition(self, device_parameters):
-        appliance_type = ApplianceTypes(device_parameters[0])
-        if len(device_parameters) > 1:
-            appliance_name = device_parameters[1]
-        else:
+    def requestDeviceAddition(self, appliance_type, appliance_name=None):
+        if appliance_name is None:
             for numerator in range(1, 9):
-                appliance_name = digitNames[numerator] + "a " + appliance_type.value
+                appliance_name = digitNames[numerator] + "a " + appliance_type
                 if not self.recognizes(appliance_name):
                     break
-        # noinspection PyUnboundLocalVariable
         if self.recognizes(appliance_name):
             raise KeyError("appliance " + appliance_name + " already exists.")
-        appliance = Appliance(appliance_type, appliance_name)
+        appliance = Appliance(ApplianceTypes(appliance_type), appliance_name)
         self.addAppliance(appliance)
 
     def requestDeviceActivation(self, devices):
@@ -95,29 +101,30 @@ class Domsagxo(object):
 
         self.performActionOnAllDevices(devices, turnOnDevice)
 
-    def requestChangeToDeviceProperty(self, devices_property_value):
+    def requestChangeToDeviceProperty(self, device, property, value):
         def setDeviceProperty(device):
-            device.properties[devices_property_value[1]] = devices_property_value[2]
+            device.properties[property] = value
 
-        self.performActionOnAllDevices([devices_property_value[0]], setDeviceProperty)
+        self.performActionOnAllDevices(device, setDeviceProperty)
 
     def performActionOnAllDevices(self, devices, action):
         for d in devices:
-            if self.isApplianceName(d):
-                device = self.getAppliance(d)
-                action(device)
-            elif self.isGroupName(d):
-                device_group = self.getGroup(d)
-                for device in device_group:
+            if isinstance(d, Appliance):
+                # if self.isApplianceName(d):
+                #     device = self.getAppliance(d)
+                action(d)
+            elif isinstance(d, list):
+                # device_group = self.getGroup(d)
+                for device in d:
                     action(device)
 
-    def renameAppliance(self, names):
-        if self.recognizes(names[1]):
-            raise KeyError("name " + names[1] + " is already taken")
-        appliance = self.variables[names[0]]
-        appliance.name = names[1]
-        self.variables[names[1]] = appliance
-        self.variables.pop(names[0])
+    def renameAppliance(self, old_name, new_name):
+        if self.recognizes(new_name):
+            raise KeyError("name " + new_name + " is already taken")
+        appliance = self.variables[old_name]
+        appliance.name = new_name
+        self.variables[new_name] = appliance
+        self.variables.pop(old_name)
 
 
 class Horaro(object):

@@ -29,57 +29,74 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         ast.parse("12")
 
     def test_capableOfNumberAssignment(self, ast):
-        assert {'kato': 10} == evaluate_and_return_state_variables(ast, "kato = 10")
+        variables = evaluate_and_return_state_variables(ast, "kato = 10")
+        assert 10 == variables["kato"]
 
     def test_capableOfExpressionAssignment(self, ast):
-        assert {'kato': 42} == evaluate_and_return_state_variables(ast, "kato=2+4*10")
+        state = evaluate_and_return_state_variables(ast, "kato=2+4*10")
+        assert 42 == state["kato"]
 
     def test_adjectivesJoinNounsToDefineVariableNames(self, ast):
         new_state = evaluate_and_return_state_variables(ast, "nigra kato=7")
-        assert {'nigra kato': 7} == new_state
+        assert 7 == new_state["nigra kato"]
         assert 'kato' not in new_state
 
     def test_reservedAdjectivesCanBeUsedForVariableNamesOutOfReservedContext(self, ast):
         new_state = evaluate_and_return_state_variables(ast, "malgranda kato estas 7")
-        assert {'malgranda kato': 7} == new_state
+        assert 7 == new_state["malgranda kato"]
         new_state = evaluate_and_return_state_variables(ast, "granda kato estas 17")
-        assert {'granda kato': 17} == new_state
+        assert 17 == new_state["granda kato"]
 
     def test_definiteNounsBecomeIndefinite(self, ast):
-        assert {'kato': 9} == evaluate_and_return_state_variables(ast, "la kato = 9")
+        state = evaluate_and_return_state_variables(ast, "la kato = 9")
+        assert 9== state["kato"]
 
     def test_definiteDescribedNounAlsoBecomesIndefinite(self, ast):
-        assert {"dika kato": 99} == evaluate_and_return_state_variables(ast, "la dika kato = 99")
+        state = evaluate_and_return_state_variables(ast, "la dika kato = 99")
+        assert 99 == state["dika kato"]
 
     def test_ifStatementContentIsNotEvaluatedIfConditionIsFalse(self, ast):
-        assert {} == evaluate_and_return_state_variables(
+        assert "kato" not in evaluate_and_return_state_variables(
             ast, "se malvero tiam kato estas sep. finu")
 
     def test_ifStatementContentIsEvaluatedIfConditionIsTrue(self, ast):
-        assert {'kato': 7} == evaluate_and_return_state_variables(
-            ast, "se vero tiam kato estas sep. finu")
+        state = \
+            evaluate_and_return_state_variables(ast, "se vero tiam kato estas sep. finu")
+        assert 7 == state["kato"]
 
     def test_elseStatementContentIsEvaluatedIfConditionIsFalse(self, ast):
-        assert {'kato': 9} == evaluate_and_return_state_variables(
-            ast, "se malvero tiam kato estas sep. alie kato estas naux. finu")
+        new_state = \
+            evaluate_and_return_state_variables(ast,
+                                                "se malvero tiam kato estas sep. "
+                                                "alie kato estas naux. finu")
+        assert 9 == new_state["kato"]
 
+    @pytest.mark.timeout(1)
     def test_canDefineSimpleWhileLoopThatDoesNotEvaluate(self, ast):
-        assert {} == evaluate_and_return_state_variables(
+        assert "kato" not in evaluate_and_return_state_variables(
             ast, "dum malvero tiam kato estas sep. finu")
 
     @pytest.mark.timeout(1)
     def test_canDefineWhileLoopThatEvaluatesOnce(self, ast):
         manager = mng_co.Domsagxo()
         manager.variables["kato"] = 1
-        assert {'kato': 0} == evaluate_and_return_state_variables(
-            ast, "dum kato estas pli granda ol nul tiam kato estas kato-1. finu", manager)
+        new_state = \
+            evaluate_and_return_state_variables(ast,
+                                                "dum kato estas pli granda ol nul tiam "
+                                                "kato estas kato-1. finu",
+                                                manager)
+        assert 0 == new_state["kato"]
 
     @pytest.mark.timeout(5)
     def test_canDefineWhileLoopThatEvaluatesFiveTimes(self, ast):
         manager = mng_co.Domsagxo()
         manager.variables["kato"] = 5
-        assert {'kato': 0} == evaluate_and_return_state_variables(
-            ast, "dum kato estas pli granda ol nul tiam kato estas kato-1. finu", manager)
+        new_state = \
+            evaluate_and_return_state_variables(ast,
+                                                "dum kato estas pli granda ol nul tiam "
+                                                "kato estas kato-1. finu",
+                                                manager)
+        assert 0 == new_state["kato"]
 
     def test_canUseTurnVariablesIntoNumeratorsViaChangeFromNounToAdjective(self, ast):
         manager = mng_co.Domsagxo()
@@ -107,27 +124,31 @@ class TestTimedAstStatements(StatementLevelAstProvided):
         current_date = manager.scheduler.getDate()
         manager.scheduler.runUntil(current_date.replace(**time))
 
+    @staticmethod
+    def assertNumberOfNewAppliances(number, state):
+        assert number == len(state.variables) - mng_co.Domsagxo.number_of_reserved_words
+
     def test_canUseDelayedActionToAddLight(self, ast, fake_timed_smart_home):
         manager, value = ast.parse("aldonu lumon post sekundo").evaluate(fake_timed_smart_home)
-        assert 0 == len(manager.variables)
+        self.assertNumberOfNewAppliances(0, manager)
         self.fastForwardBy(fake_timed_smart_home, seconds=1)
-        assert 1 == len(manager.variables)
+        self.assertNumberOfNewAppliances(1, manager)
 
     def test_canUseScheduledActionToAddLight(self, ast, fake_timed_smart_home):
         manager, value = ast.parse("aldonu lumon je la sesa horo").evaluate(fake_timed_smart_home)
-        assert 0 == len(manager.variables)
+        self.assertNumberOfNewAppliances(0, manager)
         self.fastForwardBy(fake_timed_smart_home, seconds=1)
-        assert 0 == len(manager.variables)
+        self.assertNumberOfNewAppliances(0, manager)
         self.fastForwardTo(fake_timed_smart_home, hour=6)
-        assert 1 == len(manager.variables)
+        self.assertNumberOfNewAppliances(1, manager)
 
     def test_canUseRepeatedActionToAddLightTwice(self, ast, fake_timed_smart_home):
         manager, value = ast.parse("aldonu lumon cxiu minuto").evaluate(fake_timed_smart_home)
-        assert 0 == len(manager.variables)
+        self.assertNumberOfNewAppliances(0, manager)
         self.fastForwardBy(fake_timed_smart_home, minutes=1)
-        assert 1 == len(manager.variables)
+        self.assertNumberOfNewAppliances(1, manager)
         self.fastForwardBy(fake_timed_smart_home, minutes=1)
-        assert 2 == len(manager.variables)
+        self.assertNumberOfNewAppliances(2, manager)
 
 
 class TestAstPrograms(object):
@@ -148,9 +169,10 @@ class TestAstPrograms(object):
         ast.parse("12.")
 
     def test_consecutiveStatementsPropagateVariableValues(self, ast):
-        new_manager = evaluate_and_return_state_variables(ast, '''kato=2+4*10.
+        new_state = evaluate_and_return_state_variables(ast, '''kato=2+4*10.
                         hundo = kato/6.''')
-        assert {'kato': 42, 'hundo': 7} == new_manager
+        assert 42 == new_state["kato"]
+        assert 7 == new_state["hundo"]
 
     def test_returnStatementReturnsItsDeclaredValue(self, ast):
         value = ast.parse('''revenu ses.''').evaluate(None)[1]
@@ -159,7 +181,7 @@ class TestAstPrograms(object):
     def test_returnStopsProgramFromContinuing(self, ast, initial_state):
         new_manager, value = ast.parse('''revenu ses. kato = 10.''').evaluate(initial_state)
         assert 6 == value
-        assert {} == new_manager.variables
+        assert "kato" not in new_manager.variables
 
     def test_returnStopsWhileLoopFromContinuing(self, ast, initial_state):
         manager, value = ast.parse('''
@@ -171,5 +193,5 @@ class TestAstPrograms(object):
             finu.
         finu.
         ''').evaluate(initial_state)
-        assert {'kato': 3} == manager.variables
+        assert 3 == manager.variables["kato"]
         assert 3 == value

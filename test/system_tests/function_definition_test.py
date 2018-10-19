@@ -44,26 +44,27 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLe
                                                    '''sxambaluli signifas revenu nenio. finu''')
         assert number_of_predefined_functions + 1 == len(new_state.method_dict)
         assert 'sxambalulu' in new_state.method_dict.keys()
-        assert new_state.method_dict['sxambalulu']([]) is None
+        assert new_state.method_dict['sxambalulu']() is None
 
     def test_canDefineUnitFunctionReturningItsArgument(self, ast):
         new_state = self.evaluate_and_return_state(
             ast, '''diri sxambalulo signifas revenu sxambalulo. finu''')
-        assert 1 == new_state.method_dict['diru']([1])
+        assert 1 == new_state.method_dict['diru'](1)
 
     def test_cannotPassMoreArgumentsThanPlannedToUserDefinedFunction(self, ast):
         new_state = self.evaluate_and_return_state(
             ast, '''memori sxambalulo signifas revenu sxambalulo. finu''')
         with pytest.raises(TypeError):
-            new_state.method_dict['memoru']([1, 2])
+            new_state.method_dict['memoru'](1, 2)
 
     def test_functionArgumentsDoNotMigrateBetweenFunctions(self, ast):
         new_state = self.evaluate_and_return_state(
             ast, '''forgesi sxambalulo signifas revenu nenio. finu''')
         new_state = self.evaluate_and_return_state(
             ast, '''memori signifas revenu sxambalulo. finu''', new_state)
-        assert new_state.method_dict['forgesu']([100]) is None
-        assert "sxambalulo" == new_state.method_dict['memoru']([])
+        assert new_state.method_dict['forgesu'](100) is None
+        with pytest.raises(NameError):
+            assert new_state.method_dict['memoru']()
 
     def test_functionsDoNotOverwriteEachOthersArguments(self, ast):
         new_state = self.evaluate_and_return_state(
@@ -76,21 +77,21 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLe
                     revenu sxambalulo pli rekurso.
                 finu.
             finu''')
-        assert 6 == new_state.method_dict['rekursu']([3])
+        assert 6 == new_state.method_dict['rekursu'](3)
 
     def test_canDefineMuConstantFunction(self, ast):
         """the Mu-recursive constant function has a predefined constant n which it always returns.
         The function is simply: f(x) = n."""
         new_state = self.evaluate_and_return_state(
             ast, '''forgesi sxambalulo, hundo kaj kato signifas revenu sep. finu''')
-        assert 7 == new_state.method_dict['forgesu']([10, 809, 341])
+        assert 7 == new_state.method_dict['forgesu'](10, 809, 341)
 
     def test_canDefineMuSuccessorFunction(self, ast):
         """the Mu-recursive successor function recieves an argument and returns it's successor.
         Basically, it's just f(x) = x+1."""
         new_state = self.evaluate_and_return_state(
             ast, '''diri sxambalulo signifas revenu sxambalulo pli unu. finu''')
-        assert 42 == new_state.method_dict['diru']([41])
+        assert 42 == new_state.method_dict['diru'](41)
 
     def test_canDefineTheMuProjectionFunction(self, ast):
         """the Mu-recursive projection function (also called the identity function)
@@ -98,7 +99,7 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLe
         In this specific example, we accept 2 inputs and return the first one."""
         new_state = self.evaluate_and_return_state(
             ast, '''elekti hundo kaj kato signifas revenu hundo. finu''')
-        assert 1 == new_state.method_dict['elektu']([1, 2])
+        assert 1 == new_state.method_dict['elektu'](1, 2)
 
     def test_canDefineMuCompositionOperator(self, ast):
         """the Mu-recursive composition operator receives an m-ary function (h)
@@ -119,7 +120,7 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLe
             kato estas katu argxento kaj kvin.
             muso estas musu argxento kaj oro. 
             revenu trienigu hundo, kato kaj muso. finu''', new_state)
-        assert (2 * 100) * (5 + 5) * (5 - 2) == new_state.method_dict['sxambalulu']([2, 5])
+        assert (2 * 100) * (5 + 5) * (5 - 2) == new_state.method_dict['sxambalulu'](2, 5)
 
     def test_canDefineMuPrimitiveRecursionOperator(self, ast):
         """the Mu-recursive primitive recursion operator receives a k-ary function (g)
@@ -144,12 +145,12 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLe
                     revenu kvarenigu oro malpli unu, rekursajxo, argxento kaj kupro. finu''',
             new_state)
 
-        two_input_function_result = new_state.method_dict['duenigu']([2, 5])
+        two_input_function_result = new_state.method_dict['duenigu'](2, 5)
         four_input_function_result = \
-            new_state.method_dict['kvarenigu']([0, two_input_function_result, 2, 5])
+            new_state.method_dict['kvarenigu'](0, two_input_function_result, 2, 5)
 
-        assert two_input_function_result == new_state.method_dict['trienigu']([0, 2, 5])
-        assert four_input_function_result == new_state.method_dict['trienigu']([1, 2, 5])
+        assert two_input_function_result == new_state.method_dict['trienigu'](0, 2, 5)
+        assert four_input_function_result == new_state.method_dict['trienigu'](1, 2, 5)
 
     def test_canDefineMuMinimisationOperator(self, ast):
         """the Mu-recursive minimisation operator receives a k+1-ary function (g).
@@ -180,9 +181,9 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLe
                     finu''', new_state)
 
         for i in range(0, 3):
-            assert 0 < new_state.method_dict['unuenigu']([i])
-        assert 0 == new_state.method_dict['unuenigu']([3])
-        assert 3 == new_state.method_dict['minimumigu']([])
+            assert 0 < new_state.method_dict['unuenigu'](i)
+        assert 0 == new_state.method_dict['unuenigu'](3)
+        assert 3 == new_state.method_dict['minimumigu']()
 
     def test_canDefineFunctionToTellIfANumberIsPrime(self, ast):
         """yogi was sassy and said I could not tell the prime numbers apart even if I tried.
@@ -204,18 +205,15 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLe
                 finu''')
 
         for i in range(2, 100):
-            assert is_prime(i) == new_state.method_dict['cxuprimu']([i])
+            assert is_prime(i) == new_state.method_dict['cxuprimu'](i)
 
     def test_assumingICanDifferentiateAPrimeICanFindAllPrimesUpTo100(self, ast):
         """For the sake of test independence I will program the prime chekcer in python.
         also, the printing part itself will feed a list and the list will be verified."""
         self.prime_list = []
 
-        def is_esperanto_prime(argument_list):
-            return is_prime(argument_list[0])
-
         def add_prime_to_list(additional_prime):
-            self.prime_list += additional_prime
+            self.prime_list += [additional_prime]
 
         new_state = self.evaluate_and_return_state(
             ast, '''primumi signifas
@@ -227,9 +225,9 @@ class TestDefinitionAndActivationOfFunctions(ProvidedAstUpToFunctionDefinitionLe
                     indekso estas indekso pli unu.
                 finu.
                 finu''')
-        new_state.method_dict['cxuprimu'] = is_esperanto_prime
+        new_state.method_dict['cxuprimu'] = is_prime
         new_state.method_dict['presu'] = add_prime_to_list
-        new_state.method_dict['primumu']([])
+        new_state.method_dict['primumu']()
 
         assert 25 == len(self.prime_list)
         for prime in self.prime_list:

@@ -186,6 +186,10 @@ class TestAstApplianceManagement(object):
     def manager(self):
         return mcmps.Domsagxo()
 
+    @staticmethod
+    def assertNumberOfNewAppliances(number, state):
+        assert number == len(state.variables) - mcmps.Domsagxo.number_of_reserved_words
+
     def test_canAddApplianceToSmartHomeViaCode(self, manager):
         appliance = atypes.Appliance(atypes.ApplianceTypes.LIGHT, "shambalulu")
         manager.addAppliance(appliance)
@@ -193,7 +197,8 @@ class TestAstApplianceManagement(object):
 
     def test_canTurnOnAllLights(self, ast):
         state = evaluate_and_return_state(ast, "sxaltu la lumojn")
-        for appliance in state.variables.values():
+        for appliance in [variable for variable in state.variables.values()
+                          if isinstance(variable, atypes.Appliance)]:
             if appliance.type is atypes.ApplianceTypes.LIGHT:
                 assert appliance.isTurnedOn
 
@@ -202,7 +207,7 @@ class TestAstApplianceManagement(object):
         manager.addAppliance(atypes.Appliance(atypes.ApplianceTypes.KNOB, "lulu"))
 
         evaluate_and_return_state(ast, "sxaltu la lumojn", manager)
-        for appliance in manager.variables.values():
+        for appliance in [app for app in manager.variables.values() if isinstance(app, atypes.Appliance)]:
             if appliance.type is atypes.ApplianceTypes.LIGHT:
                 assert appliance.isTurnedOn
             elif appliance.type is not atypes.ApplianceTypes.LIGHT:
@@ -210,15 +215,15 @@ class TestAstApplianceManagement(object):
 
     def test_canAddAnonymousApplianceToSmartHomeViaSpeech(self, ast):
         manager = evaluate_and_return_state(ast, "aldonu lumon")
-        assert 1 == len(manager.variables)
-        assert "lumo" not in manager.variables.keys()
+        self.assertNumberOfNewAppliances(1, manager)
+        # assert "lumo" not in manager.variables.keys() #lumo became a reserved word.
         assert "unua lumo" in manager.variables.keys()
         assert manager.variables["unua lumo"].type is atypes.ApplianceTypes.LIGHT
 
     def test_whenAddingTwoAnonymousAppliancesOneReceivesSerialNumber(self, ast):
         manager = evaluate_and_return_state(ast, "aldonu lumon")
         manager = evaluate_and_return_state(ast, "aldonu lumon", manager)
-        assert 2 == len(manager.variables)
+        self.assertNumberOfNewAppliances(2, manager)
         assert "unua lumo" in manager.variables.keys()
         assert "dua lumo" in manager.variables.keys()
         assert manager.variables["dua lumo"].type is atypes.ApplianceTypes.LIGHT
@@ -240,10 +245,10 @@ class TestObjectOrientedActions(object):
     def test_canAccessColorFieldOfLightBulb(self, parser, smart_home):
         ast = parser.parse("koloro de sxambalulo")
         state, value = ast.evaluate(smart_home)
-        assert isinstance(value, atypes.LightColor)
+        assert isinstance(value, atypes.Color)
 
     def test_canChangeColorFieldOfLightBulb(self, parser, smart_home):
         ast = parser.parse("koloro de sxambalulo estas rugxo")
         smart_home, value = ast.evaluate(smart_home)
-        assert atypes.LightColor.RED.value == smart_home.variables["sxambalulo"].properties[
+        assert atypes.Color.RED.value == smart_home.variables["sxambalulo"].properties[
             "koloro"]

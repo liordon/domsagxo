@@ -1,28 +1,4 @@
-from enum import Enum
-
-
-# noinspection SpellCheckingInspection
-class ApplianceTypes(Enum):
-    # MOST BASIC - TURN ON OR OFF
-    SWITCH = 'sxalto'
-    # A DIMMER WITH A RANGE OF VALUES
-    KNOB = 'agordo'
-    # LIKE A KNOB BUT ALSO WITH COLOR
-    LIGHT = 'lumo'
-    # A SENSOR FOR TEMPERATURE AND HUMIDITY
-    THERMOSTAT = 'termostato'
-    # A SENSOR FOR VISUAL FOOTAGE
-    CAMERA = 'fotilo'
-
-
-class ApplianceProperties(Enum):
-    BRIGHTNESS = 'brilo'
-    COLOR = 'koloro'
-
-
-class LightColor(Enum):
-    WHITE = 'blanko'
-    RED = 'rugxo'
+from library.predefined_values import *
 
 
 class Appliance(object):
@@ -41,7 +17,7 @@ class Appliance(object):
         if self.type is ApplianceTypes.LIGHT:
             self.properties = {
                 ApplianceProperties.BRIGHTNESS.value: 1,
-                ApplianceProperties.COLOR.value     : LightColor.WHITE
+                ApplianceProperties.COLOR.value     : Color.WHITE
             }
 
     def setStateComponent(self, state_component, value):

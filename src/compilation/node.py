@@ -110,9 +110,9 @@ class VariableName(AstNode):
     def _method(self, state, variable_name):
         if self.variable_name in state.variables:
             return state, state.variables[self.variable_name]
-        # else:
-        #     raise NameError("name " + variable_name + " is not defined")
-        return state, self.variable_name
+        else:
+            raise NameError("name " + variable_name + " is not defined")
+        # return state, self.variable_name
 
     def getContainedName(self):
         return self.variable_name
@@ -263,7 +263,7 @@ class FunctionInvocation(AstNode):
         for arg in args:
             state, new_arg = arg.evaluate(state)
             evaluated_args += [new_arg]
-        return state, state.method_dict[function_name](evaluated_args)
+        return state, state.method_dict[function_name](*evaluated_args)
 
 
 class ReturnValue(AstNode):
@@ -280,7 +280,7 @@ class FunctionDefinition(AstNode):
 
     @staticmethod
     def turn_ast_into_function(state, function_name, argument_names, abstract_syntax_tree):
-        def subtree_function(argument_list):
+        def subtree_function(*argument_list, **kwargs):
             closure = copy.deepcopy(state)
             if len(argument_list) != len(argument_names):
                 raise TypeError(str(function_name) + "() expects " +
@@ -295,7 +295,9 @@ class FunctionDefinition(AstNode):
         return subtree_function
 
     def _method(self, state, function_name, argument_names, command_subtree):
+        # evaluated_names = [node.getContainedName() for node in argument_names]
         state.method_dict[function_name] = self.turn_ast_into_function(
+            # state, function_name, evaluated_names, command_subtree)
             state, function_name, argument_names, command_subtree)
         return state, None
 
