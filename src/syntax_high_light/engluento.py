@@ -11,5 +11,5 @@ verbs = ["add", "turn off", "turn on", "play", "replace", "announce", "lock", "c
 
 keywords = ["like", "so", "means", "every", "on", "which",
 				"if", "while", "then", "true", "false", "greater", "equal", "not", "return", "end",
-				"at", "is", "of", "than"]
+				"at the same time", "at", "is", "of", "than" ]
 prepositions = ["between", "to", "with"]
