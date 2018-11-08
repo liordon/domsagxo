@@ -47,6 +47,7 @@ class ReservedWord(Enum):
     NONE = 'Tnenio'
     NOT = 'Tne'
     OF = 'Tde'
+    ONCE = 'Tunufoje'
     OR = 'Taux'
     PARTS = 'Tpartoj'
     RETURN = 'Trevenu'
@@ -60,6 +61,7 @@ class ReservedWord(Enum):
     TO = 'Tal'
     TRUE = 'Tvero'
     VERBAL_DIGIT = 'Vdigit_literal'
+    WHENEVER = 'Tcxiufoje'
     WORD = 'Tvorto'
 
 
@@ -78,11 +80,13 @@ class PartOfSpeech(Enum):
 reserved_words = {
     "al"       : ReservedWord.TO.value,
     "alie"     : ReservedWord.ELSE.value,
-    "ambaŭ"   : ReservedWord.BOTH.value,
+    "ambaŭ"    : ReservedWord.BOTH.value,
     "ambaux"   : ReservedWord.BOTH.value,
-    "aŭ"      : ReservedWord.OR.value,
+    "aŭ"       : ReservedWord.OR.value,
     "aux"      : ReservedWord.OR.value,
-    "ĉiu"     : ReservedWord.EVERY.value,
+    "ĉiu"      : ReservedWord.EVERY.value,
+    "ĉiufoje"  : ReservedWord.WHENEVER.value,
+    "cxiufoje" : ReservedWord.WHENEVER.value,
     "cxiu"     : ReservedWord.EVERY.value,
     "dum"      : ReservedWord.DURING.value,
     "de"       : ReservedWord.OF.value,
@@ -110,6 +114,7 @@ reserved_words = {
     "samtempe" : ReservedWord.DURING.value,
     "signifas" : ReservedWord.THIS_WAY.value,
     "tiam"     : ReservedWord.THEN.value,
+    "unufoje"  : ReservedWord.ONCE.value,
     "vero"     : ReservedWord.TRUE.value,
 }
 
