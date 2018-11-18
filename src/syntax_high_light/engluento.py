@@ -2,9 +2,13 @@ adjectives = [
 	"ugly", "beutiful", "tall", "short", "quick", "brown", "lazy", "front", "first", "second",
 ]
 nouns = [
-	"argumet", "arguments", "blinds", "brightness", "bulb", "cat", "channel", "child", 
-	"dog", "door", "fox", "hashmugan", "light", "lights", "list", "m", "number", "numbers", 
-	"other", "oven", "i", "index", "television", "televisions", "temperature", "time", 
+	"argumet", "arguments", "blinds", "brightness", "bulb", 
+	"cat", "channel", "child", "contact",
+	"dog", "door", "fox", "function", "functions", "hashmugan", 
+	"i", "index", "length", "light", "lights", "list", 
+	"m", "marko", "number", "numbers", 
+	"other", "oven", "routine", "routines", 
+	"television", "televisions", "temperature", "time", 
 	"window", 
 ]
 
@@ -21,8 +25,9 @@ verbs = [
 ]
 
 keywords = [
-	"like", "so", "means", "every", "on", "which", "do", 
-	"if", "while", "then", "true", "false", "greater", "equal", "new", "not", "return", "end",
-	"at the same time", "at", "is", "of", "than",
+	"at", "at the same time", "do", "end", "equal", "every", "false", "for", "greater", 
+	"if", "is", "like", "means", "new", "not", "of", "on", 
+	"return", "so", "than", "then", "true", 
+	"whenever", "which", "while", 
 ]
 prepositions = ["between", "to", "with"]

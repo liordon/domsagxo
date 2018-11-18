@@ -7,3 +7,14 @@ can change property of appliance
             kato estas naux.
             pliigu kato.''').evaluate(initial_state)
         assert 11 == new_state.variables['kato']
+
+a variable can be either a value or a function object like in python.
+	if a function ii is defined, preexisting variable io is no longer a valid vlaue
+	if value is assigned to io, preexisting routine iu can no longer be invoked.
+
+objects can be created (even defined?)
+	new list makes new list
+	new contact makes new contact.
+
+there is a for loop in the language
+
