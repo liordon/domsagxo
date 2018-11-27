@@ -22,7 +22,8 @@ class Domsagxo(object):
         self.method_dict = {
             "hazardu": generateRandom,
             "sxaltu" : self.requestDeviceActivation,
-            "aldonu" : self.requestDeviceAddition
+            "aldonu" : self.requestDeviceAddition,
+            "anoncu" : print,
         }
         self.variables = {}
         for enum in [cls for cls in library.predefined_values.all_categories]:
