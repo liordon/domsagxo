@@ -42,6 +42,9 @@ class ExpressionLevelAstProvided(object):
 
 class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType):
 
+    def test_parsedStringReturnsStringNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "''", Node.String)
+
     def test_parsedNumberReturnsNumberNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "1", Node.Number)
 

@@ -22,6 +22,7 @@ class UnalphabeticTerminal(Enum):
     PERIOD = 'TPERIOD'
     ASSIGN = 'TASSIGN'
     NUMBER = 'TNUMBER'
+    STRING = 'TSTRING'
     L_PAREN = 'TLPAREN'
     R_PAREN = 'TRPAREN'
     COMMENT = 'TCOMMENT'
@@ -216,6 +217,8 @@ digitRe = re.compile(
 
 timeUnitRe = re.compile(r"(jaro|monato|semajno|tago|horo|minuto|sekundo)j?\b")
 
+stringRe = re.compile(r"")
+
 
 def parseDigit(name):
     if name[-3:] == "ono":
@@ -231,6 +234,20 @@ def parseDigit(name):
         multiplier = 100
 
     return digitNames[name] * multiplier
+
+
+def t_string(t):
+    r"""('|"|maldekstra\scitilo).*(dekstra\scitilo|"|')"""
+    if t.value.startswith("maldekstra citilo"):
+        t.value = t.value[18:]
+    if t.value.startswith(("'", '"')):
+        t.value = t.value[1:]
+    if t.value.endswith("dekstra citilo"):
+        t.value = t.value[:-15]
+    if t.value.endswith(("'", '"')):
+        t.value = t.value[:-1]
+    t.type = UnalphabeticTerminal.STRING.value
+    return t
 
 
 def t_TWORD(t):

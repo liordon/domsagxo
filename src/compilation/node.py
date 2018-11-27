@@ -23,6 +23,13 @@ class Number(AstNode):
         return state, number
 
 
+class String(AstNode):
+    def __init__(self, string):
+        super(String, self).__init__(string)
+
+    def _method(self, state, string):
+        return state, string
+
 class NoneNode(AstNode):
     def __init__(self):
         super(NoneNode, self).__init__()

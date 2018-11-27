@@ -149,6 +149,38 @@ class TestReservedWords(LexerProvided):
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.EVERY)
 
 
+class TestStrings(LexerProvided):
+    def test_theWords_leftQuotationRightQuotation_createAStringToken(self, lexer):
+        lexer.input("maldekstra citilo dekstra citilo")
+        token = lexer.token()
+        assert UnalphabeticTerminal.STRING.value == token.type
+        assert "" == token.value
+
+    def test_quotationMarks_createAStringToken(self, lexer):
+        lexer.input("''")
+        token = lexer.token()
+        assert UnalphabeticTerminal.STRING.value == token.type
+        assert "" == token.value
+
+    def test_doubleQuotes_createAStringToken(self, lexer):
+        lexer.input('""')
+        token = lexer.token()
+        assert UnalphabeticTerminal.STRING.value == token.type
+        assert "" == token.value
+
+    def test_stringContentIsNotParsedLexicallyAsCode(self, lexer):
+        lexer.input("'kato'")
+        token = lexer.token()
+        assert "kato" == token.value
+        assert PartOfSpeech.NOUN.value != token.type
+        assert UnalphabeticTerminal.STRING.value == token.type
+
+    def test_literalQuotationMarksDoNotLeaveLeadingOrTrailingSpaces(self, lexer):
+        lexer.input("maldekstra citilo kato dekstra citilo")
+        token = lexer.token()
+        assert "kato" == token.value
+
+
 class TestMultipleTokenSequences(LexerProvided):
 
     @staticmethod

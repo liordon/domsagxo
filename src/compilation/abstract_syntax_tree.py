@@ -273,7 +273,7 @@ def build(start=None):
 
     # ----------------------------   literals and constants    ------------------------- #
     @RULE(Var.EXPRESSION, [[ResWord.NONE]])
-    def p_factor_none(p):
+    def p_expression_none(p):
         p[0] = Node.NoneNode()
 
     @RULE(Var.EXPRESSION, [[ResWord.TRUE]])
@@ -283,6 +283,10 @@ def build(start=None):
     @RULE(Var.EXPRESSION, [[ResWord.FALSE]])
     def p_expression_false(p):
         p[0] = Node.Boolean(False)
+
+    @RULE(Var.EXPRESSION, [[UaTer.STRING]])
+    def p_expression_string(p):
+        p[0] = Node.String(p[1])
 
     @RULE(Var.TIME_POINT, [[Var.HOUR_NUMERATOR, ResWord.AND, Var.NUMBER_LITERAL]])
     def p_time_point(p):
