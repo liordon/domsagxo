@@ -206,7 +206,7 @@ digitNames = {
     "ses" : 6,
     "sep" : 7,
     "ok"  : 8,
-    "naŭ": 9,
+    "naŭ" : 9,
     "naux": 9,
     ""    : 1
 }

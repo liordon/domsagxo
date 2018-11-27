@@ -28,6 +28,7 @@ class Var(Enum):
     TIME_SPAN = 'Vtime_span'
     TIME_POINT = 'Vtime_point'
     NAME = 'Vname'
+    VARIABLE = 'Vvariable'
     PARTIAL_NAME = 'Vpartial_name'
     ADJECTIVE = 'Vadjective'
     TERM = 'Vterm'
@@ -115,7 +116,7 @@ def build(start=None):
     def p_repeatingStatement_repetitionAndAction(p):
         p[0] = Node.RepeatedStatement(p[1], p[3])
 
-    @RULE(Var.ASSIGN_STATEMENT, [[Var.NAME, UaTer.ASSIGN, Var.EXPRESSION]])
+    @RULE(Var.ASSIGN_STATEMENT, [[Var.VARIABLE, UaTer.ASSIGN, Var.EXPRESSION]])
     def p_assignStatement_assign(p):
         p[0] = Node.VariableAssignment(p[1], p[3])
 
@@ -125,14 +126,18 @@ def build(start=None):
 
     # ---------------------       variable name definitions     ----------------------------#
 
-    @RULE(Var.NAME, [[Var.NAME, ResWord.OF, Var.NAME]])
-    def p_name_dereference(p):
+    @RULE(Var.VARIABLE, [[Var.NAME, ResWord.OF, Var.VARIABLE]])
+    def p_variable_dereference(p):
         p[0] = Node.Dereference(p[1], p[3])
 
-    @RULE(Var.NAME, [[Var.PARTIAL_NAME, ResWord.OF, Var.NAME],
-                     [POS.NUMERATOR, ResWord.OF, Var.NAME]])
-    def p_name_arrayAccess(p):
+    @RULE(Var.VARIABLE, [[Var.PARTIAL_NAME, ResWord.OF, Var.VARIABLE],
+                     [POS.NUMERATOR, ResWord.OF, Var.VARIABLE]])
+    def p_variable_arrayAccess(p):
         p[0] = Node.ArrayAccess(p[1], p[3])
+
+    @RULE(Var.VARIABLE, [[Var.NAME]])
+    def p_variable_name(p):
+        p[0] = p[1]
 
     @RULE(Var.NAME, [[POS.NOUN],
                      [Var.PARTIAL_NAME, POS.NOUN]])
@@ -215,7 +220,7 @@ def build(start=None):
                                                + str(p[1]) + " and " + str(p[2]))
             p[0] = p[1] + p[2]
 
-    @RULE(Var.FACTOR, [[Var.NAME]])
+    @RULE(Var.FACTOR, [[Var.VARIABLE]])
     def p_factor_noun(p):
         p[0] = p[1]
 
