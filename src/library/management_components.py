@@ -22,6 +22,7 @@ class Domsagxo(object):
         self.method_dict = {
             "hazardu": generateRandom,
             "sxaltu" : self.requestDeviceActivation,
+            "malsxaltu" : self.requestDeviceDeActivation,
             "aldonu" : self.requestDeviceAddition,
             "anoncu" : print,
         }
@@ -87,11 +88,17 @@ class Domsagxo(object):
         appliance = Appliance(ApplianceTypes(appliance_type), appliance_name)
         self.addAppliance(appliance)
 
-    def requestDeviceActivation(self, devices):
+    def requestDeviceActivation(self, *devices):
         def turnOnDevice(device):
             device.isTurnedOn = True
 
         self.performActionOnAllDevices(devices, turnOnDevice)
+
+    def requestDeviceDeActivation(self, *devices):
+        def turnOffDevice(device):
+            device.isTurnedOn = False
+
+        self.performActionOnAllDevices(devices, turnOffDevice)
 
     def requestChangeToDeviceProperty(self, device, property_to_change, value):
         def setDeviceProperty(specific_device):

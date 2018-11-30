@@ -207,7 +207,8 @@ class TestAstApplianceManagement(object):
         manager.addAppliance(atypes.Appliance(atypes.ApplianceTypes.KNOB, "lulu"))
 
         evaluate_and_return_state(ast, "sxaltu la lumojn", manager)
-        for appliance in [app for app in manager.variables.values() if isinstance(app, atypes.Appliance)]:
+        for appliance in [app for app in manager.variables.values() if
+                          isinstance(app, atypes.Appliance)]:
             if appliance.type is atypes.ApplianceTypes.LIGHT:
                 assert appliance.isTurnedOn
             elif appliance.type is not atypes.ApplianceTypes.LIGHT:
@@ -242,13 +243,13 @@ class TestObjectOrientedActions(object):
         smart_home.addAppliance(light_bulb)
         return smart_home
 
-    def test_canAccessColorFieldOfLightBulb(self, parser, smart_home):
-        ast = parser.parse("koloro de sxambalulo")
-        state, value = ast.evaluate(smart_home)
-        assert isinstance(value, atypes.Color)
-
     def test_canChangeColorFieldOfLightBulb(self, parser, smart_home):
         ast = parser.parse("koloro de sxambalulo estas rugxo")
         smart_home, value = ast.evaluate(smart_home)
         assert atypes.Color.RED.value == smart_home.variables["sxambalulo"].properties[
             "koloro"]
+
+    def test_canChangeBrightnessFieldOfLightBulb(self, parser, smart_home):
+        ast = parser.parse("brilo de sxambalulo estas sepdek")
+        smart_home, value = ast.evaluate(smart_home)
+        assert 70 == smart_home.variables["sxambalulo"].properties["brilo"]

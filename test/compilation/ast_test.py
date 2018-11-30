@@ -150,6 +150,15 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
         assert 6 == ast.parse(variable_name).getter(state)
         assert 6 == state.variables["ampoloj"][1]
 
+    def test_canUseVariableAsIndexOfArray(self, ast, state):
+        variable_name = "kata de ampoloj"
+        setter = ast.parse(variable_name).setter
+        state.variables["ampoloj"] = [1, 2, 3]
+        state.variables["kato"] = 2
+        setter(state, 5)
+        assert 5 == ast.parse(variable_name).getter(state)
+        assert 5 == state.variables["ampoloj"][1]
+
 
 def parsed_value_of(ast, expr, state=None):
     node = ast.parse(expr)

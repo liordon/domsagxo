@@ -198,7 +198,7 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         manager.addApplianceToGroup(app_nm2, group_nm1)
 
         manager.requestDeviceActivation(
-            [manager.variables[group_nm1], manager.variables[app_nm3]])
+            manager.variables[group_nm1], manager.variables[app_nm3])
 
         assert manager.variables[app_nm1].isTurnedOn
         assert manager.variables[app_nm2].isTurnedOn

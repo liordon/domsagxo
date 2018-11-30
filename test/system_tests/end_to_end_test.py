@@ -25,9 +25,6 @@ class StatementLevelAstProvided(object):
 
 class TestUntimedAstStatements(StatementLevelAstProvided):
 
-    def test_anExpressionIsAlsoAStatement(self, ast):
-        ast.parse("12")
-
     def test_capableOfNumberAssignment(self, ast):
         variables = evaluate_and_return_state_variables(ast, "kato = 10")
         assert 10 == variables["kato"]
@@ -49,7 +46,7 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
 
     def test_definiteNounsBecomeIndefinite(self, ast):
         state = evaluate_and_return_state_variables(ast, "la kato = 9")
-        assert 9== state["kato"]
+        assert 9 == state["kato"]
 
     def test_definiteDescribedNounAlsoBecomesIndefinite(self, ast):
         state = evaluate_and_return_state_variables(ast, "la dika kato = 99")
@@ -166,7 +163,7 @@ class TestAstPrograms(object):
             ast.parse("12")
 
     def test_canParseASingleCommandAsProgram(self, ast):
-        ast.parse("12.")
+        ast.parse("kato estas sep.")
 
     def test_consecutiveStatementsPropagateVariableValues(self, ast):
         new_state = evaluate_and_return_state_variables(ast, '''kato=2+4*10.
@@ -174,13 +171,8 @@ class TestAstPrograms(object):
         assert 42 == new_state["kato"]
         assert 7 == new_state["hundo"]
 
-    def test_returnStatementReturnsItsDeclaredValue(self, ast):
-        value = ast.parse('''revenu ses.''').evaluate(None)[1]
-        assert 6 == value
-
     def test_returnStopsProgramFromContinuing(self, ast, initial_state):
-        new_manager, value = ast.parse('''revenu ses. kato = 10.''').evaluate(initial_state)
-        assert 6 == value
+        new_manager, value = ast.parse('''revenu. kato = 10.''').evaluate(initial_state)
         assert "kato" not in new_manager.variables
 
     def test_returnStopsWhileLoopFromContinuing(self, ast, initial_state):
@@ -189,9 +181,8 @@ class TestAstPrograms(object):
         dum kato estas pli granda ol nul tiam
             kato estas kato-1.
             se kato estas egala al tri tiam
-                revenu kato.
+                revenu.
             finu.
         finu.
         ''').evaluate(initial_state)
         assert 3 == manager.variables["kato"]
-        assert 3 == value

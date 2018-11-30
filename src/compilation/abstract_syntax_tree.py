@@ -77,8 +77,8 @@ def build(start=None):
         else:
             p[0] = Node.Program(p[1], p[2])
 
-    @RULE(Var.STATEMENT, [[Var.EXPRESSION],
-                          [Var.FUNCTION_DEFINITION],
+    @RULE(Var.STATEMENT, [[Var.FUNCTION_DEFINITION],
+                          [Var.FUNCTION_INVOCATION],
                           [Var.ASSIGN_STATEMENT],
                           [Var.RETURN_STATEMENT],
                           [Var.IF_STATEMENT],
@@ -120,9 +120,9 @@ def build(start=None):
     def p_assignStatement_assign(p):
         p[0] = Node.VariableAssignment(p[1], p[3])
 
-    @RULE(Var.RETURN_STATEMENT, [[ResWord.RETURN, Var.EXPRESSION]])
+    @RULE(Var.RETURN_STATEMENT, [[ResWord.RETURN]])
     def p_returnStatement_return(p):
-        p[0] = Node.ReturnValue(p[2])
+        p[0] = Node.ReturnValue()
 
     # ---------------------       variable name definitions     ----------------------------#
 
@@ -131,7 +131,7 @@ def build(start=None):
         p[0] = Node.Dereference(p[1], p[3])
 
     @RULE(Var.VARIABLE, [[Var.PARTIAL_NAME, ResWord.OF, Var.VARIABLE],
-                     [POS.NUMERATOR, ResWord.OF, Var.VARIABLE]])
+                         [POS.NUMERATOR, ResWord.OF, Var.VARIABLE]])
     def p_variable_arrayAccess(p):
         p[0] = Node.ArrayAccess(p[1], p[3])
 
@@ -143,7 +143,7 @@ def build(start=None):
                      [Var.PARTIAL_NAME, POS.NOUN]])
     def p_name_partialNameAndNoun(p):
         if len(p) == 3:
-            p[0] = Node.VariableName(p[2] , p[1])
+            p[0] = Node.VariableName(p[2], p[1])
         else:
             p[0] = Node.VariableName(p[1], Node.NoneNode())
 
@@ -194,8 +194,7 @@ def build(start=None):
 
     @RULE(Var.EXPRESSION, [[Var.TERM],
                            [Var.TIME_POINT],
-                           [Var.TIME_SPAN],
-                           [Var.FUNCTION_INVOCATION]])
+                           [Var.TIME_SPAN], ])
     def p_expression_term(p):
         p[0] = p[1]
 

@@ -30,6 +30,7 @@ class String(AstNode):
     def _method(self, state, string):
         return state, string
 
+
 class NoneNode(AstNode):
     def __init__(self):
         super(NoneNode, self).__init__()
@@ -180,17 +181,26 @@ class ArrayAccess(AstNode):
     def _method(self, state, numerator, variable_name):
         state, evaluated_index = numerator.evaluate(state)
         state, evaluated_var = variable_name.evaluate(state)
-        return state, evaluated_var[evaluated_index-1]
+        return state, evaluated_var[evaluated_index - 1]
 
     def _get_containing_object(self, state):
         return self.variable_name.getter(state)
 
     def setter(self, state, value):
+        evaluated_numerator = self.evaluate_numerator(state)
         containing_object = self._get_containing_object(state)
-        containing_object[self.numerator - 1] = value
+        containing_object[evaluated_numerator - 1] = value
+
+    def evaluate_numerator(self, state):
+        if isinstance(self.numerator, AstNode):
+            state, evaluated_numerator = self.numerator.evaluate(state)
+        else:
+            evaluated_numerator = self.numerator
+        return evaluated_numerator
 
     def getter(self, state):
-        return self._get_containing_object(state)[self.numerator - 1]
+        evaluated_numerator = self.evaluate_numerator(state)
+        return self._get_containing_object(state)[evaluated_numerator - 1]
 
 
 class VariableAssignment(AstNode):
@@ -200,7 +210,12 @@ class VariableAssignment(AstNode):
     def _method(self, state, variable_name, variable_value):
         state, value = variable_value.evaluate(state)
         variable_name.setter(state, value)
-        return state, None
+        return state, nextAction.GO_ON
+
+
+class nextAction(Enum):
+    GO_ON = "go on"
+    RETURN = "return"
 
 
 class Program(AstNode):
@@ -210,7 +225,7 @@ class Program(AstNode):
     def _method(self, state, previous_commands, next_command):
         if previous_commands is not None:
             state, return_value = previous_commands.evaluate(state)
-            if return_value is not None:
+            if return_value == nextAction.RETURN:
                 return state, return_value
         return next_command.evaluate(state)
 
@@ -271,11 +286,11 @@ class FunctionInvocation(AstNode):
 
 
 class ReturnValue(AstNode):
-    def __init__(self, return_value):
-        super(ReturnValue, self).__init__(return_value)
+    def __init__(self):
+        super(ReturnValue, self).__init__()
 
-    def _method(self, state, return_value):
-        return return_value.evaluate(state)
+    def _method(self, state):
+        return state, nextAction.RETURN
 
 
 class FunctionDefinition(AstNode):
@@ -285,7 +300,8 @@ class FunctionDefinition(AstNode):
     @staticmethod
     def turn_ast_into_function(state, function_name, argument_names, abstract_syntax_tree):
         def subtree_function(*argument_list, **kwargs):
-            closure = copy.deepcopy(state)
+            closure = copy.copy(state)
+            closure.variables = copy.copy(state.variables)
             if len(argument_list) != len(argument_names):
                 raise TypeError(str(function_name) + "() expects " +
                                 str(len(argument_names)) + "arguments:\n\t" +
@@ -294,14 +310,15 @@ class FunctionDefinition(AstNode):
                                 str(len(argument_list)) + "were given.")
             for i in range(len(argument_list)):
                 closure.variables[argument_names[i].getContainedName()] = argument_list[i]
-            return abstract_syntax_tree.evaluate(closure)[1]
+            abstract_syntax_tree.evaluate(closure)
+            return nextAction.GO_ON
 
         return subtree_function
 
     def _method(self, state, function_name, argument_names, command_subtree):
         state.method_dict[function_name] = self.turn_ast_into_function(
             state, function_name, argument_names, command_subtree)
-        return state, None
+        return state, nextAction.GO_ON
 
 
 class ConditionalStatement(AstNode):
@@ -406,7 +423,7 @@ class LoopStatement(AstNode):
         state, flag = condition.evaluate(state)
         while flag:
             state, return_value = body.evaluate(state)
-            if return_value is not None:
+            if return_value == nextAction.RETURN:
                 return state, return_value
             state, flag = condition.evaluate(state)
 
