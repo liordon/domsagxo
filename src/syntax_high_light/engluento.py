@@ -1,15 +1,15 @@
 adjectives = [
-	"ugly", "beutiful", "tall", "short", "quick", "brown", "lazy", "front", "first", "second",
+    "ugly", "beutiful", "tall", "short", "quick", "brown", "lazy", "front", "first", "second",
 ]
 nouns = [
-	"argumet", "arguments", "blinds", "brightness", "bulb", 
-	"cat", "channel", "child", "contact",
-	"dog", "door", "fox", "function", "functions", "hashmugan", 
-	"i", "index", "length", "light", "lights", "list", 
-	"m", "marko", "number", "numbers", 
-	"other", "oven", "routine", "routines", 
-	"television", "televisions", "temperature", "time", 
-	"window", 
+    "argumet", "arguments", "blinds", "brightness", "bulb",
+    "cat", "channel", "child", "contact",
+    "dog", "door", "fox", "function", "functions", "hashmugan",
+    "i", "index", "length", "light", "lights", "list",
+    "m", "marko", "number", "numbers",
+    "other", "oven", "routine", "routines",
+    "television", "televisions", "temperature", "time",
+    "window",
 ]
 
 fractions = ["half", "third", "thirds", "quarter", "quarters"]
@@ -20,15 +20,15 @@ decades = ["ten", "twenty", "thirty", "fourty", "fifty", "sixty", "seventy", "ei
 largeAmounts = ["hundred", "thousand", "million", "billion"]
 
 verbs = [
-	"add", "announce", "check primality", "close", "compose", "lock", "minimize", 
-	"play", "pretend", "project", "randomize", "recurse", "replace", 
-	"sub-compose", "successor", "square", "turn off", "turn on", 
+    "add", "announce", "check primality", "close", "compose", "lock", "minimize",
+    "play", "pretend", "project", "randomize", "recurse", "replace",
+    "sub-compose", "successor", "square", "turn off", "turn on",
 ]
 
 keywords = [
-	"at", "at the same time", "do", "end", "equal", "every", "false", "for", "greater", 
-	"if", "is", "like", "means", "new", "not", "of", "on", 
-	"return", "so", "than", "then", "true", 
-	"whenever", "which", "while", 
+    "at", "at the same time", "do", "end", "equal", "every", "false", "for", "greater",
+    "if", "is", "like", "means", "new", "not", "of", "on",
+    "return", "so", "than", "then", "true",
+    "whenever", "which", "while",
 ]
 prepositions = ["between", "to", "with"]

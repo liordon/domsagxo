@@ -6,7 +6,6 @@ import compilation.abstract_syntax_tree as ast_bld
 import compilation.esp_lexer as lxr
 import library.atomic_types as atypes
 import library.management_components as mgmt_cmp
-from library import predefined_values
 
 lxr.build()
 
@@ -206,5 +205,5 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
 
         assert 25 == len(self.prime_list)
         for i in range(2, 100):
-            assert is_prime(i) == new_state.variables['sxambaluloj'][i-1].isTurnedOn
+            assert is_prime(i) == new_state.variables['sxambaluloj'][i - 1].isTurnedOn
             assert is_prime(i) == (i in self.prime_list)

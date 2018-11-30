@@ -20,11 +20,11 @@ class Domsagxo(object):
     def __init__(self, scheduler=None):
         self.variables = {}
         self.method_dict = {
-            "hazardu": generateRandom,
-            "sxaltu" : self.requestDeviceActivation,
-            "malsxaltu" : self.requestDeviceDeActivation,
-            "aldonu" : self.requestDeviceAddition,
-            "anoncu" : print,
+            "hazardu"  : generateRandom,
+            "sxaltu"   : self.requestDeviceActivation,
+            "malsxaltu": self.requestDeviceDeActivation,
+            "aldonu"   : self.requestDeviceAddition,
+            "anoncu"   : print,
         }
         self.variables = {}
         for enum in [cls for cls in library.predefined_values.all_categories]:

@@ -38,7 +38,7 @@ class TestLiterals(LexerProvided):
 
     def test_strings(self, lexer):
         tokens = lexer.get_tokens("maldekstra citilo mi nomigxas lioro dekstra citilo")
-        self.assertTokensTypeSequence(tokens, [Keyword] + [String]*3 + [Keyword])
+        self.assertTokensTypeSequence(tokens, [Keyword] + [String] * 3 + [Keyword])
 
     def test_timePoints_timeSpans(self, lexer):
         tokens = lexer.get_tokens("horo minutoj jaro sekundoj")

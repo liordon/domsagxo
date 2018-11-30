@@ -1,8 +1,8 @@
 from appJar import gui
 
 import compilation.abstract_syntax_tree as ast_bld
-from library.management_components import Domsagxo
 import compilation.esp_lexer as lxr
+from library.management_components import Domsagxo
 
 lxr.build()
 smart_home = Domsagxo()

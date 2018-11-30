@@ -4,7 +4,7 @@ setup(
     name="domsagxo",
     packages=find_packages(),
 
-     entry_points="""
+    entry_points="""
          [pygments.lexers]
          domsagxo = syntax_high_light.pygment_lexer:DomsagxoLexer
          engluento = syntax_high_light.pygment_lexer:EngluentoLexer
