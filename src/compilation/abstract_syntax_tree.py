@@ -69,13 +69,14 @@ def build(start=None):
     def p_program_block(p):
         p[0] = p[1]
 
-    @RULE(Var.BLOCK, [[Var.STATEMENT, UaTer.PERIOD],
-                      [Var.BLOCK, Var.STATEMENT, UaTer.PERIOD]])
+    @RULE(Var.BLOCK, [[Var.STATEMENT],
+                      [Var.BLOCK, ResWord.AND_THEN, Var.STATEMENT],
+                      [Var.BLOCK, ResWord.SIMULTANEOUSLY, Var.STATEMENT]])
     def p_block_separatedStatements(p):
-        if len(p) == 3:
+        if len(p) == 2:
             p[0] = Node.Program(None, p[1])
         else:
-            p[0] = Node.Program(p[1], p[2])
+            p[0] = Node.Program(p[1], p[3])
 
     @RULE(Var.STATEMENT, [[Var.FUNCTION_DEFINITION],
                           [Var.FUNCTION_INVOCATION],

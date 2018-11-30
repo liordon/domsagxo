@@ -148,6 +148,12 @@ class TestReservedWords(LexerProvided):
         lexer.input("cxiu")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.EVERY)
 
+    def test_theWords_AndThenAtTheSameTime_areReservedForChainingCommands(self, lexer):
+        lexer.input("poste")
+        self.assertPartOfSpeechForNextToken(lexer, ReservedWord.AND_THEN)
+        lexer.input("samtempe")
+        self.assertPartOfSpeechForNextToken(lexer, ReservedWord.SIMULTANEOUSLY)
+
 
 class TestStrings(LexerProvided):
     def test_theWords_leftQuotationRightQuotation_createAStringToken(self, lexer):

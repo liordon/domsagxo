@@ -54,24 +54,24 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
 
     def test_ifStatementContentIsNotEvaluatedIfConditionIsFalse(self, ast):
         assert "kato" not in evaluate_and_return_state_variables(
-            ast, "se malvero tiam kato estas sep. finu")
+            ast, "se malvero tiam kato estas sep finu")
 
     def test_ifStatementContentIsEvaluatedIfConditionIsTrue(self, ast):
         state = \
-            evaluate_and_return_state_variables(ast, "se vero tiam kato estas sep. finu")
+            evaluate_and_return_state_variables(ast, "se vero tiam kato estas sep finu")
         assert 7 == state["kato"]
 
     def test_elseStatementContentIsEvaluatedIfConditionIsFalse(self, ast):
         new_state = \
             evaluate_and_return_state_variables(ast,
-                                                "se malvero tiam kato estas sep. "
-                                                "alie kato estas naux. finu")
+                                                "se malvero tiam kato estas sep "
+                                                "alie kato estas naux finu")
         assert 9 == new_state["kato"]
 
     @pytest.mark.timeout(1)
     def test_canDefineSimpleWhileLoopThatDoesNotEvaluate(self, ast):
         assert "kato" not in evaluate_and_return_state_variables(
-            ast, "dum malvero tiam kato estas sep. finu")
+            ast, "dum malvero tiam kato estas sep finu")
 
     @pytest.mark.timeout(1)
     def test_canDefineWhileLoopThatEvaluatesOnce(self, ast):
@@ -80,7 +80,7 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         new_state = \
             evaluate_and_return_state_variables(ast,
                                                 "dum kato estas pli granda ol nul tiam "
-                                                "kato estas kato-1. finu",
+                                                "kato estas kato-1 finu",
                                                 manager)
         assert 0 == new_state["kato"]
 
@@ -91,11 +91,11 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         new_state = \
             evaluate_and_return_state_variables(ast,
                                                 "dum kato estas pli granda ol nul tiam "
-                                                "kato estas kato-1. finu",
+                                                "kato estas kato-1 finu",
                                                 manager)
         assert 0 == new_state["kato"]
 
-    def test_canUseTurnVariablesIntoNumeratorsViaChangeFromNounToAdjective(self, ast):
+    def test_canTurnVariablesIntoNumeratorsViaChangeFromNounToAdjective(self, ast):
         manager = mng_co.Domsagxo()
         manager.variables["indekso"] = 2
         manager.variables["ampoloj"] = [1, 2, 3]
@@ -163,26 +163,38 @@ class TestAstPrograms(object):
             ast.parse("12")
 
     def test_canParseASingleCommandAsProgram(self, ast):
-        ast.parse("kato estas sep.")
+        ast.parse("kato estas sep")
+
+    def test_canExecuteTwoCommandsSequentially(self, ast):
+        variables = evaluate_and_return_state_variables(
+            ast, "kato estas kvar poste hundo estas kvin")
+        assert 4 == variables["kato"]
+        assert 5 == variables["hundo"]
+
+    def test_canExecuteTwoCommandsInParallel(self, ast):
+        variables = evaluate_and_return_state_variables(
+            ast, "kato estas kvin samtempe hundo estas kvar")
+        assert 5 == variables["kato"]
+        assert 4 == variables["hundo"]
 
     def test_consecutiveStatementsPropagateVariableValues(self, ast):
-        new_state = evaluate_and_return_state_variables(ast, '''kato=2+4*10.
-                        hundo = kato/6.''')
+        new_state = evaluate_and_return_state_variables(ast, '''kato=2+4*10
+                        poste hundo = kato/6''')
         assert 42 == new_state["kato"]
         assert 7 == new_state["hundo"]
 
     def test_returnStopsProgramFromContinuing(self, ast, initial_state):
-        new_manager, value = ast.parse('''revenu. kato = 10.''').evaluate(initial_state)
+        new_manager, value = ast.parse('''revenu poste kato = 10''').evaluate(initial_state)
         assert "kato" not in new_manager.variables
 
     def test_returnStopsWhileLoopFromContinuing(self, ast, initial_state):
         manager, value = ast.parse('''
-        kato estas naux.
-        dum kato estas pli granda ol nul tiam
-            kato estas kato-1.
-            se kato estas egala al tri tiam
-                revenu.
-            finu.
-        finu.
+        kato estas naux
+        poste dum kato estas pli granda ol nul tiam
+            kato estas kato-1
+            poste se kato estas egala al tri tiam
+                revenu
+            finu
+        finu
         ''').evaluate(initial_state)
         assert 3 == manager.variables["kato"]

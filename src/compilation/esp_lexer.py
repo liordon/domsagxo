@@ -31,6 +31,7 @@ class UnalphabeticTerminal(Enum):
 class ReservedWord(Enum):
     AFTER = 'Tpost'
     AND = 'Tkaj'
+    AND_THEN = 'Tposte'
     AT = 'Tje'
     BOTH = 'Tambaux'
     DURING = 'Tdum'
@@ -52,6 +53,7 @@ class ReservedWord(Enum):
     OR = 'Taux'
     PARTS = 'Tpartoj'
     RETURN = 'Trevenu'
+    SIMULTANEOUSLY = 'Tsamtempe'
     SMALLER = 'Tmalgranda'
     THAN = 'Tol'
     THE = 'Tla'
@@ -109,10 +111,10 @@ reserved_words = {
     "pli"      : ReservedWord.MORE.value,
     "por"      : ReservedWord.FOR.value,
     "post"     : ReservedWord.AFTER.value,
-    "poste"    : ReservedWord.AFTER.value,
+    "poste"    : ReservedWord.AND_THEN.value,
     "revenu"   : ReservedWord.RETURN.value,
     "se"       : ReservedWord.IF.value,
-    "samtempe" : ReservedWord.DURING.value,
+    "samtempe" : ReservedWord.SIMULTANEOUSLY.value,
     "signifas" : ReservedWord.THIS_WAY.value,
     "tiam"     : ReservedWord.THEN.value,
     "unufoje"  : ReservedWord.ONCE.value,
