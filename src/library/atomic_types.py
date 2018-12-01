@@ -17,7 +17,7 @@ class Appliance(object):
         if self.type is ApplianceTypes.LIGHT:
             self.properties = {
                 ApplianceProperties.BRIGHTNESS.value: 1,
-                ApplianceProperties.COLOR.value     : Color.WHITE
+                ApplianceProperties.COLOR.value     : Color.WHITE.value
             }
 
     def setStateComponent(self, state_component, value):
