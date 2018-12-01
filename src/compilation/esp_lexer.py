@@ -239,7 +239,8 @@ def parseDigit(name):
 
 
 def t_string(t):
-    r"""('|"|maldekstra\scitilo).*(dekstra\scitilo|"|')"""
+    r"""('|"|maldekstra\scitilo\b).*?(\bdekstra\scitilo\b|"|')"""
+    # r"""('[^']*')|("[^"]*")|(maldekstra\scitilo [^(dekstra\scitilo)]*( dekstra\scitilo))"""
     if t.value.startswith("maldekstra citilo"):
         t.value = t.value[18:]
     if t.value.startswith(("'", '"')):

@@ -1,21 +1,5 @@
-import pytest
-
-import compilation.esp_lexer as lxr
 from compilation.esp_lexer import PartOfSpeech, UnalphabeticTerminal, ReservedWord
-
-
-class LexerProvided(object):
-    @pytest.fixture
-    def lexer(self):
-        return lxr.build()
-
-    @staticmethod
-    def assertPartOfSpeechForGivenToken(token, partOfSpeech):
-        assert partOfSpeech.value == token.type
-
-    @staticmethod
-    def assertPartOfSpeechForNextToken(lexer, partOfSpeech):
-        assert partOfSpeech.value == lexer.token().type
+from test_utils.providers import LexerProvided
 
 
 class TestPartsOfSpeech(LexerProvided):
@@ -181,10 +165,26 @@ class TestStrings(LexerProvided):
         assert PartOfSpeech.NOUN.value != token.type
         assert UnalphabeticTerminal.STRING.value == token.type
 
+    def test_canDifferentiateTwoStringsInSameSpeech(self, lexer):
+        lexer.input("maldekstra citilo dekstra citilo maldekstra citilo dekstra citilo")
+        assert UnalphabeticTerminal.STRING.value == lexer.token().type
+        assert UnalphabeticTerminal.STRING.value == lexer.token().type
+        lexer.input("''''")
+
     def test_literalQuotationMarksDoNotLeaveLeadingOrTrailingSpaces(self, lexer):
         lexer.input("maldekstra citilo kato dekstra citilo")
         token = lexer.token()
         assert "kato" == token.value
+
+    def test_literalQuotationMarksCannotHavePrefixesOrSuffixes(self, lexer):
+        lexer.input("maldekstra citiloj dekstra citilo")
+        assert UnalphabeticTerminal.STRING.value != lexer.token().type
+        lexer.input("maldekstra citilo dekstra citiloj")
+        assert UnalphabeticTerminal.STRING.value != lexer.token().type
+        lexer.input("maldekstra citilo maldekstra citilo")
+        assert UnalphabeticTerminal.STRING.value != lexer.token().type
+        lexer.input("malmaldekstra citilo dekstra citilo")
+        assert UnalphabeticTerminal.STRING.value != lexer.token().type
 
 
 class TestMultipleTokenSequences(LexerProvided):

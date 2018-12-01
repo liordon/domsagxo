@@ -1,23 +1,15 @@
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
-import compilation.esp_lexer as lxr
 import compilation.node as Node
 from test_utils import mocks
-
-lxr.build()
+from test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided
 
 
 class CanAssertNodeType(object):
     @staticmethod
     def assertThatExpressionIsOfNodeType(ast, expr, nodeType):
         assert isinstance(ast.parse(expr), nodeType)
-
-
-class PartialNameLevelAstProvided(object):
-    @pytest.fixture
-    def ast(self):
-        return ast_bld.build(start=ast_bld.Var.PARTIAL_NAME.value)
 
 
 class TestNameAndNumeratorAstNodes(PartialNameLevelAstProvided, CanAssertNodeType):
@@ -32,12 +24,6 @@ class TestNameAndNumeratorAstNodes(PartialNameLevelAstProvided, CanAssertNodeTyp
 
     def test_parsedDigitalNumeratorReturnsDescriptionNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "unua", Node.Description)
-
-
-class ExpressionLevelAstProvided(object):
-    @pytest.fixture
-    def ast(self):
-        return ast_bld.build(start=ast_bld.Var.EXPRESSION.value)
 
 
 class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType):

@@ -1,4 +1,5 @@
 import sched
+from threading import Thread
 
 import library.predefined_values
 from library.atomic_types import Appliance
@@ -34,7 +35,25 @@ class Domsagxo(object):
         for appType in library.predefined_values.ApplianceTypes:
             self.variables[appType.value + "j"] = []
         self.number_of_reserved_words = len(self.variables)
+
         self.scheduler = scheduler
+        if self.scheduler is None:
+            self.scheduler = Horaro()
+        self.scheduler_is_running = False
+        self.scheduler_runner = None
+
+    def start_scheduler(self):
+        def run_scheduler_in_background():
+            while self.scheduler_is_running:
+                self.scheduler.runSetTime()
+
+        self.scheduler_runner = Thread(target=run_scheduler_in_background)
+        self.scheduler_is_running = True
+        self.scheduler_runner.start()
+
+    def stop_scheduler(self):
+        self.scheduler_is_running = False
+        self.scheduler_runner.join()
 
     def addAppliance(self, appliance):
         if appliance.name in self.variables:
@@ -129,22 +148,29 @@ class Domsagxo(object):
 
 class Horaro(object):
 
-    def __init__(self, time_function, delay_function):
+    def __init__(self, time_function=None, delay_function=None, polling_interval=1):
         """receives a function that tells the time in each invocation, and a function that
         enables a wait for desired amount of time. returns a Horaro scheduler"""
-        self.scheduler = sched.scheduler(time_function, delay_function)
-        self.time_check_interval = 1
+        if time_function is None and delay_function is None:
+            self.scheduler = sched.scheduler()
+        else:
+            self.scheduler = sched.scheduler(time_function, delay_function)
+        self.time_check_interval = polling_interval
 
     def currentTime(self):
         return self.scheduler.timefunc()
 
-    def runSetTime(self, amountOfTime):
+    def runSetTime(self, amountOfTime=None):
+        if amountOfTime is None:
+            amountOfTime = datetime.timedelta(seconds=self.time_check_interval)
         target_time = self.scheduler.timefunc() + amountOfTime.total_seconds()
         while (not self.scheduler.empty()) and \
                 (self.scheduler.queue[0][0] <= target_time):
             self.scheduler.delayfunc(self.scheduler.queue[0][0] - self.scheduler.timefunc())
             self.scheduler.run(False)
-        self.scheduler.delayfunc(target_time - self.scheduler.timefunc())
+        time_left = target_time - self.scheduler.timefunc()
+        if time_left > 0:
+            self.scheduler.delayfunc(time_left)
 
     def runUntil(self, time_point):
         time_amount = time_point - self.getDate()
@@ -180,7 +206,7 @@ class Horaro(object):
             kwargs = {}
         delay = self.timeToSeconds(time_point_or_date)
         if delay > 0:
-            self.scheduler.enter(delay, 1, action, *argument, **kwargs)
+            self.scheduler.enter(delay, 1, action, argument, kwargs)
         else:
             raise ValueError("cannot schedule events for past time.")
 

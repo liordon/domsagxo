@@ -1,13 +1,12 @@
 import datetime
+import time
 
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
-import compilation.esp_lexer as lxr
 import library.management_components as mng_co
-from test_utils.mocks import MockClock
-
-lxr.build()
+from test_utils.providers import StatementLevelAstProvided, SmartHomeManagerProvided, \
+    RealTimeSmartHomeManagerProvided_CarefulVolatile
 
 
 def evaluate_and_return_state_variables(ast, statement, initial_state=None):
@@ -15,12 +14,6 @@ def evaluate_and_return_state_variables(ast, statement, initial_state=None):
         initial_state = mng_co.Domsagxo()  # so as not to put a mutable default
     state, nothing = ast.parse(statement).evaluate(initial_state)
     return state.variables
-
-
-class StatementLevelAstProvided(object):
-    @pytest.fixture
-    def ast(self):
-        return ast_bld.build(start=ast_bld.Var.STATEMENT.value)
 
 
 class TestUntimedAstStatements(StatementLevelAstProvided):
@@ -103,48 +96,28 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
             ast, "kato estas indeksa de ampoloj", manager)['kato']
 
 
-class TestTimedAstStatements(StatementLevelAstProvided):
+class TestTimedAstStatements(StatementLevelAstProvided, SmartHomeManagerProvided):
 
-    @pytest.fixture
-    def fake_timed_smart_home(self):
-        simulative_time = MockClock()
-        scheduler = mng_co.Horaro(time_function=simulative_time.get_current_time,
-                                  delay_function=simulative_time.increase_time)
-        return mng_co.Domsagxo(scheduler)
-
-    @staticmethod
-    def fastForwardBy(manager, **time):
-        manager.scheduler.runSetTime(datetime.timedelta(**time))
-
-    @staticmethod
-    def fastForwardTo(manager, **time):
-        current_date = manager.scheduler.getDate()
-        manager.scheduler.runUntil(current_date.replace(**time))
-
-    @staticmethod
-    def assertNumberOfNewAppliances(number, state):
-        assert number == len(state.variables) - state.number_of_reserved_words
-
-    def test_canUseDelayedActionToAddLight(self, ast, fake_timed_smart_home):
-        manager, value = ast.parse("aldonu lumon post sekundo").evaluate(fake_timed_smart_home)
+    def test_canUseDelayedActionToAddLight(self, ast, smart_home):
+        manager, value = ast.parse("aldonu lumon post sekundo").evaluate(smart_home)
         self.assertNumberOfNewAppliances(0, manager)
-        self.fastForwardBy(fake_timed_smart_home, seconds=1)
+        self.fastForwardBy(smart_home, seconds=1)
         self.assertNumberOfNewAppliances(1, manager)
 
-    def test_canUseScheduledActionToAddLight(self, ast, fake_timed_smart_home):
-        manager, value = ast.parse("aldonu lumon je la sesa horo").evaluate(fake_timed_smart_home)
+    def test_canUseScheduledActionToAddLight(self, ast, smart_home):
+        manager, value = ast.parse("aldonu lumon je la sesa horo").evaluate(smart_home)
         self.assertNumberOfNewAppliances(0, manager)
-        self.fastForwardBy(fake_timed_smart_home, seconds=1)
+        self.fastForwardBy(smart_home, seconds=1)
         self.assertNumberOfNewAppliances(0, manager)
-        self.fastForwardTo(fake_timed_smart_home, hour=6)
+        self.fastForwardTo(smart_home, hour=6)
         self.assertNumberOfNewAppliances(1, manager)
 
-    def test_canUseRepeatedActionToAddLightTwice(self, ast, fake_timed_smart_home):
-        manager, value = ast.parse("aldonu lumon cxiu minuto").evaluate(fake_timed_smart_home)
+    def test_canUseRepeatedActionToAddLightTwice(self, ast, smart_home):
+        manager, value = ast.parse("aldonu lumon cxiu minuto").evaluate(smart_home)
         self.assertNumberOfNewAppliances(0, manager)
-        self.fastForwardBy(fake_timed_smart_home, minutes=1)
+        self.fastForwardBy(smart_home, minutes=1)
         self.assertNumberOfNewAppliances(1, manager)
-        self.fastForwardBy(fake_timed_smart_home, minutes=1)
+        self.fastForwardBy(smart_home, minutes=1)
         self.assertNumberOfNewAppliances(2, manager)
 
 
@@ -198,3 +171,28 @@ class TestAstPrograms(object):
         finu
         ''').evaluate(initial_state)
         assert 3 == manager.variables["kato"]
+
+
+@pytest.mark.timeout(10)
+class TestLargeScalePhenomena(RealTimeSmartHomeManagerProvided_CarefulVolatile):
+
+    def test_afterSchedulerIsStartedItCanAlsoBeStopped(self, smart_home):
+        smart_home.start_scheduler()
+        smart_home.stop_scheduler()
+        smart_home.scheduler_runner.join()
+
+    def test_tasksCanBeAddedToSchedulerWhileItIsBusyWithOthers(self, smart_home, polling_interval):
+        smart_home.start_scheduler()
+        smart_home.scheduler.enter(datetime.timedelta(seconds=polling_interval * 1.5), time.sleep,
+                                   (polling_interval * 2,))
+        time.sleep(polling_interval * 5)
+        self.assert_that_the_scheduler_is_alive(smart_home)
+
+    def test_tasksCanBeSubmittedFasterThanPollingTime(self, smart_home, polling_interval):
+        smart_home.start_scheduler()
+        smart_home.scheduler.enter(datetime.timedelta(seconds=polling_interval * 0.01), time.sleep,
+                                   (polling_interval * 2,))
+        time.sleep(polling_interval * 0.5)
+        smart_home.scheduler.enter(datetime.timedelta(seconds=polling_interval * 0.01), time.sleep,
+                                   (polling_interval * 2,))
+        self.assert_that_the_scheduler_is_alive(smart_home)

@@ -3,7 +3,7 @@ import syntax_high_light.pygment_lexer as lxr
 from pygments.token import *
 
 
-class LexerProvided(object):
+class SyntaxLexerProvided(object):
     @pytest.fixture
     def lexer(self):
         return lxr.DomsagxoLexer()
@@ -30,7 +30,7 @@ class LexerProvided(object):
             current_type += 1
 
 
-class TestLiterals(LexerProvided):
+class TestLiterals(SyntaxLexerProvided):
 
     def test_numbers(self, lexer):
         tokens = lexer.get_tokens("naux dudek ses tricent unu")
@@ -45,7 +45,7 @@ class TestLiterals(LexerProvided):
         self.assertAllTokensOfSameType(tokens, Generic.TypeIndicator)
 
 
-class TestRegularWords(LexerProvided):
+class TestRegularWords(SyntaxLexerProvided):
 
     def test_functions(self, lexer):
         tokens = lexer.get_tokens("vini vidi vicxi sxambaluli lernu programu sxambalulu")
@@ -60,7 +60,7 @@ class TestRegularWords(LexerProvided):
         self.assertAllTokensOfSameType(tokens, Name)
 
 
-class TestReserveWords(LexerProvided):
+class TestReserveWords(SyntaxLexerProvided):
 
     def test_separators(self, lexer):
         tokens = lexer.get_tokens("gxis kaj ekster trans,")

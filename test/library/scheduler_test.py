@@ -2,45 +2,10 @@ import datetime
 
 import pytest
 
-from library.management_components import Horaro
-from test_utils.mocks import MockClock
+from test_utils.providers import TimeManagerWithSimulativeClockProvided
 
 
-class TimeManagerProvided(object):
-
-    @pytest.fixture
-    def scd(self):
-        simulative_time = MockClock()
-        return Horaro(time_function=simulative_time.get_current_time,
-                      delay_function=simulative_time.increase_time)
-
-    @pytest.fixture
-    def increaser(self):
-        self.counter = 0
-
-        def increase_counter(num=1):
-            self.counter += num
-
-        return increase_counter
-
-    @pytest.fixture
-    def one_sec(self):
-        return datetime.timedelta(seconds=1)
-
-    @pytest.fixture
-    def one_min(self):
-        return datetime.timedelta(minutes=1)
-
-    @pytest.fixture
-    def one_day(self):
-        return datetime.timedelta(days=1)
-
-    @pytest.fixture
-    def dawn_of_time(self):
-        return datetime.datetime.utcfromtimestamp(0)
-
-
-class TestTimedActions(TimeManagerProvided):
+class TestTimedActions(TimeManagerWithSimulativeClockProvided):
 
     def test_canRunSetAmountOfTime(self, scd):
         scd.runSetTime(datetime.timedelta(seconds=3))

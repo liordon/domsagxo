@@ -3,11 +3,8 @@ import datetime
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
-import compilation.esp_lexer as lxr
 import library.atomic_types as atypes
 import library.management_components as mcmps
-
-lxr.build()
 
 
 def parsed_value_of(ast, expr, state=None):
