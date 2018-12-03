@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 
 from appJar import gui
 
@@ -34,10 +35,10 @@ def press(button_or_key):
         app.clearTextArea("Speech")
 
 
-def create_light_bulb(name):
+def create_light_bulb(name, row=0, col=0):
     bulb = Appliance(ApplianceTypes.LIGHT, name)
     smart_home.addAppliance(bulb)
-    app.addLabel(name)
+    app.addLabel(name, row=row, column=col)
 
     def update_gui():
         bulb_color = bulb.properties["koloro"]
@@ -59,24 +60,41 @@ def create_light_bulb(name):
             app.setLabelBg(name, "gray")
 
     app.registerEvent(update_gui)
+    return bulb
 
+
+class DemoType(Enum):
+    HOUSE = "house"
+    CORRIDOR = "corridor"
+
+
+demo = DemoType.CORRIDOR
 
 with gui("virtuala domo") as app:
     app.addLabel("title", "Welcome to Domsagxo", colspan=3)
     app.setLabelBg("title", "green")
 
-    with app.labelFrame("Enirejo", 1, 2, 1):
-        create_light_bulb("enirlumo")
+    if demo == DemoType.HOUSE:
+        with app.labelFrame("Enirejo", 1, 2, 1):
+            create_light_bulb("enirlumo")
+        with app.labelFrame("Koridoro", 1, 0, 2):
+            create_light_bulb("koridora lumo")
+        with app.labelFrame("Oficejo", 2, 2, 1, 1):
+            create_light_bulb("laborlampo")
+        with app.labelFrame("Necesejo", 2):
+            create_light_bulb("necesa lumo")
+        with app.labelFrame("dormcxambro", 2, 1):
+            create_light_bulb("dormlumo")
+    else:
+        with app.labelFrame("Koridoro", colspan=2):
+            light_bulbs = []
+            for i in range(100):
+                light_bulbs += [create_light_bulb(str(i+1), row=int(i/10), col=(i)%10)]
+            smart_home.variables["ampoloj"] = light_bulbs
+        with app.labelFrame("scicxambro", colspan=2):
+            # create_screen
+            pass
 
-    with app.labelFrame("Koridoro", 1, 0, 2):
-        create_light_bulb("koridora lumo")
-
-    with app.labelFrame("Oficejo", 2, 2, 1, 1):
-        create_light_bulb("laborlampo")
-    with app.labelFrame("Necesejo", 2):
-        create_light_bulb("necesa lumo")
-    with app.labelFrame("dormcxambro", 2, 1):
-        create_light_bulb("dormlumo")
 
     app.addLabel("l9", "speech:")
     app.addTextArea("Speech", row=3, column=1, colspan=2)
