@@ -45,7 +45,7 @@ if __name__ == "__main__":
                 else:
                     parse_rules[lhs] += [" ".join(rhs)]
 
-    new_grammar_file = "Manuscripts/MscThesis/raw-grammar-rules.tex"
+    new_grammar_file = "Manuscripts/MscThesis/misc/raw-grammar-rules.tex"
     print("writing new grammar rules to: " + new_grammar_file)
     should_print_result = "-p" in sys.argv[1:]
     should_save_result = "-w" in sys.argv[1:]
