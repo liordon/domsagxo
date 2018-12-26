@@ -44,6 +44,7 @@ class ReservedWord(Enum):
     GREATER = 'Tgranda'
     IF = 'Tse'
     IN = 'Ten'
+    IS = 'Testas'
     LESS = 'Tmalpli'
     MORE = 'Tpli'
     NONE = 'Tnenio'
@@ -52,6 +53,7 @@ class ReservedWord(Enum):
     ONCE = 'Tunufoje'
     OR = 'Taux'
     PARTS = 'Tpartoj'
+    PUT = 'Tasignu'
     RETURN = 'Trevenu'
     SIMULTANEOUSLY = 'Tsamtempe'
     SMALLER = 'Tmalgranda'
@@ -85,6 +87,7 @@ reserved_words = {
     "alie"     : ReservedWord.ELSE.value,
     "ambaŭ"    : ReservedWord.BOTH.value,
     "ambaux"   : ReservedWord.BOTH.value,
+    "asignu"   : ReservedWord.PUT.value,
     "aŭ"       : ReservedWord.OR.value,
     "aux"      : ReservedWord.OR.value,
     "ĉiu"      : ReservedWord.EVERY.value,
@@ -94,7 +97,7 @@ reserved_words = {
     "dum"      : ReservedWord.DURING.value,
     "de"       : ReservedWord.OF.value,
     "egala"    : ReservedWord.EQUAL.value,
-    "estas"    : UnalphabeticTerminal.ASSIGN.value,
+    "estas"    : ReservedWord.IS.value,
     "finu"     : ReservedWord.END.value,
     "fojoj"    : ReservedWord.TIMES.value,
     "granda"   : ReservedWord.GREATER.value,

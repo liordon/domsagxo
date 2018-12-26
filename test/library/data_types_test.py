@@ -241,12 +241,12 @@ class TestObjectOrientedActions(object):
         return smart_home
 
     def test_canChangeColorFieldOfLightBulb(self, parser, smart_home):
-        ast = parser.parse("koloro de sxambalulo estas rugxo")
+        ast = parser.parse("asignu rugxo al koloro de sxambalulo")
         smart_home, value = ast.evaluate(smart_home)
         assert atypes.Color.RED.value == smart_home.variables["sxambalulo"].properties[
             "koloro"]
 
     def test_canChangeBrightnessFieldOfLightBulb(self, parser, smart_home):
-        ast = parser.parse("brilo de sxambalulo estas sepdek")
+        ast = parser.parse("asignu sepdek al brilo de sxambalulo")
         smart_home, value = ast.evaluate(smart_home)
         assert 70 == smart_home.variables["sxambalulo"].properties["brilo"]

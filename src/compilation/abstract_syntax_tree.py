@@ -117,8 +117,12 @@ def build(start=None):
     def p_repeatingStatement_repetitionAndAction(p):
         p[0] = Node.RepeatedStatement(p[1], p[3])
 
+    @RULE(Var.ASSIGN_STATEMENT, [[ResWord.PUT, Var.EXPRESSION, ResWord.TO, Var.VARIABLE]])
+    def p_assignStatement_verbalAssign(p):
+        p[0] = Node.VariableAssignment(p[4], p[2])
+
     @RULE(Var.ASSIGN_STATEMENT, [[Var.VARIABLE, UaTer.ASSIGN, Var.EXPRESSION]])
-    def p_assignStatement_assign(p):
+    def p_assignStatement_signedAssign(p):
         p[0] = Node.VariableAssignment(p[1], p[3])
 
     @RULE(Var.RETURN_STATEMENT, [[ResWord.RETURN]])
@@ -229,12 +233,12 @@ def build(start=None):
         p[0] = p[2]
 
     # ----------------------------   boolean calculations    ------------------------- #
-    @RULE(Var.RELATION, [[UaTer.ASSIGN, ResWord.EQUAL, ResWord.TO]])
+    @RULE(Var.RELATION, [[ResWord.IS, ResWord.EQUAL, ResWord.TO]])
     def p_relation_equal(p):
         p[0] = Node.Comparison.Relation.EQUAL
 
-    @RULE(Var.RELATION, [[UaTer.ASSIGN, ResWord.MORE, ResWord.GREATER, ResWord.THAN],
-                         [UaTer.ASSIGN, ResWord.MORE, ResWord.GREATER,
+    @RULE(Var.RELATION, [[ResWord.IS, ResWord.MORE, ResWord.GREATER, ResWord.THAN],
+                         [ResWord.IS, ResWord.MORE, ResWord.GREATER,
                           ResWord.OR, ResWord.EQUAL, ResWord.TO]])
     def p_relation_greatnessAndEquality(p):
         if len(p) == 5:
@@ -242,9 +246,9 @@ def build(start=None):
         else:
             p[0] = Node.Comparison.Relation.GREATER_OR_EQUAL
 
-    @RULE(Var.RELATION, [[UaTer.ASSIGN, ResWord.MORE, ResWord.SMALLER,
+    @RULE(Var.RELATION, [[ResWord.IS, ResWord.MORE, ResWord.SMALLER,
                           ResWord.OR, ResWord.EQUAL, ResWord.TO],
-                         [UaTer.ASSIGN, ResWord.MORE, ResWord.SMALLER, ResWord.THAN]])
+                         [ResWord.IS, ResWord.MORE, ResWord.SMALLER, ResWord.THAN]])
     def p_relation_smallnessAndEquality(p):
         if len(p) == 5:
             p[0] = Node.Comparison.Relation.LESSER

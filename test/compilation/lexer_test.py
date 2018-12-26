@@ -36,9 +36,11 @@ class TestPartsOfSpeech(LexerProvided):
 
 class TestReservedWords(LexerProvided):
 
+    def test_theWordAsignuIsRecognizedForAssignment(self, lexer):
+        lexer.input("asignu")
+        self.assertPartOfSpeechForNextToken(lexer, ReservedWord.PUT)
+
     def test_theWordEstasIsEquivalentToEqualsSign(self, lexer):
-        lexer.input("estas")
-        self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.ASSIGN)
         lexer.input("=")
         self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.ASSIGN)
 
