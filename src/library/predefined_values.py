@@ -21,6 +21,10 @@ class ApplianceProperties(Enum):
     TEMPERATURE = "temperaturo"
 
 
+class ApplianceQueries(Enum):
+    IS_ON = "sxaltas"
+
+
 class Color(Enum):
     WHITE = "blanko"
     RED = "rugxo"

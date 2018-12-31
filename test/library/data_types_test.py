@@ -181,35 +181,36 @@ class TestAstApplianceManagement(object):
 
     @pytest.fixture
     def manager(self):
-        return mcmps.Domsagxo()
+        manager = mcmps.Domsagxo()
+        manager.addAppliance(atypes.Appliance(atypes.ApplianceTypes.LIGHT, "sxambo"))
+        manager.addAppliance(atypes.Appliance(atypes.ApplianceTypes.KNOB, "lulo"))
+        return manager
 
     @staticmethod
     def assertNumberOfNewAppliances(number, state):
         assert number == len(state.variables) - state.number_of_reserved_words
 
     def test_canAddApplianceToSmartHomeViaCode(self, manager):
-        appliance = atypes.Appliance(atypes.ApplianceTypes.LIGHT, "shambalulu")
+        appliance = atypes.Appliance(atypes.ApplianceTypes.LIGHT, "sxambalulo")
+        manager = mcmps.Domsagxo()
         manager.addAppliance(appliance)
         assert appliance.name in manager.variables.keys()
 
-    def test_canTurnOnAllLights(self, ast):
-        state = evaluate_and_return_state(ast, "sxaltu la lumojn")
+    def test_canTurnOnAllLights(self, ast, manager):
+        state = evaluate_and_return_state(ast, "sxaltu la lumojn", manager)
         for appliance in [variable for variable in state.variables.values()
                           if isinstance(variable, atypes.Appliance)]:
             if appliance.type is atypes.ApplianceTypes.LIGHT:
-                assert appliance.isTurnedOn
+                assert appliance.isTurnedOn() is True
 
     def test_nonLightAppliancesAreUnaffectedByLightsCommand(self, ast, manager):
-        manager.addAppliance(atypes.Appliance(atypes.ApplianceTypes.LIGHT, "shamba"))
-        manager.addAppliance(atypes.Appliance(atypes.ApplianceTypes.KNOB, "lulu"))
-
         evaluate_and_return_state(ast, "sxaltu la lumojn", manager)
         for appliance in [app for app in manager.variables.values() if
                           isinstance(app, atypes.Appliance)]:
             if appliance.type is atypes.ApplianceTypes.LIGHT:
-                assert appliance.isTurnedOn
+                assert appliance.isTurnedOn() is True
             elif appliance.type is not atypes.ApplianceTypes.LIGHT:
-                assert not appliance.isTurnedOn
+                assert appliance.isTurnedOn() is False
 
     def test_canAddAnonymousApplianceToSmartHomeViaSpeech(self, ast):
         manager = evaluate_and_return_state(ast, "aldonu lumon")
@@ -225,6 +226,11 @@ class TestAstApplianceManagement(object):
         assert "unua lumo" in manager.variables.keys()
         assert "dua lumo" in manager.variables.keys()
         assert manager.variables["dua lumo"].type is atypes.ApplianceTypes.LIGHT
+
+    def test_canQueryTheStateOfLights(self, ast, manager):
+        manager = evaluate_and_return_state(ast, "sxaltu sxambo", manager)
+        assert manager.variables["sxambo"].stateQueries[atypes.ApplianceQueries.IS_ON.value]
+        assert not manager.variables["lulo"].stateQueries[atypes.ApplianceQueries.IS_ON.value]
 
 
 class TestObjectOrientedActions(object):

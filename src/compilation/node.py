@@ -428,3 +428,12 @@ class LoopStatement(AstNode):
             state, flag = condition.evaluate(state)
 
         return state, None
+
+
+class QueryState(AstNode):
+    def __init__(self, appliance, stateName):
+        super(QueryState, self).__init__(appliance, stateName)
+
+    def _method(self, state, appliance, stateName):
+        state, evaluated_appliance = appliance.evaluate(state)
+        return state, evaluated_appliance.stateQueries[stateName]

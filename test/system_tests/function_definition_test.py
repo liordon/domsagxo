@@ -161,7 +161,7 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
 
         for i in range(2, 100):
             new_state.method_dict['cxuprimu'](i)
-            assert is_prime(i) == new_state.variables['sxambalulo'].isTurnedOn
+            assert is_prime(i) == new_state.variables['sxambalulo'].isTurnedOn()
 
     def test_assumingICanIdentifyAPrimeICanFindAllPrimesUpTo100(self, ast, smart_home):
         """For the sake of test independence I will program the prime chekcer in python.
@@ -176,7 +176,7 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
                 asignu du al indekso
                 poste dum indekso ne estas pli granda ol cent tiam
                     cxuprimu indekso
-                    poste se brilo de sxambalulo estas egala al cent tiam
+                    poste se sxambalulo sxaltas tiam
                         sxaltu indeksa de sxambaluloj
                         poste presu indekso
                     alie
@@ -186,23 +186,23 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
                 finu
                 finu''', smart_home)
 
-        def turn_light_green_if_prime(number):
+        def turn_light_on_if_prime(number):
             if is_prime(number):
-                new_state.variables['sxambalulo'].properties[
-                    'brilo'] = 100
+                new_state.variables['sxambalulo'].turnOn()
             else:
-                new_state.variables['sxambalulo'].properties[
-                    'brilo'] = 0
+                new_state.variables['sxambalulo'].turnOff()
 
+        new_state.variables['sxambalulo'] = \
+            atypes.Appliance(atypes.ApplianceTypes.LIGHT, 'sxambalulo')
         new_state.variables['sxambaluloj'] = []
         for i in range(100):
             new_state.variables['sxambaluloj'] += \
                 [atypes.Appliance(atypes.ApplianceTypes.LIGHT, i)]
-        new_state.method_dict['cxuprimu'] = turn_light_green_if_prime
+        new_state.method_dict['cxuprimu'] = turn_light_on_if_prime
         new_state.method_dict['presu'] = add_prime_to_list
         new_state.method_dict['primumu']()
 
         assert 25 == len(self.prime_list)
         for i in range(2, 100):
-            assert is_prime(i) == new_state.variables['sxambaluloj'][i - 1].isTurnedOn
+            assert is_prime(i) == new_state.variables['sxambaluloj'][i - 1].isTurnedOn()
             assert is_prime(i) == (i in self.prime_list)

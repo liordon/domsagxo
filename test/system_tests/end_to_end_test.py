@@ -31,7 +31,7 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         assert 7 == new_state["nigra kato"]
         assert 'kato' not in new_state
 
-    def test_reservedAdjectivesCanBeUsedForVariableNamesOutOfReservedContext(self, ast):
+    def test_reservedAdjectivesCanBeReclaimedForVariableNamesOutOfReservedContext(self, ast):
         new_state = evaluate_and_return_state_variables(ast, "asignu 7 al malgranda kato")
         assert 7 == new_state["malgranda kato"]
         new_state = evaluate_and_return_state_variables(ast, "asignu 17 al granda kato")
@@ -172,6 +172,28 @@ class TestAstPrograms(object):
         ''').evaluate(initial_state)
         assert 3 == manager.variables["kato"]
 
+    def test_applianceStateCanBeQueriedWithPresentVerbs(self, ast, initial_state):
+        manager, value = ast.parse('''
+        aldonu lumon
+        poste se unua lumo sxaltas tiam
+            asignu unu al muso
+        finu
+        poste sxaltu unuan lumon
+        poste se unua lumo sxaltas tiam
+            asignu du al kato
+        finu
+        poste malsxaltu unuan lumon
+        poste se unua lumo sxaltas tiam
+            asignu tri al hundo
+        finu
+        ''').evaluate(initial_state)
+        with pytest.raises(KeyError):
+            assert manager.variables["muso"] is None
+
+        assert 2 == manager.variables["kato"]
+
+        with pytest.raises(KeyError):
+            assert manager.variables["hundo"] is None
 
 @pytest.mark.timeout(10)
 class TestLargeScalePhenomena(RealTimeSmartHomeManagerProvided_CarefulVolatile):

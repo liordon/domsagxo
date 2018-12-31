@@ -311,6 +311,10 @@ def build(start=None):
     def p_expression_booleanNot(p):
         p[0] = Node.LogicNot(p[2])
 
+    @RULE(Var.EXPRESSION, [[Var.VARIABLE, POS.V_PRES]])
+    def p_expression_stateQuery(p):
+        p[0] = Node.QueryState(p[1], p[2])
+
     # ----------------------------   literals and constants    ------------------------- #
     @RULE(Var.EXPRESSION, [[ResWord.NONE]])
     def p_expression_none(p):

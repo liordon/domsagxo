@@ -109,13 +109,13 @@ class Domsagxo(object):
 
     def requestDeviceActivation(self, *devices):
         def turnOnDevice(device):
-            device.isTurnedOn = True
+            device.turnOn()
 
         self.performActionOnAllDevices(devices, turnOnDevice)
 
     def requestDeviceDeActivation(self, *devices):
         def turnOffDevice(device):
-            device.isTurnedOn = False
+            device.turnOff()
 
         self.performActionOnAllDevices(devices, turnOffDevice)
 

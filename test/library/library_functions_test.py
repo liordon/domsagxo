@@ -163,9 +163,9 @@ class TestApplianceCommands(SmartHomeManagerProvided):
 
         smart_home.requestDeviceActivation(smart_home.variables[group_nm1])
 
-        assert smart_home.variables[app_nm1].isTurnedOn
-        assert smart_home.variables[app_nm2].isTurnedOn
-        assert not smart_home.variables[app_nm3].isTurnedOn
+        assert smart_home.variables[app_nm1].isTurnedOn() is True
+        assert smart_home.variables[app_nm2].isTurnedOn() is True
+        assert smart_home.variables[app_nm3].isTurnedOn() is False
 
     def test_canTurnOnSeveralAppliancesAtOnce(self, smart_home):
         smart_home.addAppliance(Appliance(ApplianceTypes.SWITCH, app_nm1))
@@ -175,9 +175,9 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         smart_home.requestDeviceActivation(
             [smart_home.variables[app_nm2], smart_home.variables[app_nm3]])
 
-        assert not smart_home.variables[app_nm1].isTurnedOn
-        assert smart_home.variables[app_nm2].isTurnedOn
-        assert smart_home.variables[app_nm3].isTurnedOn
+        assert smart_home.variables[app_nm1].isTurnedOn() is False
+        assert smart_home.variables[app_nm2].isTurnedOn() is True
+        assert smart_home.variables[app_nm3].isTurnedOn() is True
 
     def test_canTurnOnBothAppliancesAndGroupsAtOnce(self, smart_home):
         smart_home.addAppliance(Appliance(ApplianceTypes.SWITCH, app_nm1))
@@ -190,9 +190,9 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         smart_home.requestDeviceActivation(
             smart_home.variables[group_nm1], smart_home.variables[app_nm3])
 
-        assert smart_home.variables[app_nm1].isTurnedOn
-        assert smart_home.variables[app_nm2].isTurnedOn
-        assert smart_home.variables[app_nm3].isTurnedOn
+        assert smart_home.variables[app_nm1].isTurnedOn() is True
+        assert smart_home.variables[app_nm2].isTurnedOn() is True
+        assert smart_home.variables[app_nm3].isTurnedOn() is True
 
     def test_canQueryLightForItsBrightness(self, smart_home):
         smart_home.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
