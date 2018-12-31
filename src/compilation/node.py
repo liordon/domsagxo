@@ -119,7 +119,7 @@ class VariableName(AstNode):
         if self.variable_name in state.variables:
             return state, state.variables[self.variable_name]
         else:
-            raise NameError("name " + variable_name + " is not defined")
+            raise NameError("name " + self.variable_name + " is not defined")
 
     def getContainedName(self):
         return self.variable_name

@@ -6,10 +6,70 @@ from test_utils import mocks
 from test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided
 
 
+def parsed_value_of(ast, expr, state=None):
+    node = ast.parse(expr)
+    return node.evaluate(state)[1]
+
+
 class CanAssertNodeType(object):
     @staticmethod
     def assertThatExpressionIsOfNodeType(ast, expr, nodeType):
         assert isinstance(ast.parse(expr), nodeType)
+
+
+class TestVerbalNumbers(ExpressionLevelAstProvided):
+    @staticmethod
+    def assertVerbalNumberValue(numerical_value, token):
+        # assert ReservedWord.VERBAL_DIGIT.value == token.type
+        assert numerical_value == token.value
+
+    def test_canParseDigit0(self, ast):
+        assert parsed_value_of(ast, "nul") == 0
+
+    def test_canParseDigit1(self, ast):
+        assert parsed_value_of(ast, "unu") == 1
+
+    def test_canParseDigit2(self, ast):
+        assert parsed_value_of(ast, "du") == 2
+
+    def test_canParseDigit3(self, ast):
+        assert parsed_value_of(ast, "tri") == 3
+
+    def test_canParseDigit4(self, ast):
+        assert parsed_value_of(ast, "kvar") == 4
+
+    def test_canParseDigit5(self, ast):
+        assert parsed_value_of(ast, "kvin") == 5
+
+    def test_canParseDigit6(self, ast):
+        assert parsed_value_of(ast, "ses") == 6
+
+    def test_canParseDigit7(self, ast):
+        assert parsed_value_of(ast, "sep") == 7
+
+    def test_canParseDigit8(self, ast):
+        assert parsed_value_of(ast, "ok") == 8
+
+    def test_canParseDigit9(self, ast):
+        assert parsed_value_of(ast, "naux") == 9
+
+    def test_canParseNumber10(self, ast):
+        assert parsed_value_of(ast, "dek") == 10
+
+    def test_canParseNumber20(self, ast):
+        assert parsed_value_of(ast, "dudek") == 20
+
+    def test_canParseNumber100(self, ast):
+        assert parsed_value_of(ast, "cent") == 100
+
+    def test_canParseNumber248(self, ast):
+        assert parsed_value_of(ast, "ducent kvardek ok") == 248
+
+    def test_canParseFractionHalf(self, ast):
+        assert parsed_value_of(ast, "duono") == 1 / 2
+
+    def test_canParseFractionQuarter(self, ast):
+        assert parsed_value_of(ast, "kvarono") == 1 / 4
 
 
 class TestNameAndNumeratorAstNodes(PartialNameLevelAstProvided, CanAssertNodeType):
@@ -144,12 +204,6 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
         setter(state, 5)
         assert 5 == ast.parse(variable_name).getter(state)
         assert 5 == state.variables["ampoloj"][1]
-
-
-def parsed_value_of(ast, expr, state=None):
-    node = ast.parse(expr)
-    return node.evaluate(state)[1]
-
 
 class TestAstMathExpressions(ExpressionLevelAstProvided):
 

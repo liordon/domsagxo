@@ -57,6 +57,38 @@ def RULE(product, rule_list):
     return set_rule
 
 
+digitNames = {
+    "nul" : 0,
+    "unu" : 1,
+    "du"  : 2,
+    "tri" : 3,
+    "kvar": 4,
+    "kvin": 5,
+    "ses" : 6,
+    "sep" : 7,
+    "ok"  : 8,
+    "naŭ" : 9,
+    "naux": 9,
+    ""    : 1
+}
+
+
+def parseDigit(name):
+    if name[-3:] == "ono":
+        name = name[:-3]
+        return 1 / digitNames[name]
+
+    multiplier = 1
+    if name[-3:] == "dek":
+        name = name[:-3]
+        multiplier = 10
+    elif name[-4:] == "cent":
+        name = name[:-4]
+        multiplier = 100
+
+    return digitNames[name] * multiplier
+
+
 def get_digit(number, digit):
     return number // 10 ** digit % 10
 
@@ -135,10 +167,13 @@ def build(start=None):
     def p_variable_dereference(p):
         p[0] = Node.Dereference(p[1], p[3])
 
-    @RULE(Var.VARIABLE, [[Var.PARTIAL_NAME, ResWord.OF, Var.VARIABLE],
-                         [POS.NUMERATOR, ResWord.OF, Var.VARIABLE]])
+    @RULE(Var.VARIABLE, [[Var.PARTIAL_NAME, ResWord.OF, Var.VARIABLE]])
     def p_variable_arrayAccess(p):
         p[0] = Node.ArrayAccess(p[1], p[3])
+
+    @RULE(Var.VARIABLE, [[POS.NUMERATOR, ResWord.OF, Var.VARIABLE]])
+    def p_numerator_arrayAccess(p):
+        p[0] = Node.ArrayAccess(parseDigit(p[1][:-1]), p[3])
 
     @RULE(Var.VARIABLE, [[Var.NAME]])
     def p_variable_name(p):
@@ -163,8 +198,8 @@ def build(start=None):
     @RULE(Var.ADJECTIVE, [[ResWord.GREATER],
                           [ResWord.SMALLER],
                           [POS.ADJECTIVE],
-                          [POS.NUMERATOR]])
-    def p_adjective_normalAdjectiveOrWeaklyReservedWord(p):
+                          [POS.NUMERATOR], ])
+    def p_adjective_normalAdjectiveOrReclaimedWeaklyReservedWord(p):
         p[0] = str(p[1])
 
     @RULE(Var.PARTIAL_NAME, [[ResWord.THE]])
@@ -216,13 +251,14 @@ def build(start=None):
                                [Var.NUMBER_LITERAL, ResWord.VERBAL_DIGIT]])
     def p_verbal_number(p):
         if len(p) == 2:
-            p[0] = p[1]
+            p[0] = parseDigit(p[1])
         else:
-            for digit in range(min(int(math.log10(p[1])), int(math.log10(p[2]))) + 1):
-                if get_digit(p[1], digit) != 0 and get_digit(p[2], digit) != 0:
+            numerical_value = parseDigit(p[2])
+            for digit in range(min(int(math.log10(p[1])), int(math.log10(numerical_value))) + 1):
+                if get_digit(p[1], digit) != 0 and get_digit(numerical_value, digit) != 0:
                     raise EsperantoSyntaxError("illegal verbal number combination: "
-                                               + str(p[1]) + " and " + str(p[2]))
-            p[0] = p[1] + p[2]
+                                               + str(p[1]) + " and " + str(numerical_value))
+            p[0] = p[1] + numerical_value
 
     @RULE(Var.FACTOR, [[Var.VARIABLE]])
     def p_factor_noun(p):
@@ -308,12 +344,19 @@ def build(start=None):
                 "wrong hour format. expected hour descriptor, then minute number.")
         p[0] = Node.TimePoint(hour=p[1])
 
-    @RULE(Var.HOUR_NUMERATOR, [[ResWord.THE, POS.NUMERATOR],
-                               [ResWord.THE, Var.NUMBER_LITERAL, POS.NUMERATOR]])
-    def p_hour_numerator(p):
+    @RULE(Var.HOUR_NUMERATOR, [[ResWord.THE, POS.NUMERATOR]])
+    def p_hourNumerator_numerator(p):
+        p[0] = parseDigit(p[2][:-1])
+        if p[0] > 24:
+            raise EsperantoSyntaxError(
+                "Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
+        p[0] = Node.Number(p[0])
+
+    @RULE(Var.HOUR_NUMERATOR, [[ResWord.THE, Var.NUMBER_LITERAL, POS.NUMERATOR]])
+    def p_hourNumerator_numberAndNumerator(p):
         p[0] = p[2]
         if len(p) > 3:
-            p[0] += p[3]
+            p[0] += parseDigit(p[3][:-1])
         if p[0] > 24:
             raise EsperantoSyntaxError(
                 "Illegal hour entered: " + str(p[0]) + ". we use a 24h system")

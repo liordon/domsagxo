@@ -202,20 +202,6 @@ def t_TNUMBER(t):
     return t
 
 
-digitNames = {
-    "nul" : 0,
-    "unu" : 1,
-    "du"  : 2,
-    "tri" : 3,
-    "kvar": 4,
-    "kvin": 5,
-    "ses" : 6,
-    "sep" : 7,
-    "ok"  : 8,
-    "naŭ" : 9,
-    "naux": 9,
-    ""    : 1
-}
 
 digitRe = re.compile(
     r"((nul|unu)|((du|tri|kvar|kvin|ses|sep|ok|naux|naŭ)(dek|cent|ono)?)|(dek|cent|mil))\b")
@@ -225,20 +211,6 @@ timeUnitRe = re.compile(r"(jaro|monato|semajno|tago|horo|minuto|sekundo)j?\b")
 stringRe = re.compile(r"")
 
 
-def parseDigit(name):
-    if name[-3:] == "ono":
-        name = name[:-3]
-        return 1 / digitNames[name]
-
-    multiplier = 1
-    if name[-3:] == "dek":
-        name = name[:-3]
-        multiplier = 10
-    elif name[-4:] == "cent":
-        name = name[:-4]
-        multiplier = 100
-
-    return digitNames[name] * multiplier
 
 
 def t_string(t):
@@ -262,7 +234,6 @@ def t_TWORD(t):
         t.type = reserved_words[t.value]
     elif digitRe.fullmatch(t.value):
         t.type = ReservedWord.VERBAL_DIGIT.value
-        t.value = parseDigit(t.value)
     elif timeUnitRe.fullmatch(t.value):
         t.type = ReservedWord.TIME_INDICATION.value
     elif t.value in prepositions:
@@ -274,7 +245,6 @@ def t_TWORD(t):
         elif re.search(r'((a)|(aj))$', t.value):
             if digitRe.fullmatch(t.value[0:-1]) and t.value[-1] == 'a':
                 t.type = PartOfSpeech.NUMERATOR.value
-                t.value = parseDigit(t.value[:-1])
             else:
                 t.type = PartOfSpeech.ADJECTIVE.value
         elif re.search(r'i$', t.value):

@@ -10,6 +10,11 @@ class TestPartsOfSpeech(LexerProvided):
         self.assertPartOfSpeechForGivenToken(token, PartOfSpeech.ADJECTIVE)
         assert token.value == "blanka"
 
+    def test_numberWithAdjectiveEndingIsNumerator(self, lexer):
+        lexer.input("unua")
+        token = lexer.token()
+        assert PartOfSpeech.NUMERATOR.value == token.type
+
     def test_ImperativeVerbsAreNotCategorizedAsWords(self, lexer):
         lexer.input("presu")
         token = lexer.token()
@@ -59,6 +64,10 @@ class TestReservedWords(LexerProvided):
     def test_numericalTokensHaveIntValuesInsteadOfStrings(self, lexer):
         lexer.input("42")
         assert 42 == lexer.token().value
+
+    def test_cantParseIllegalDigitCombination(self, lexer):
+        lexer.input("dudu")
+        assert ReservedWord.VERBAL_DIGIT.value != lexer.token().type
 
     def test_booleanReservedWords_TrueFalse(self, lexer):
         lexer.input("vero")
@@ -207,86 +216,3 @@ class TestMultipleTokenSequences(LexerProvided):
     def test_canParseSimpleAdditionExpression(self, lexer):
         lexer.input("1+1")
         assert 3 == len(self.getTokenList(lexer))
-
-
-class TestVerbalNumbers(LexerProvided):
-    @staticmethod
-    def assertVerbalNumberValue(numerical_value, token):
-        assert ReservedWord.VERBAL_DIGIT.value == token.type
-        assert numerical_value == token.value
-
-    def test_canParseDigit0(self, lexer):
-        lexer.input("nul")
-        self.assertVerbalNumberValue(0, lexer.token())
-
-    def test_canParseDigit1(self, lexer):
-        lexer.input("unu")
-        self.assertVerbalNumberValue(1, lexer.token())
-
-    def test_canParseDigit2(self, lexer):
-        lexer.input("du")
-        self.assertVerbalNumberValue(2, lexer.token())
-
-    def test_canParseDigit3(self, lexer):
-        lexer.input("tri")
-        self.assertVerbalNumberValue(3, lexer.token())
-
-    def test_canParseDigit4(self, lexer):
-        lexer.input("kvar")
-        self.assertVerbalNumberValue(4, lexer.token())
-
-    def test_canParseDigit5(self, lexer):
-        lexer.input("kvin")
-        self.assertVerbalNumberValue(5, lexer.token())
-
-    def test_canParseDigit6(self, lexer):
-        lexer.input("ses")
-        self.assertVerbalNumberValue(6, lexer.token())
-
-    def test_canParseDigit7(self, lexer):
-        lexer.input("sep")
-        self.assertVerbalNumberValue(7, lexer.token())
-
-    def test_canParseDigit8(self, lexer):
-        lexer.input("ok")
-        self.assertVerbalNumberValue(8, lexer.token())
-
-    def test_canParseDigit9(self, lexer):
-        lexer.input("naux")
-        self.assertVerbalNumberValue(9, lexer.token())
-
-    def test_canParseNumber10(self, lexer):
-        lexer.input("dek")
-        self.assertVerbalNumberValue(10, lexer.token())
-
-    def test_canParseNumber20(self, lexer):
-        lexer.input("dudek")
-        self.assertVerbalNumberValue(20, lexer.token())
-
-    def test_canParseNumber100(self, lexer):
-        lexer.input("cent")
-        self.assertVerbalNumberValue(100, lexer.token())
-
-    def test_canParseNumber248(self, lexer):
-        lexer.input("ducent kvardek ok")
-        self.assertVerbalNumberValue(200, lexer.token())
-        self.assertVerbalNumberValue(40, lexer.token())
-        self.assertVerbalNumberValue(8, lexer.token())
-
-    def test_cantParseIllegalDigitCombination(self, lexer):
-        lexer.input("dudu")
-        assert ReservedWord.VERBAL_DIGIT.value != lexer.token().type
-
-    def test_canParseFractionHalf(self, lexer):
-        lexer.input("duono")
-        self.assertVerbalNumberValue(1 / 2, lexer.token())
-
-    def test_canParseFractionQuarter(self, lexer):
-        lexer.input("kvarono")
-        self.assertVerbalNumberValue(1 / 4, lexer.token())
-
-    def test_numberWithAdjectiveEndingIsNumerator(self, lexer):
-        lexer.input("unua")
-        token = lexer.token()
-        assert PartOfSpeech.NUMERATOR.value == token.type
-        assert 1 == token.value
