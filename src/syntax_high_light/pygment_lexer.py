@@ -30,7 +30,7 @@ class DomsagxoLexer(RegexLexer):
             (digitRe.pattern, Number),
             (r'maldekstra citilo', Keyword, 'string'),
             (timeUnitRe.pattern, Generic.TypeIndicator),
-            (r'\bkaj\b|poste|samtempe', Generic.Separator),
+            (r'\b(kaj|poste|samtempe)\b', Generic.Separator),
             (regexFromWordList(reserved_words), Keyword),
             (regexFromWordList(prepositions), Generic.Separator),
             (alphabet + r'+oj?n?\b', Name),
