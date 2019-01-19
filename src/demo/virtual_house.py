@@ -4,7 +4,7 @@ from enum import Enum
 from appJar import gui
 
 import compilation.abstract_syntax_tree as ast_bld
-import compilation.esp_lexer as lxr
+import compilation.esperanto_lexer as lxr
 from library.atomic_types import Appliance, ApplianceTypes, Color
 from library.management_components import Domsagxo
 

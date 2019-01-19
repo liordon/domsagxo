@@ -3,15 +3,15 @@ import datetime
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
-import compilation.esp_lexer as lxr
+import compilation.esperanto_lexer as eo_lxr
 from library.management_components import Horaro, Domsagxo
 from test_utils.mocks import MockClock
 
 
-class LexerProvided(object):
+class EsperantoLexerProvided(object):
     @pytest.fixture
     def lexer(self):
-        return lxr.build()
+        return eo_lxr.build()
 
     @staticmethod
     def assertPartOfSpeechForGivenToken(token, partOfSpeech):

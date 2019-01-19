@@ -72,7 +72,7 @@ class TestVerbalNumbers(ExpressionLevelAstProvided):
         assert parsed_value_of(ast, "kvarono") == 1 / 4
 
 
-class TestNameAndNumeratorAstNodes(PartialNameLevelAstProvided, CanAssertNodeType):
+class TestNameAndOrdinalAstNodes(PartialNameLevelAstProvided, CanAssertNodeType):
     def test_parsedAdjectiveReturnsDescriptionNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "bela", Node.Description)
 
@@ -82,7 +82,7 @@ class TestNameAndNumeratorAstNodes(PartialNameLevelAstProvided, CanAssertNodeTyp
     def test_twoParsedAdjectivesReturnsDescriptionNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "bela bona", Node.Description)
 
-    def test_parsedDigitalNumeratorReturnsDescriptionNode(self, ast):
+    def test_parsedDigitalOrdinalReturnsDescriptionNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "unua", Node.Description)
 
 
@@ -126,7 +126,7 @@ class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType)
     def test_fieldAccessReturnsDereferenceNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "sxa mbo de lulo", Node.Dereference)
 
-    def test_useOfNumeratorReturnsArrayAccessNode(self, ast):
+    def test_useOfOrdinalReturnsArrayAccessNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "sxa mba de lulo", Node.ArrayAccess)
 
 

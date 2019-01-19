@@ -88,7 +88,7 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
                                                 manager)
         assert 0 == new_state["kato"]
 
-    def test_canTurnVariablesIntoNumeratorsViaChangeFromNounToAdjective(self, ast):
+    def test_canTurnVariablesIntoOrdinalsViaChangeFromNounToAdjective(self, ast):
         manager = mng_co.Domsagxo()
         manager.variables["indekso"] = 2
         manager.variables["ampoloj"] = [1, 2, 3]

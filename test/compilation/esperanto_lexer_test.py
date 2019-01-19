@@ -1,8 +1,8 @@
-from compilation.esp_lexer import PartOfSpeech, UnalphabeticTerminal, ReservedWord
-from test_utils.providers import LexerProvided
+from compilation.definitions import PartOfSpeech, UnalphabeticTerminal, ReservedWord
+from test_utils.providers import EsperantoLexerProvided
 
 
-class TestPartsOfSpeech(LexerProvided):
+class TestPartsOfSpeech(EsperantoLexerProvided):
 
     def test_adjectivesAreNotCategorizedAsWords(self, lexer):
         lexer.input("blanka")
@@ -10,10 +10,10 @@ class TestPartsOfSpeech(LexerProvided):
         self.assertPartOfSpeechForGivenToken(token, PartOfSpeech.ADJECTIVE)
         assert token.value == "blanka"
 
-    def test_numberWithAdjectiveEndingIsNumerator(self, lexer):
+    def test_numberWithAdjectiveEndingIsOrdinal(self, lexer):
         lexer.input("unua")
         token = lexer.token()
-        assert PartOfSpeech.NUMERATOR.value == token.type
+        assert PartOfSpeech.ORDINAL.value == token.type
 
     def test_ImperativeVerbsAreNotCategorizedAsWords(self, lexer):
         lexer.input("presu")
@@ -39,7 +39,7 @@ class TestPartsOfSpeech(LexerProvided):
         assert lexer.token().value == 'musoj'
 
 
-class TestReservedWords(LexerProvided):
+class TestReservedWords(EsperantoLexerProvided):
 
     def test_theWordAsignuIsRecognizedForAssignment(self, lexer):
         lexer.input("asignu")
@@ -150,7 +150,7 @@ class TestReservedWords(LexerProvided):
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.SIMULTANEOUSLY)
 
 
-class TestStrings(LexerProvided):
+class TestStrings(EsperantoLexerProvided):
     def test_theWords_leftQuotationRightQuotation_createAStringToken(self, lexer):
         lexer.input("maldekstra citilo dekstra citilo")
         token = lexer.token()
@@ -198,7 +198,7 @@ class TestStrings(LexerProvided):
         assert UnalphabeticTerminal.STRING.value != lexer.token().type
 
 
-class TestMultipleTokenSequences(LexerProvided):
+class TestMultipleTokenSequences(EsperantoLexerProvided):
 
     @staticmethod
     def getTokenList(lexer):
@@ -210,7 +210,7 @@ class TestMultipleTokenSequences(LexerProvided):
         return res
 
     def test_canParseSeveralTokensTogether(self, lexer):
-        lexer.input("kato ludas hun hundo")
+        lexer.input("kato ludas kun hundo")
         assert 4 == len(self.getTokenList(lexer))
 
     def test_canParseSimpleAdditionExpression(self, lexer):

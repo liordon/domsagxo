@@ -3,7 +3,7 @@ import math
 import ply.yacc as yacc
 
 import compilation.node as Node
-from compilation.esp_lexer import UnalphabeticTerminal as UaTer, PartOfSpeech as POS, \
+from compilation.esperanto_lexer import UnalphabeticTerminal as UaTer, PartOfSpeech as POS, \
     ReservedWord as ResWord, tokens
 from library.atomic_types import *
 
@@ -35,7 +35,7 @@ class Var(Enum):
     FACTOR = 'Vfactor'
     FUNCTION_INVOCATION = 'Vfunction_invocation'
     NUMBER_LITERAL = 'Vnumber_literal'
-    HOUR_NUMERATOR = 'Vhour_numerator'
+    HOUR_ORDINAL = 'Vhour_ordinal'
     PARTIAL_TIME_SPAN = 'Vpartial_time_span'
     FUNCTION_ARGUMENTS = 'Varguments'
     FUNCTION_ARGUMENT = 'Vsingle_argument'
@@ -171,8 +171,8 @@ def build(start=None):
     def p_variable_arrayAccess(p):
         p[0] = Node.ArrayAccess(p[1], p[3])
 
-    @RULE(Var.VARIABLE, [[POS.NUMERATOR, ResWord.OF, Var.VARIABLE]])
-    def p_numerator_arrayAccess(p):
+    @RULE(Var.VARIABLE, [[POS.ORDINAL, ResWord.OF, Var.VARIABLE]])
+    def p_ordinal_arrayAccess(p):
         p[0] = Node.ArrayAccess(parseDigit(p[1][:-1]), p[3])
 
     @RULE(Var.VARIABLE, [[Var.NAME]])
@@ -198,7 +198,7 @@ def build(start=None):
     @RULE(Var.ADJECTIVE, [[ResWord.GREATER],
                           [ResWord.SMALLER],
                           [POS.ADJECTIVE],
-                          [POS.NUMERATOR], ])
+                          [POS.ORDINAL], ])
     def p_adjective_normalAdjectiveOrReclaimedWeaklyReservedWord(p):
         p[0] = str(p[1])
 
@@ -332,7 +332,7 @@ def build(start=None):
     def p_expression_string(p):
         p[0] = Node.String(p[1])
 
-    @RULE(Var.TIME_POINT, [[Var.HOUR_NUMERATOR, ResWord.AND, Var.NUMBER_LITERAL]])
+    @RULE(Var.TIME_POINT, [[Var.HOUR_ORDINAL, ResWord.AND, Var.NUMBER_LITERAL]])
     def p_time_point(p):
         p[0] = p[1]
         if p[3] < 1:
@@ -341,23 +341,23 @@ def build(start=None):
             raise EsperantoSyntaxError("Illegal number of minutes entered: " + str(p[3]))
         p[0] = Node.TimePoint(hour=p[1], minute=Node.Number(p[3]))
 
-    @RULE(Var.TIME_POINT, [[Var.HOUR_NUMERATOR, ResWord.TIME_INDICATION]])
+    @RULE(Var.TIME_POINT, [[Var.HOUR_ORDINAL, ResWord.TIME_INDICATION]])
     def p_round_time_point(p):
         if len(p) > 2 and p[2] != "horo":
             raise EsperantoSyntaxError(
                 "wrong hour format. expected hour descriptor, then minute number.")
         p[0] = Node.TimePoint(hour=p[1])
 
-    @RULE(Var.HOUR_NUMERATOR, [[ResWord.THE, POS.NUMERATOR]])
-    def p_hourNumerator_numerator(p):
+    @RULE(Var.HOUR_ORDINAL, [[ResWord.THE, POS.ORDINAL]])
+    def p_hourOrdinal_ordinal(p):
         p[0] = parseDigit(p[2][:-1])
         if p[0] > 24:
             raise EsperantoSyntaxError(
                 "Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
         p[0] = Node.Number(p[0])
 
-    @RULE(Var.HOUR_NUMERATOR, [[ResWord.THE, Var.NUMBER_LITERAL, POS.NUMERATOR]])
-    def p_hourNumerator_numberAndNumerator(p):
+    @RULE(Var.HOUR_ORDINAL, [[ResWord.THE, Var.NUMBER_LITERAL, POS.ORDINAL]])
+    def p_hourOrdinal_numberAndOrdinal(p):
         p[0] = p[2]
         if len(p) > 3:
             p[0] += parseDigit(p[3][:-1])
@@ -470,7 +470,7 @@ class Object(object):
 
 
 if __name__ == "__main__":
-    import compilation.esp_lexer as lxr
+    import compilation.esperanto_lexer as lxr
     import sys
 
     lxr.build()

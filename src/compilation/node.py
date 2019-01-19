@@ -173,13 +173,13 @@ class Dereference(AstNode):
 
 
 class ArrayAccess(AstNode):
-    def __init__(self, numerator, variable_name):
-        super(ArrayAccess, self).__init__(numerator, variable_name)
-        self.numerator = numerator
+    def __init__(self, ordinal, variable_name):
+        super(ArrayAccess, self).__init__(ordinal, variable_name)
+        self.ordinal = ordinal
         self.variable_name = variable_name
 
-    def _method(self, state, numerator, variable_name):
-        state, evaluated_index = numerator.evaluate(state)
+    def _method(self, state, ordinal, variable_name):
+        state, evaluated_index = ordinal.evaluate(state)
         state, evaluated_var = variable_name.evaluate(state)
         return state, evaluated_var[evaluated_index - 1]
 
@@ -187,20 +187,20 @@ class ArrayAccess(AstNode):
         return self.variable_name.getter(state)
 
     def setter(self, state, value):
-        evaluated_numerator = self.evaluate_numerator(state)
+        evaluated_ordinal = self.evaluate_ordinal(state)
         containing_object = self._get_containing_object(state)
-        containing_object[evaluated_numerator - 1] = value
+        containing_object[evaluated_ordinal - 1] = value
 
-    def evaluate_numerator(self, state):
-        if isinstance(self.numerator, AstNode):
-            state, evaluated_numerator = self.numerator.evaluate(state)
+    def evaluate_ordinal(self, state):
+        if isinstance(self.ordinal, AstNode):
+            state, evaluated_ordinal = self.ordinal.evaluate(state)
         else:
-            evaluated_numerator = self.numerator
-        return evaluated_numerator
+            evaluated_ordinal = self.ordinal
+        return evaluated_ordinal
 
     def getter(self, state):
-        evaluated_numerator = self.evaluate_numerator(state)
-        return self._get_containing_object(state)[evaluated_numerator - 1]
+        evaluated_ordinal = self.evaluate_ordinal(state)
+        return self._get_containing_object(state)[evaluated_ordinal - 1]
 
 
 class VariableAssignment(AstNode):

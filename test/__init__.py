@@ -1,3 +1,3 @@
-import compilation.esp_lexer as lxr
+import compilation.esperanto_lexer as lxr
 
 lxr.build()

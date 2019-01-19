@@ -98,8 +98,8 @@ class Domsagxo(object):
 
     def requestDeviceAddition(self, appliance_type, appliance_name=None):
         if appliance_name is None:
-            for numerator in range(1, 9):
-                appliance_name = digitNames[numerator] + "a " + appliance_type
+            for ordinal in range(1, 9):
+                appliance_name = digitNames[ordinal] + "a " + appliance_type
                 if not self.recognizes(appliance_name):
                     break
         if self.recognizes(appliance_name):
