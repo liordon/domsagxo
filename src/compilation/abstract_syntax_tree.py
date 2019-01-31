@@ -175,6 +175,10 @@ def build(start=None):
     def p_ordinal_arrayAccess(p):
         p[0] = Node.ArrayAccess(parseDigit(p[1][:-1]), p[3])
 
+    @RULE(Var.VARIABLE, [[Var.HOUR_ORDINAL, ResWord.OF, Var.VARIABLE]])
+    def p_variable_arrayAccessViaReclaimedOrdinal(p):
+        p[0] = Node.ArrayAccess(p[1].args[0], p[3])
+
     @RULE(Var.VARIABLE, [[Var.NAME]])
     def p_variable_name(p):
         p[0] = p[1]
@@ -201,6 +205,10 @@ def build(start=None):
                           [POS.ORDINAL], ])
     def p_adjective_normalAdjectiveOrReclaimedWeaklyReservedWord(p):
         p[0] = str(p[1])
+
+    @RULE(Var.ADJECTIVE, [[Var.HOUR_ORDINAL], ])
+    def p_adjective_reclaimedHourOrdinal(p):
+        p[0] = p[1].args[0]
 
     @RULE(Var.PARTIAL_NAME, [[ResWord.THE]])
     def p_partialName_la(p):

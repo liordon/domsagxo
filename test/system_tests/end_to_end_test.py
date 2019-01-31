@@ -195,6 +195,7 @@ class TestAstPrograms(object):
         with pytest.raises(KeyError):
             assert manager.variables["hundo"] is None
 
+
 @pytest.mark.timeout(10)
 class TestLargeScalePhenomena(RealTimeSmartHomeManagerProvided_CarefulVolatile):
 

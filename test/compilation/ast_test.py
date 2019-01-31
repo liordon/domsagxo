@@ -126,14 +126,41 @@ class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType)
     def test_fieldAccessReturnsDereferenceNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "sxa mbo de lulo", Node.Dereference)
 
-    def test_useOfOrdinalReturnsArrayAccessNode(self, ast):
+    def test_useOfOrdinalVariableReturnsArrayAccessNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "sxa mba de lulo", Node.ArrayAccess)
+
+    def test_useOfIndefiniteOrdinalNumberReturnsArrayAccessNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "unua de sxambaluloj", Node.ArrayAccess)
+
+    def test_useOfDefiniteOrdinalNumberReturnsArrayAccessNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "la unua de sxambaluloj", Node.ArrayAccess)
 
 
 class TestReferenceSemantics(ExpressionLevelAstProvided):
     @pytest.fixture
     def state(self):
         return mocks.Bunch(variables={})
+
+    def test_nounVariableValueCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "sxambalulo"
+        state.variables[variable_name] = 1
+        assert ast.parse(variable_name).getter(state) == 1
+
+    def test_adjectiveNounVariableCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "sxamba lulo"
+        state.variables[variable_name] = 2
+        assert ast.parse(variable_name).getter(state) == 2
+
+    def test_ordinalNounVariableCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "tria sxambalulo"
+        state.variables[variable_name] = 3
+        assert ast.parse(variable_name).getter(state) == 3
+
+    def test_definiteOrdinalNounVariableCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "qvara sxambalulo"
+        definite_Variable_name = "la " + variable_name
+        state.variables[variable_name] = 4
+        assert ast.parse(definite_Variable_name).getter(state) == 4
 
     def test_variableSetterCanBeUsedToChangeVariableValue(self, ast, state):
         variable_name = "sxambalulo"
@@ -188,6 +215,11 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
         ast.parse(variable_name).setter(state, 6)
         assert 6 == state.variables["ampoloj"][0]
 
+    def test_definiteArticleArrayAccessWorksJustAsWellAsIndefinite(self, ast, state):
+        variable_name = "la unua de ampoloj"
+        state.variables["ampoloj"] = [1]
+        assert 1 == ast.parse(variable_name).getter(state)
+
     def test_canAssignIntoIndexOfExistingArray(self, ast, state):
         variable_name = "dua de ampoloj"
         setter = ast.parse(variable_name).setter
@@ -204,6 +236,7 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
         setter(state, 5)
         assert 5 == ast.parse(variable_name).getter(state)
         assert 5 == state.variables["ampoloj"][1]
+
 
 class TestAstMathExpressions(ExpressionLevelAstProvided):
 
