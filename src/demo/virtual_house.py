@@ -1,3 +1,4 @@
+import math
 import os
 from enum import Enum
 
@@ -23,6 +24,18 @@ smart_home.start_scheduler()
 smart_home.method_dict['anoncu'] = announce_in_multimedia
 
 
+def all_true(argument_list):
+    for arg in argument_list:
+        if not arg:
+            return False
+    return True
+
+
+def is_prime(number):
+    if number <= 1:
+        return False
+    return all_true([number % i for i in range(2, int(math.sqrt(number)) + 1)])
+
 def press(button_or_key):
     global app, smart_home, ast
     if button_or_key == "Cancel" or button_or_key == "<Escape>":
@@ -42,7 +55,7 @@ def create_light_bulb(name, row=0, col=0):
 
     def update_gui():
         bulb_color = bulb.properties["koloro"]
-        if not bulb.isTurnedOn:
+        if not bulb.isTurnedOn():
             app.setLabelBg(name, "black")
         elif bulb_color == Color.WHITE.value:
             app.setLabelBg(name, "white")
@@ -88,12 +101,21 @@ with gui("virtuala domo") as app:
     else:
         with app.labelFrame("Koridoro", colspan=2):
             light_bulbs = []
+            app.setPollTime(1000)
             for i in range(100):
                 light_bulbs += [create_light_bulb(str(i+1), row=int(i/10), col=(i)%10)]
             smart_home.variables["ampoloj"] = light_bulbs
-        with app.labelFrame("scicxambro", colspan=2):
-            # create_screen
-            pass
+        with app.labelFrame("salono", row=2, colspan=2):
+            smart_home.variables["sxambalulo"] = create_light_bulb("sxambalulo")
+
+        def turn_light_on_if_prime(number):
+            if is_prime(number):
+                smart_home.variables['sxambalulo'].turnOn()
+            else:
+                smart_home.variables['sxambalulo'].turnOff()
+
+
+        smart_home.method_dict['cxuprimu'] = turn_light_on_if_prime
 
 
     app.addLabel("l9", "speech:")
