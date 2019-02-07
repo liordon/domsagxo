@@ -201,7 +201,7 @@ def build(start=None):
 
     @RULE(Var.VARIABLE, [[Var.LARGE_ORDINAL, ResWord.OF, Var.VARIABLE], ])
     def p_variable_arrayAccessViaOrdinal(p):
-        p[0] = Node.ArrayAccess(parseEntireNumber(p[1]), p[3])
+        p[0] = Node.ArrayAccess(Node.Number(parseEntireNumber(p[1])), p[3])
 
     @RULE(Var.VARIABLE, [[Var.NAME], ])
     def p_variable_name(p):

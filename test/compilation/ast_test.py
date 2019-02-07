@@ -226,7 +226,8 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
     def test_definiteArticleArrayAccessWorksJustAsWellAsIndefinite(self, ast, state):
         variable_name = "la unua de ampoloj"
         state.variables["ampoloj"] = [1]
-        assert 1 == ast.parse(variable_name).getter(state)
+        assert ast.parse(variable_name).getter(state) == 1
+        assert parsed_value_of(ast, variable_name, state) == 1
 
     def test_canAssignIntoIndexOfExistingArray(self, ast, state):
         variable_name = "dua de ampoloj"

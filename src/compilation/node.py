@@ -187,19 +187,12 @@ class ArrayAccess(AstNode):
         return self.variable_name.getter(state)
 
     def setter(self, state, value):
-        evaluated_ordinal = self.evaluate_ordinal(state)
+        state, evaluated_ordinal = self.ordinal.evaluate(state)
         containing_object = self._get_containing_object(state)
         containing_object[evaluated_ordinal - 1] = value
 
-    def evaluate_ordinal(self, state):
-        if isinstance(self.ordinal, AstNode):
-            state, evaluated_ordinal = self.ordinal.evaluate(state)
-        else:
-            evaluated_ordinal = self.ordinal
-        return evaluated_ordinal
-
     def getter(self, state):
-        evaluated_ordinal = self.evaluate_ordinal(state)
+        state, evaluated_ordinal = self.ordinal.evaluate(state)
         return self._get_containing_object(state)[evaluated_ordinal - 1]
 
 
