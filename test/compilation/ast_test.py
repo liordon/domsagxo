@@ -76,9 +76,6 @@ class TestNameAndOrdinalAstNodes(PartialNameLevelAstProvided, CanAssertNodeType)
     def test_parsedAdjectiveReturnsDescriptionNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "bela", Node.Description)
 
-    def test_parsedKeywordLaReturnsNoneNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "la", Node.NoneNode)
-
     def test_twoParsedAdjectivesReturnsDescriptionNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "bela bona", Node.Description)
 
@@ -158,9 +155,20 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
 
     def test_definiteOrdinalNounVariableCanBeAssessedAsExpression(self, ast, state):
         variable_name = "qvara sxambalulo"
-        definite_Variable_name = "la " + variable_name
+        definite_variable_name = "la " + variable_name
         state.variables[variable_name] = 4
-        assert ast.parse(definite_Variable_name).getter(state) == 4
+        assert ast.parse(definite_variable_name).getter(state) == 4
+
+    def test_indefiniteLargeOrdinalNounVariableCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "kvindek kvara sxambalulo"
+        state.variables[variable_name] = 54
+        assert ast.parse(variable_name).getter(state) == 54
+
+    def test_definiteLargeOrdinalNounVariableCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "kvindek kvina sxambalulo"
+        definite_variable_name = "la " + variable_name
+        state.variables[variable_name] = 55
+        assert ast.parse(definite_variable_name).getter(state) == 55
 
     def test_variableSetterCanBeUsedToChangeVariableValue(self, ast, state):
         variable_name = "sxambalulo"

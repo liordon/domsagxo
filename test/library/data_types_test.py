@@ -80,8 +80,8 @@ class TestAstTimePoints(object):
     @staticmethod
     def assertTimePointValues(parse_result, hour, minutes=0):
         assert isinstance(parse_result, datetime.time)
-        assert hour == parse_result.hour
-        assert minutes == parse_result.minute
+        assert parse_result.hour == hour
+        assert parse_result.minute == minutes
 
     def test_canFormatFormalRoundHour(self, ast):
         parse_result = parsed_value_of(ast, "la sesa horo")
