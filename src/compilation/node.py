@@ -3,6 +3,21 @@ import datetime
 from enum import Enum
 
 
+def leaf_form(lastChild):
+    return "└- " if lastChild else "├- "
+
+
+def branch_form(last_child):
+    return "\t" if last_child else "│\t"
+
+
+def pretty_print(whatever, indent="", last_child=True):
+    if isinstance(whatever, AstNode):
+        return whatever.pretty_print(indent, last_child)
+    else:
+        return indent + leaf_form(last_child) + str(whatever)
+
+
 class AstNode(object):
     def __init__(self, *args, **kwargs):
         self.args = args
@@ -14,8 +29,38 @@ class AstNode(object):
     def _method(self, *args, **kwargs):
         return None, None
 
+    def __repr__(self):
+        arg_string = "" if len(self.args) + len(self.kwargs) == 0 else \
+            "(" + ", ".join(self.list_args_and_kwargs()) + ")"
 
-class Number(AstNode):
+        return str(type(self).__name__) + arg_string
+
+    def list_args_and_kwargs(self):
+        return [arg.__repr__() for arg in self.args] + \
+               [key + "=" + val.__repr__() for (key, val) in self.kwargs.items()]
+
+    def pretty_print(self, indent="", last_child=True):
+        res = indent + leaf_form(last_child) + str(type(self).__name__)
+        for i in range(len(self.args)):
+            child = self.args[i]
+            newIndent = indent + branch_form(last_child)
+            res += "\n" + pretty_print(child, newIndent, i == len(self.args) - 1)
+
+        return res
+
+
+class BasicNode(AstNode):
+    def __init__(self, *args, **kwargs):
+        super(BasicNode, self).__init__(*args, **kwargs)
+
+    def pretty_print(self, indent="", last_child=True):
+        return indent + leaf_form(last_child) + str(self)
+
+    def __str__(self):
+        return str(self.args[0])
+
+
+class Number(BasicNode):
     def __init__(self, number):
         super(Number, self).__init__(number)
 
@@ -23,12 +68,15 @@ class Number(AstNode):
         return state, number
 
 
-class String(AstNode):
+class String(BasicNode):
     def __init__(self, string):
         super(String, self).__init__(string)
 
     def _method(self, state, string):
         return state, string
+
+    def __str__(self):
+        return "`" + str(self.args[0]) + "'"
 
 
 class NoneNode(AstNode):
@@ -38,7 +86,8 @@ class NoneNode(AstNode):
     def _method(self, state):
         return state, None
 
-    def getContainedAdjectives(self):
+    @staticmethod
+    def getContainedAdjectives():
         return []
 
 
@@ -101,7 +150,7 @@ class LogicNot(UnaryOp):
         return state, not value
 
 
-class Boolean(AstNode):
+class Boolean(BasicNode):
     def __init__(self, value):
         super(Boolean, self).__init__(value)
 
@@ -109,7 +158,7 @@ class Boolean(AstNode):
         return state, value
 
 
-class VariableName(AstNode):
+class VariableName(BasicNode):
     def __init__(self, variable_name, variable_descriptor):
         super(VariableName, self).__init__(variable_name)
         self.variable_name = " ".join(
@@ -130,11 +179,14 @@ class VariableName(AstNode):
     def getter(self, state):
         return state.variables[self.variable_name]
 
+    def __str__(self):
+        return '<' + self.variable_name + '>'
+
 
 class Description(AstNode):
     def __init__(self, descriptor, additional_descriptor=NoneNode()):
         super(Description, self).__init__(descriptor, additional_descriptor)
-        self.adjectives = [descriptor] + additional_descriptor.getContainedAdjectives()
+        self.adjectives = additional_descriptor.getContainedAdjectives() + [descriptor]
 
     def _method(self, state, descriptor, additional_descriptor):
         variable_name = " ".join(self.adjectives)[:-1] + "o"
@@ -225,7 +277,7 @@ class Program(AstNode):
 
 class TimeSpan(AstNode):
     def __init__(self, days=Number(0), hours=Number(0), minutes=Number(0), seconds=Number(0)):
-        super(TimeSpan, self).__init__(self, days=days, hours=hours, minutes=minutes,
+        super(TimeSpan, self).__init__(days=days, hours=hours, minutes=minutes,
                                        seconds=seconds)
 
     def _method(self, state, *args, **kwargs):
@@ -233,6 +285,17 @@ class TimeSpan(AstNode):
         for key, value in kwargs.items():
             state, evaluated_kwargs[key] = value.evaluate(state)
         return state, datetime.timedelta(**evaluated_kwargs)
+
+    def __str__(self):
+        res = []
+        res += self._part_of_time_span("minutes", "m")
+        res += self._part_of_time_span("days", "d")
+        res += self._part_of_time_span("hours", "h")
+        res += self._part_of_time_span("seconds", "s")
+        return " ".join(res) if len(res) != 0 else "0s"
+
+    def _part_of_time_span(self, part, suffix):
+        return [] if self.kwargs[part].args[0] == 0 else [(str(self.kwargs[part]) + suffix)]
 
 
 class TimeUnion(AstNode):
@@ -266,9 +329,9 @@ class TimePoint(AstNode):
         return state, datetime.time(**evaluated_kwargs)
 
 
-class FunctionInvocation(AstNode):
+class RoutineInvocation(AstNode):
     def __init__(self, function_name, args):
-        super(FunctionInvocation, self).__init__(function_name, args)
+        super(RoutineInvocation, self).__init__(function_name, args)
 
     def _method(self, state, function_name, args):
         evaluated_args = []
@@ -276,6 +339,17 @@ class FunctionInvocation(AstNode):
             state, new_arg = arg.evaluate(state)
             evaluated_args += [new_arg]
         return state, state.method_dict[function_name](*evaluated_args)
+
+    def pretty_print(self, indent="", last_child=True):
+        res = indent + leaf_form(last_child) + str(type(self).__name__) \
+              + ": " + self.args[0]
+        inner_args = self.args[1]
+        for i in range(len(inner_args)):
+            child = inner_args[i]
+            newIndent = indent + branch_form(last_child)
+            res += "\n" + pretty_print(child, newIndent, i == len(inner_args) - 1)
+
+        return res
 
 
 class ReturnValue(AstNode):
@@ -286,9 +360,9 @@ class ReturnValue(AstNode):
         return state, nextAction.RETURN
 
 
-class FunctionDefinition(AstNode):
+class RoutineDefinition(AstNode):
     def __init__(self, function_name, argument_names, command_subtree):
-        super(FunctionDefinition, self).__init__(function_name, argument_names, command_subtree)
+        super(RoutineDefinition, self).__init__(function_name, argument_names, command_subtree)
 
     @staticmethod
     def turn_ast_into_function(state, function_name, argument_names, abstract_syntax_tree):
@@ -312,6 +386,22 @@ class FunctionDefinition(AstNode):
         state.method_dict[function_name] = self.turn_ast_into_function(
             state, function_name, argument_names, command_subtree)
         return state, nextAction.GO_ON
+
+    def pretty_print(self, indent="", last_child=True):
+        res = indent + leaf_form(last_child) + str(type(self).__name__) + ": " \
+              + self.args[0] + "\n" + \
+              indent + "\t" + leaf_form(False) + "Arguments:"
+        inner_args = self.args[1]
+        for i in range(len(inner_args)):
+            res += "\n" + pretty_print(inner_args[i], indent + "\t" + branch_form(False),
+                                       i == len(inner_args) - 1)
+        inner_args = self.args[2:]
+        for i in range(len(inner_args)):
+            child = inner_args[i]
+            res += "\n" + child.pretty_print(indent + branch_form(last_child),
+                                             i == len(inner_args) - 1)
+
+        return res
 
 
 class ConditionalStatement(AstNode):

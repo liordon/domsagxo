@@ -34,6 +34,20 @@ class ExpressionLevelAstProvided(object):
         return ast_bld.build(start=ast_bld.Var.EXPRESSION.value)
 
 
+class ProvidedAstUpToFunctionDefinitionLevel(object):
+    @staticmethod
+    def evaluate_and_return_state(ast, statement, initial_state=None):
+        if initial_state is None:
+            initial_state = Domsagxo()  # so as not to put a mutable default
+        ast_parse = ast.parse(statement)
+        state, nothing = ast_parse.evaluate(initial_state)
+        return state
+
+    @pytest.fixture
+    def ast(self):
+        return ast_bld.build(start=ast_bld.Var.ROUTINE_DEFINITION.value)
+
+
 class StatementLevelAstProvided(object):
     @pytest.fixture
     def ast(self):

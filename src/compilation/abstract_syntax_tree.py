@@ -33,14 +33,14 @@ class Var(Enum):
     ADJECTIVE = 'Vadjective'
     TERM = 'Vterm'
     FACTOR = 'Vfactor'
-    FUNCTION_INVOCATION = 'Vfunction_invocation'
+    ROUTINE_INVOCATION = 'Vroutine_invocation'
     NUMBER_LITERAL = 'Vnumber_literal'
     HOUR_ORDINAL = 'Vhour_ordinal'
     PARTIAL_TIME_SPAN = 'Vpartial_time_span'
-    FUNCTION_ARGUMENTS = 'Varguments'
-    FUNCTION_ARGUMENT = 'Vsingle_argument'
+    ROUTINE_ARGUMENTS = 'Varguments'
+    ROUTINE_ARGUMENT = 'Vsingle_argument'
     PARAMETERS = 'Vparameters'
-    FUNCTION_DEFINITION = 'Vfunction_definition'
+    ROUTINE_DEFINITION = 'Vroutine_definition'
     RELATION = 'Vrelation'
     LARGE_ORDINAL = 'Vlarge_ordinal'
 
@@ -129,8 +129,8 @@ def build(start=None):
         else:
             p[0] = Node.Program(p[1], p[3])
 
-    @RULE(Var.STATEMENT, [[Var.FUNCTION_DEFINITION],
-                          [Var.FUNCTION_INVOCATION],
+    @RULE(Var.STATEMENT, [[Var.ROUTINE_DEFINITION],
+                          [Var.ROUTINE_INVOCATION],
                           [Var.ASSIGN_STATEMENT],
                           [Var.RETURN_STATEMENT],
                           [Var.IF_STATEMENT],
@@ -428,22 +428,27 @@ def build(start=None):
                              Node.Number(minutes),
                              Node.Number(seconds))
 
-    # ------------------------    function invocation and definition   --------------------- #
-    @RULE(Var.FUNCTION_INVOCATION, [[POS.V_IMP, Var.FUNCTION_ARGUMENTS], ])
-    def p_function_call(p):
-        p[0] = Node.FunctionInvocation(p[1], p[2])
+    # ------------------------    routine invocation and definition   --------------------- #
+    @RULE(Var.ROUTINE_INVOCATION, [[POS.V_IMP, Var.ROUTINE_ARGUMENTS], ])
+    def p_routineInvocation_imperativeVerbAndArguments(p):
+        p[0] = Node.RoutineInvocation(p[1], p[2])
 
-    @RULE(Var.FUNCTION_ARGUMENTS, [[Var.FUNCTION_ARGUMENT],
-                                   [Var.FUNCTION_ARGUMENTS, Var.DELIMITER,
-                                    Var.FUNCTION_ARGUMENT], ])
-    def p_function_arguments(p):
+    @RULE(Var.ROUTINE_INVOCATION, [[POS.V_IMP], ])
+    def p_routineInvocation_lonelyImperativeVerb(p):
+        # noinspection PyTypeChecker
+        p[0] = Node.RoutineInvocation(p[1], [])
+
+    @RULE(Var.ROUTINE_ARGUMENTS, [[Var.ROUTINE_ARGUMENT],
+                                  [Var.ROUTINE_ARGUMENTS, Var.DELIMITER,
+                                   Var.ROUTINE_ARGUMENT], ])
+    def p_routineArguments_argumentAndAdditionalExpression(p):
         if len(p) == 2:
             p[0] = [p[1]]
         else:
             p[0] = p[1] + [p[3]]
 
-    @RULE(Var.FUNCTION_ARGUMENT, [[Var.EXPRESSION], ])
-    def p_first_function_argument(p):
+    @RULE(Var.ROUTINE_ARGUMENT, [[Var.EXPRESSION], ])
+    def p_routineArgument_firstExpression(p):
         p[0] = p[1]
 
     @RULE(Var.PARAMETERS, [[Var.NAME],
@@ -458,10 +463,10 @@ def build(start=None):
     def p_inputArg_nothing(p):
         p[0] = []
 
-    @RULE(Var.FUNCTION_DEFINITION,
+    @RULE(Var.ROUTINE_DEFINITION,
           [[POS.V_INF, Var.PARAMETERS, ResWord.THIS_WAY, Var.BLOCK, ResWord.END], ])
-    def p_funcDef_nameAndArgs(p):
-        p[0] = Node.FunctionDefinition(p[1][:-1] + "u", p[2], p[4])
+    def p_routineDefinition_nameAndArgs(p):
+        p[0] = Node.RoutineDefinition(p[1][:-1] + "u", p[2], p[4])
 
     @RULE(Var.DELIMITER, [[UaTer.DELIMITER],
                           [POS.PREPOSITION],
@@ -473,8 +478,19 @@ def build(start=None):
     # Error rule for syntax errors
     # noinspection PyUnusedLocal
     def p_error(p):
-        raise EsperantoSyntaxError("Syntax error in input: " + str(p))
+        symbol_stack_trace = ""
+        for symbol in ast_builder.symstack[1:]:
+            # noinspection PyUnresolvedReferences
+            if isinstance(symbol, yacc.YaccSymbol) and isinstance(symbol.value, Node.AstNode):
+                # noinspection PyUnresolvedReferences
+                symbol_stack_trace += symbol.value.pretty_print()
+            else:
+                symbol_stack_trace += str(symbol)
+            symbol_stack_trace += "\n"
+        raise EsperantoSyntaxError("Syntax error in input: " + str(p) +
+                                   "\nOn parse tree:\n" + symbol_stack_trace)
 
+    global ast_builder
     ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, errorlog=yacc.NullLogger())
     return ast_builder
 

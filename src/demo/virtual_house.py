@@ -13,7 +13,7 @@ from library.management_components import Domsagxo
 def announce_in_multimedia(*args):
     for output in args:
         print(output)
-        os.system('espeak -v eo+f3 "' + output + '"')
+        os.system('espeak -v eo+f3 "' + str(output) + '"')
 
 
 lxr.build()
@@ -35,6 +35,7 @@ def is_prime(number):
     if number <= 1:
         return False
     return all_true([number % i for i in range(2, int(math.sqrt(number)) + 1)])
+
 
 def press(button_or_key):
     global app, smart_home, ast
@@ -103,10 +104,11 @@ with gui("virtuala domo") as app:
             light_bulbs = []
             app.setPollTime(1000)
             for i in range(100):
-                light_bulbs += [create_light_bulb(str(i+1), row=int(i/10), col=(i)%10)]
+                light_bulbs += [create_light_bulb(str(i + 1), row=int(i / 10), col=(i) % 10)]
             smart_home.variables["ampoloj"] = light_bulbs
         with app.labelFrame("salono", row=2, colspan=2):
             smart_home.variables["sxambalulo"] = create_light_bulb("sxambalulo")
+
 
         def turn_light_on_if_prime(number):
             if is_prime(number):
@@ -116,7 +118,6 @@ with gui("virtuala domo") as app:
 
 
         smart_home.method_dict['cxuprimu'] = turn_light_on_if_prime
-
 
     app.addLabel("l9", "speech:")
     app.addTextArea("Speech", row=3, column=1, colspan=2)

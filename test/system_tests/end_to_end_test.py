@@ -95,6 +95,29 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         assert 2 == evaluate_and_return_state_variables(
             ast, "asignu indeksa de ampoloj al kato", manager)['kato']
 
+    def test_canNotInvokeNonExistentRoutine(self, ast):
+        with pytest.raises(KeyError):
+            evaluate_and_return_state_variables(ast, "sxamnalulu kvardek du")
+
+    def test_canInvokeRoutineWithArguments(self, ast):
+        # noinspection PyUnusedLocal
+        def mock_routine(arg):
+            pass
+
+        smart_home = mng_co.Domsagxo()
+        smart_home.method_dict["sxambalulu"] = mock_routine
+        # should execute without exception
+        evaluate_and_return_state_variables(ast, "sxambalulu kvardek du", smart_home)
+
+    def test_canInvokeRoutineWithoutArguments(self, ast):
+        def mock_routine():
+            pass
+
+        smart_home = mng_co.Domsagxo()
+        smart_home.method_dict["sxambalulu"] = mock_routine
+        # should execute without exception
+        evaluate_and_return_state_variables(ast, "sxambalulu", smart_home)
+
 
 class TestTimedAstStatements(StatementLevelAstProvided, SmartHomeManagerProvided):
 

@@ -2,23 +2,9 @@ import math
 
 import pytest
 
-import compilation.abstract_syntax_tree as ast_bld
 import library.atomic_types as atypes
 import library.management_components as mgmt_cmp
-
-
-class ProvidedAstUpToFunctionDefinitionLevel(object):
-    @staticmethod
-    def evaluate_and_return_state(ast, statement, initial_state=None):
-        if initial_state is None:
-            initial_state = mgmt_cmp.Domsagxo()  # so as not to put a mutable default
-        ast_parse = ast.parse(statement)
-        state, nothing = ast_parse.evaluate(initial_state)
-        return state
-
-    @pytest.fixture
-    def ast(self):
-        return ast_bld.build(start=ast_bld.Var.FUNCTION_DEFINITION.value)
+from test_utils.providers import ProvidedAstUpToFunctionDefinitionLevel
 
 
 def all_true(argument_list):
