@@ -217,7 +217,9 @@ class Dereference(AstNode):
     def setter(self, state, value):
         containing_object = self._get_containing_object(state)
         if self.getContainedName() not in containing_object.properties:
-            raise KeyError()
+            raise KeyError(str(containing_object) + " has no field named `"
+                           + self.getContainedName() + "'. only:\n"
+                           + str(containing_object.properties))
         containing_object.properties[self.getContainedName()] = value
 
     def getter(self, state):
@@ -366,7 +368,7 @@ class RoutineDefinition(AstNode):
 
     @staticmethod
     def turn_ast_into_function(state, function_name, argument_names, abstract_syntax_tree):
-        def subtree_function(*argument_list, **kwargs):
+        def subtree_function(*argument_list):
             closure = copy.copy(state)
             closure.variables = copy.copy(state.variables)
             if len(argument_list) != len(argument_names):

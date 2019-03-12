@@ -20,6 +20,11 @@ class Appliance(object):
                 ApplianceProperties.BRIGHTNESS.value: 1,
                 ApplianceProperties.COLOR.value     : Color.WHITE.value
             }
+        elif self.type is ApplianceTypes.BOILER:
+            self.properties = {
+                ApplianceProperties.CURRENT_TEMPERATURE.value: 0,
+                ApplianceProperties.DESIRED_TEMPERATURE.value: 100
+            }
 
     def setStateComponent(self, state_component, value):
         self.properties[state_component] = value

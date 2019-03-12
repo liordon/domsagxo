@@ -53,7 +53,8 @@ class Domsagxo(object):
 
     def stop_scheduler(self):
         self.scheduler_is_running = False
-        self.scheduler_runner.join()
+        if self.scheduler_runner is not None:
+            self.scheduler_runner.join()
 
     def addAppliance(self, appliance):
         if appliance.name in self.variables:

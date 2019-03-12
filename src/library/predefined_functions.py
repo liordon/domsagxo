@@ -18,7 +18,7 @@ digitNames = {
 
 def generateRandom(type_to_generate, lower_bound=None, upper_bound=None):
     both_bounds_were_given = lower_bound is not None and upper_bound is not None
-    if type_to_generate == RandomizableType.TIME_POINT.value:
+    if type_to_generate == PossibleRandomType.TIME_POINT.value:
         if both_bounds_were_given:
             hour_range = upper_bound.hour - lower_bound.hour
             minute_range = upper_bound.minute - lower_bound.minute
@@ -30,7 +30,7 @@ def generateRandom(type_to_generate, lower_bound=None, upper_bound=None):
             random_minute = randrange(0, 60)
         return datetime.time(hour=random_hour, minute=random_minute)
 
-    elif type_to_generate == RandomizableType.TIME_SPAN.value:
+    elif type_to_generate == PossibleRandomType.TIME_SPAN.value:
         if both_bounds_were_given:
             return generateConstrainedTimeSpan(lower_bound, upper_bound)
         return datetime.timedelta(hours=randrange(0, 24),
