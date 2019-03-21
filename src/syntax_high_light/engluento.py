@@ -1,15 +1,15 @@
 adjectives = [
-    "ugly", "beutiful", "tall", "short", "quick", "brown", "lazy", "front", "first", "second",
+    "beutiful", "brown", "front", "first", "tall", "short", "quick", "lazy", "my", "second", "ugly",
 ]
 nouns = [
     "argumet", "arguments", "blinds", "brightness", "bulb",
     "cat", "channel", "child", "contact",
-    "dog", "door", "fox", "function", "functions", "hashmugan",
+    "dog", "door", "fox", "function", "functions", "Haifa", "Hashmugan",
     "i", "index", "length", "light", "lights", "list",
-    "m", "marko", "number", "numbers",
-    "other", "oven", "routine", "routines",
-    "television", "televisions", "temperature", "time",
-    "window",
+    "m", "memories", "marko", "number", "numbers",
+    "other", "oven", "room", "routine", "routines",
+    "television", "televisions", "temperature", "time", "traffic",
+    "weather", "window",
 ]
 
 fractions = ["half", "third", "thirds", "quarter", "quarters"]
@@ -20,14 +20,14 @@ decades = ["ten", "twenty", "thirty", "fourty", "fifty", "sixty", "seventy", "ei
 largeAmounts = ["hundred", "thousand", "million", "billion"]
 
 verbs = [
-    "add", "announce", "check primality", "close", "compose", "lock", "minimize",
-    "play", "pretend", "project", "randomize", "recurse", "replace",
+    "add", "announce", "check primality", "close", "compose", "ground", "lock", "minimize",
+    "play", "pretend", "project", "randomize", "recurse", "replace", "report",
     "sub-compose", "successor", "square", "turn off", "turn on",
 ]
 
 keywords = [
-    "at the same time", "at", "do", "end", "equal", "every", "false", "for", "greater",
-    "if", "is", "like", "means", "new", "not", "of", "on",
+    "and then", "assign", "at the same time", "at", "do", "else", "end", "equal", "every", "false", "for", "greater",
+    "if", "into", "is", "it", "like", "means", "new", "not", "of", "on",
     "return", "so", "than", "then", "true",
     "whenever", "which", "while",
 ]
