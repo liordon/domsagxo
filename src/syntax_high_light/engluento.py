@@ -2,7 +2,7 @@ adjectives = [
     "beutiful", "brown", "front", "first", "tall", "short", "quick", "lazy", "my", "second", "ugly",
 ]
 nouns = [
-    "argumet", "arguments", "blinds", "brightness", "bulb",
+    "argumet", "arguments", "blinds", "boiler", "brightness", "bulb",
     "cat", "channel", "child", "contact",
     "dog", "door", "fox", "function", "functions", "Haifa", "Hashmugan",
     "i", "index", "length", "light", "lights", "list",
@@ -20,15 +20,15 @@ decades = ["ten", "twenty", "thirty", "fourty", "fifty", "sixty", "seventy", "ei
 largeAmounts = ["hundred", "thousand", "million", "billion"]
 
 verbs = [
-    "add", "announce", "check primality", "close", "compose", "ground", "lock", "minimize",
+    "add", "announce", "check primality", "close", "compose", "ground", "open", "lock", "minimize",
     "play", "pretend", "project", "randomize", "recurse", "replace", "report",
-    "sub-compose", "successor", "square", "turn off", "turn on",
+    "sub-compose", "successor", "square", "turn off", "turn on", "turns off", "turns on",
 ]
 
 keywords = [
-    "and then", "assign", "at the same time", "at", "do", "else", "end", "equal", "every", "false", "for", "greater",
-    "if", "into", "is", "it", "like", "means", "new", "not", "of", "on",
-    "return", "so", "than", "then", "true",
+    "after", "and then", "assign", "at the same time", "at", "do", "else", "end", "equal", "every", "false", "for", "greater",
+    "if", "into", "is", "it", "like", "means", "new", "not", "of", "on", "once",
+    "return", "so", "than", "them", "then", "true",
     "whenever", "which", "while",
 ]
 prepositions = ["between", "to", "with"]
