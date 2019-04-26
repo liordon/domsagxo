@@ -7,7 +7,7 @@ nouns = [
     "dog", "door", "fox", "function", "functions", "Haifa", "Hashmugan",
     "i", "index", "length", "light", "lights", "list",
     "m", "memories", "marko", "number", "numbers",
-    "other", "oven", "room", "routine", "routines",
+    "other", "oven", "radio", "room", "routine", "routines",
     "television", "televisions", "temperature", "time", "traffic",
     "weather", "window",
 ]
