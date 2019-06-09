@@ -42,20 +42,15 @@ digitRe = re.compile(
 
 timeUnitRe = re.compile(r"(jaro|monato|semajno|tago|horo|minuto|sekundo)j?\b")
 
-stringRe = re.compile(r"")
-
 
 def t_string(t):
-    r"""('|"|maldekstra\scitilo\b).*?(\bdekstra\scitilo\b|"|')"""
-    # r"""('[^']*')|("[^"]*")|(maldekstra\scitilo [^(dekstra\scitilo)]*( dekstra\scitilo))"""
+    r"""('.*?')|(".*?")|(\bmaldekstra\scitilo\b.*?\bdekstra\scitilo\b)|(\bcitilo\b.*?\bmalcitilo\b)"""
     if t.value.startswith("maldekstra citilo"):
-        t.value = t.value[18:]
+        t.value = t.value[18:-15]
+    if t.value.startswith("citilo"):
+        t.value = t.value[7:-10]
     if t.value.startswith(("'", '"')):
-        t.value = t.value[1:]
-    if t.value.endswith("dekstra citilo"):
-        t.value = t.value[:-15]
-    if t.value.endswith(("'", '"')):
-        t.value = t.value[:-1]
+        t.value = t.value[1:-1]
     t.type = UnalphabeticTerminal.STRING.value
     return t
 

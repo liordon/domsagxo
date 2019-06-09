@@ -185,7 +185,32 @@ class TestStrings(EsperantoLexerProvided):
     def test_literalQuotationMarksDoNotLeaveLeadingOrTrailingSpaces(self, lexer):
         lexer.input("maldekstra citilo kato dekstra citilo")
         token = lexer.token()
-        assert "kato" == token.value
+        assert token.value == "kato"
+
+    def test_canUseShortQuotationKeywords(self, lexer):
+        lexer.input("citilo kato malcitilo")
+        token = lexer.token()
+        assert token.value == "kato"
+
+    def test_cannotMixCitationTypesWhenDefiningAString(self, lexer):
+        lexer.input("maldekstra citilo '")
+        assert UnalphabeticTerminal.STRING.value != lexer.token().type
+        lexer.input("maldekstra citilo \"")
+        assert UnalphabeticTerminal.STRING.value != lexer.token().type
+        # unmatched ' or " are not even legal in this grammar, so they have to be caught.
+        # this is still considered valid as far as I am concerned, but I don't want to
+        # expect it as a part of the test.
+        from compilation.esperanto_lexer import SemanticError
+        try:
+            lexer.input("' dekstra citilo")
+            assert UnalphabeticTerminal.STRING.value != lexer.token().type
+        except SemanticError:
+            pass
+        try:
+            lexer.input("\" dekstra citilo")
+            assert UnalphabeticTerminal.STRING.value != lexer.token().type
+        except SemanticError:
+            pass
 
     def test_literalQuotationMarksCannotHavePrefixesOrSuffixes(self, lexer):
         lexer.input("maldekstra citiloj dekstra citilo")
