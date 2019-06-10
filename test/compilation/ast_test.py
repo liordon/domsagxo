@@ -275,6 +275,10 @@ class TestAstMathExpressions(ExpressionLevelAstProvided):
         assert 1 == parsed_value_of(ast, "7+-6")
         assert 1 == parsed_value_of(ast, "sep pli malpli ses")
 
+    def test_parenthesesCanAlterCalculationOrder(self, ast):
+        assert 9 == parsed_value_of(ast, "(1+2)*3")
+        assert 9 == parsed_value_of(ast, "krampo unu pli du malkrampo fojoj tri")
+
     def test_sameDigitCannotBeSpecifiedTwice(self, ast):
         with pytest.raises(ast_bld.EsperantoSyntaxError):
             ast.parse("naux ses")

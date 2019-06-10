@@ -34,7 +34,7 @@ class ExpressionLevelAstProvided(object):
         return ast_bld.build(start=ast_bld.Var.EXPRESSION.value)
 
 
-class ProvidedAstUpToFunctionDefinitionLevel(object):
+class FunctionDefinitionLevelAstProvided(object):
     @staticmethod
     def evaluate_and_return_state(ast, statement, initial_state=None):
         if initial_state is None:

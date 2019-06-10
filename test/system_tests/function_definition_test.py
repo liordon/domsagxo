@@ -4,7 +4,7 @@ import pytest
 
 import library.atomic_types as atypes
 import library.management_components as mgmt_cmp
-from test_utils.providers import ProvidedAstUpToFunctionDefinitionLevel
+from test_utils.providers import FunctionDefinitionLevelAstProvided
 
 
 def all_true(argument_list):
@@ -29,7 +29,7 @@ class ProvidedSmartHomeWithLightBulb(object):
         return smart_home
 
 
-class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLevel,
+class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
                                             ProvidedSmartHomeWithLightBulb):
 
     def test_canDefineSimpleReturningRoutine(self, ast):

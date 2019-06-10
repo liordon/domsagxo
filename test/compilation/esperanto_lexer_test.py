@@ -85,6 +85,16 @@ class TestReservedWords(EsperantoLexerProvided):
         lexer.input("partoj")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.PARTS)
 
+    def test_words_rightLeftParenthesis_areReservedForMath(self, lexer):
+        lexer.input("(")
+        self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.L_PAREN)
+        lexer.input(")")
+        self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.R_PAREN)
+        lexer.input("krampo")
+        self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.L_PAREN)
+        lexer.input("malkrampo")
+        self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.R_PAREN)
+
     def test_timeUnitsAreRecognizedTimeIndicationsAndNotNouns(self, lexer):
         lexer.input("jaro")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.TIME_INDICATION)
