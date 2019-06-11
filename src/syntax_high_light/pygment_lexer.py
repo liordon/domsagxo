@@ -6,7 +6,7 @@ from pygments.lexer import RegexLexer
 from pygments.token import *
 from syntax_high_light.pygment_style import DomsagxoStyle
 
-from compilation.esp_lexer import reserved_words, prepositions, digitRe, timeUnitRe
+from compilation.esperanto_lexer import reserved_words, prepositions, digitRe, timeUnitRe
 
 
 def regexFromWordList(words):

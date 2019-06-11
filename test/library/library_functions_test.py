@@ -1,7 +1,7 @@
 import pytest
 
 from library.management_components import *
-from library.predefined_values import RandomizableType
+from library.predefined_values import PossibleRandomType
 from test_utils.providers import SmartHomeManagerProvided
 
 app_nm1 = "sxambalulo"
@@ -14,13 +14,13 @@ group_nm2 = "infancxambro"
 class TestTimePointGeneration(object):
 
     def test_canGenerateTotallyRandomTimePoint(self):
-        time_point = generateRandom(RandomizableType.TIME_POINT.value)
+        time_point = generateRandom(PossibleRandomType.TIME_POINT.value)
         assert isinstance(time_point, datetime.time)
         assert 24 > time_point.hour
         assert 60 > time_point.minute
 
     def test_canGenerateConstrainedRandomTimePoint(self):
-        time_point = generateRandom(RandomizableType.TIME_POINT.value,
+        time_point = generateRandom(PossibleRandomType.TIME_POINT.value,
                                     datetime.time(9, 20),
                                     datetime.time(9, 50))
         assert isinstance(time_point, datetime.time)
@@ -29,7 +29,7 @@ class TestTimePointGeneration(object):
         assert 20 <= time_point.minute
 
     def test_canGenerateRandomTimePointWithOverflowToNextHour(self):
-        time_point = generateRandom(RandomizableType.TIME_POINT.value,
+        time_point = generateRandom(PossibleRandomType.TIME_POINT.value,
                                     datetime.time(12, 59),
                                     datetime.time(13, 50))
         assert isinstance(time_point, datetime.time)
@@ -40,11 +40,11 @@ class TestTimePointGeneration(object):
 class TestTimeSpanGeneration(object):
 
     def test_canGenerateTotallyRandomTimeSpan(self):
-        time_span = generateRandom(RandomizableType.TIME_SPAN.value)
+        time_span = generateRandom(PossibleRandomType.TIME_SPAN.value)
         assert isinstance(time_span, datetime.timedelta)
 
     def test_canGenerateConstrainedRandomTimeSpan(self):
-        time_span = generateRandom(RandomizableType.TIME_SPAN.value,
+        time_span = generateRandom(PossibleRandomType.TIME_SPAN.value,
                                    datetime.timedelta(seconds=1),
                                    datetime.timedelta(minutes=1))
         assert isinstance(time_span, datetime.timedelta)
@@ -52,7 +52,7 @@ class TestTimeSpanGeneration(object):
         assert 1 <= time_span.seconds
 
     def test_canGenerateLargeConstrainedRandomTimeSpan(self):
-        time_span = generateRandom(RandomizableType.TIME_SPAN.value,
+        time_span = generateRandom(PossibleRandomType.TIME_SPAN.value,
                                    datetime.timedelta(hours=1),
                                    datetime.timedelta(hours=2))
         assert isinstance(time_span, datetime.timedelta)
@@ -60,7 +60,7 @@ class TestTimeSpanGeneration(object):
         assert 3600 <= time_span.seconds
 
     def test_canGenerateRandomTimeSpanWithOverflow(self):
-        time_span = generateRandom(RandomizableType.TIME_SPAN.value,
+        time_span = generateRandom(PossibleRandomType.TIME_SPAN.value,
                                    datetime.timedelta(minutes=59),
                                    datetime.timedelta(hours=2))
         assert isinstance(time_span, datetime.timedelta)
@@ -163,9 +163,9 @@ class TestApplianceCommands(SmartHomeManagerProvided):
 
         smart_home.requestDeviceActivation(smart_home.variables[group_nm1])
 
-        assert smart_home.variables[app_nm1].isTurnedOn
-        assert smart_home.variables[app_nm2].isTurnedOn
-        assert not smart_home.variables[app_nm3].isTurnedOn
+        assert smart_home.variables[app_nm1].isTurnedOn() is True
+        assert smart_home.variables[app_nm2].isTurnedOn() is True
+        assert smart_home.variables[app_nm3].isTurnedOn() is False
 
     def test_canTurnOnSeveralAppliancesAtOnce(self, smart_home):
         smart_home.addAppliance(Appliance(ApplianceTypes.SWITCH, app_nm1))
@@ -175,9 +175,9 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         smart_home.requestDeviceActivation(
             [smart_home.variables[app_nm2], smart_home.variables[app_nm3]])
 
-        assert not smart_home.variables[app_nm1].isTurnedOn
-        assert smart_home.variables[app_nm2].isTurnedOn
-        assert smart_home.variables[app_nm3].isTurnedOn
+        assert smart_home.variables[app_nm1].isTurnedOn() is False
+        assert smart_home.variables[app_nm2].isTurnedOn() is True
+        assert smart_home.variables[app_nm3].isTurnedOn() is True
 
     def test_canTurnOnBothAppliancesAndGroupsAtOnce(self, smart_home):
         smart_home.addAppliance(Appliance(ApplianceTypes.SWITCH, app_nm1))
@@ -190,14 +190,15 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         smart_home.requestDeviceActivation(
             smart_home.variables[group_nm1], smart_home.variables[app_nm3])
 
-        assert smart_home.variables[app_nm1].isTurnedOn
-        assert smart_home.variables[app_nm2].isTurnedOn
-        assert smart_home.variables[app_nm3].isTurnedOn
+        assert smart_home.variables[app_nm1].isTurnedOn() is True
+        assert smart_home.variables[app_nm2].isTurnedOn() is True
+        assert smart_home.variables[app_nm3].isTurnedOn() is True
 
     def test_canQueryLightForItsBrightness(self, smart_home):
         smart_home.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
 
-        brightness = smart_home.getPropertyOfAppliance(app_nm1, ApplianceProperties.BRIGHTNESS.value)
+        brightness = smart_home.getPropertyOfAppliance(app_nm1,
+                                                       ApplianceProperties.BRIGHTNESS.value)
 
         assert 1 == brightness
 
@@ -206,7 +207,8 @@ class TestApplianceCommands(SmartHomeManagerProvided):
 
         smart_home.setPropertyOfAppliance(app_nm1, ApplianceProperties.BRIGHTNESS.value, .15)
 
-        assert .15 == smart_home.getPropertyOfAppliance(app_nm1, ApplianceProperties.BRIGHTNESS.value)
+        assert .15 == smart_home.getPropertyOfAppliance(app_nm1,
+                                                        ApplianceProperties.BRIGHTNESS.value)
 
     def test_canAlterLightBrightnessForEntireGroup(self, smart_home):
         smart_home.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
@@ -217,6 +219,9 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         smart_home.requestChangeToDeviceProperty(
             group_of_all_lights, ApplianceProperties.BRIGHTNESS.value, .15)
 
-        assert .15 == smart_home.getPropertyOfAppliance(app_nm1, ApplianceProperties.BRIGHTNESS.value)
-        assert .15 == smart_home.getPropertyOfAppliance(app_nm2, ApplianceProperties.BRIGHTNESS.value)
-        assert .15 == smart_home.getPropertyOfAppliance(app_nm3, ApplianceProperties.BRIGHTNESS.value)
+        assert .15 == smart_home.getPropertyOfAppliance(app_nm1,
+                                                        ApplianceProperties.BRIGHTNESS.value)
+        assert .15 == smart_home.getPropertyOfAppliance(app_nm2,
+                                                        ApplianceProperties.BRIGHTNESS.value)
+        assert .15 == smart_home.getPropertyOfAppliance(app_nm3,
+                                                        ApplianceProperties.BRIGHTNESS.value)

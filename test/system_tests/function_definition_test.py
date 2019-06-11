@@ -2,23 +2,9 @@ import math
 
 import pytest
 
-import compilation.abstract_syntax_tree as ast_bld
 import library.atomic_types as atypes
 import library.management_components as mgmt_cmp
-
-
-class ProvidedAstUpToFunctionDefinitionLevel(object):
-    @staticmethod
-    def evaluate_and_return_state(ast, statement, initial_state=None):
-        if initial_state is None:
-            initial_state = mgmt_cmp.Domsagxo()  # so as not to put a mutable default
-        ast_parse = ast.parse(statement)
-        state, nothing = ast_parse.evaluate(initial_state)
-        return state
-
-    @pytest.fixture
-    def ast(self):
-        return ast_bld.build(start=ast_bld.Var.FUNCTION_DEFINITION.value)
+from test_utils.providers import FunctionDefinitionLevelAstProvided
 
 
 def all_true(argument_list):
@@ -43,7 +29,7 @@ class ProvidedSmartHomeWithLightBulb(object):
         return smart_home
 
 
-class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLevel,
+class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
                                             ProvidedSmartHomeWithLightBulb):
 
     def test_canDefineSimpleReturningRoutine(self, ast):
@@ -52,6 +38,19 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
                                                    '''sxambaluli signifas revenu finu''')
         assert number_of_predefined_functions + 1 == len(new_state.method_dict)
         assert 'sxambalulu' in new_state.method_dict.keys()
+
+    def test_canDefineRoutineReturningValue(self, ast):
+        number_of_predefined_functions = len(mgmt_cmp.Domsagxo().method_dict)
+        new_state = self.evaluate_and_return_state(ast,
+                                                   '''sxambaluli signifas revenu nul finu''')
+        assert number_of_predefined_functions + 1 == len(new_state.method_dict)
+        assert 'sxambalulu' in new_state.method_dict.keys()
+
+    def test_returnValueIsSavedInVariableItAfterFunctionCall(self, ast):
+        new_state = self.evaluate_and_return_state(ast,
+                                                   '''sxambaluli signifas revenu nul finu''')
+        new_state.method_dict['sxambalulu']()
+        assert new_state.variables['gxi'] == 0
 
     def test_cannotPassMoreArgumentsThanPlannedToUserDefinedFunction(self, ast):
         new_state = self.evaluate_and_return_state(
@@ -63,7 +62,7 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
         new_state = self.evaluate_and_return_state(
             ast, '''forgesi sxambalulo signifas revenu finu''')
         new_state = self.evaluate_and_return_state(
-            ast, '''memori signifas kato estas sxambalulo finu''', new_state)
+            ast, '''memori signifas asignu sxambalulo al kato finu''', new_state)
         new_state.method_dict['forgesu'](100)
         # forgesi now knows a variable called sxambalulo
         with pytest.raises(NameError):
@@ -72,14 +71,14 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
 
     def test_routinesCanChangeApplianceState(self, ast, smart_home):
         new_state = self.evaluate_and_return_state(
-            ast, '''sxangxi signifas brilo de sxambalulo estas kvardek finu''', smart_home)
+            ast, '''sxangxi signifas asignu kvardek al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['sxangxu']()
         assert 40 == new_state.variables["sxambalulo"].properties["brilo"]
 
     def test_routinesCanAccessAppliancesDefinedAfterThemselves(self, ast):
         initial_state = mgmt_cmp.Domsagxo()
         new_state = self.evaluate_and_return_state(
-            ast, '''sxangxi signifas brilo de sxambalulo estas kvardek finu''', initial_state)
+            ast, '''sxangxi signifas asignu kvardek al brilo de sxambalulo finu''', initial_state)
         new_state.addAppliance(
             appliance=atypes.Appliance(atypes.ApplianceTypes.LIGHT, "sxambalulo"))
         new_state.method_dict['sxangxu']()
@@ -93,7 +92,7 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
                     revenu
                 alie
                     rekursu sxambalulo malpli unu
-                    poste brilo de sxambalula de sxambaluloj estas sxambalulo fojoj dek
+                    poste asignu sxambalulo fojoj dek al brilo de sxambalula de sxambaluloj
                     poste revenu
                 finu
             finu''')
@@ -114,7 +113,7 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
         The function is simply: f(x) = n."""
         new_state = self.evaluate_and_return_state(
             ast, '''konstanti hundo, kato kaj muso signifas
-                brilo de sxambalulo estas sep finu''', smart_home)
+                asignu sep al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['konstantu'](10, 809, 341)
         assert 7 == new_state.variables['sxambalulo'].properties["brilo"]
 
@@ -123,7 +122,7 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
         Basically, it's just f(x) = x+1."""
         new_state = self.evaluate_and_return_state(
             ast, '''posteuli nombro signifas 
-                brilo de sxambalulo estas nombro pli unu finu''', smart_home)
+                asignu nombro pli unu al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['posteulu'](41)
         assert 42 == new_state.variables['sxambalulo'].properties["brilo"]
 
@@ -133,7 +132,7 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
         In this specific example, we accept 2 inputs and return the first one."""
         new_state = self.evaluate_and_return_state(
             ast, '''elekti hundo kaj kato signifas 
-            brilo de sxambalulo estas hundo finu''', smart_home)
+            asignu hundo al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['elektu'](31, 42)
         assert 31 == new_state.variables['sxambalulo'].properties["brilo"]
 
@@ -142,26 +141,26 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
         So let's check, since I bet I can do that with several simple functions."""
         new_state = self.evaluate_and_return_state(
             ast, '''cxuprimi nombro signifas
-                unua indekso estas du
+                asignu du al unua indekso 
                 poste dum unua indekso fojoj unua indekso 
                         ne estas pli granda ol nombro tiam
-                    dua indekso estas unua indekso
+                    asignu unua indekso al dua indekso
                     poste dum unua indekso fojoj dua indekso 
                             ne estas pli granda ol nombro tiam
                         se unua indekso fojoj dua indekso estas egala al nombro tiam
                             malsxaltu sxambalulon
                             poste revenu
                         finu
-                        poste dua indekso estas dua indekso pli unu
+                        poste asignu dua indekso pli unu al dua indekso
                     finu
-                    poste unua indekso estas unua indekso pli unu
+                    poste asignu unua indekso pli unu al unua indekso
                 finu
                 poste sxaltu sxambalulon
                 finu''', smart_home)
 
         for i in range(2, 100):
             new_state.method_dict['cxuprimu'](i)
-            assert is_prime(i) == new_state.variables['sxambalulo'].isTurnedOn
+            assert is_prime(i) == new_state.variables['sxambalulo'].isTurnedOn()
 
     def test_assumingICanIdentifyAPrimeICanFindAllPrimesUpTo100(self, ast, smart_home):
         """For the sake of test independence I will program the prime chekcer in python.
@@ -173,36 +172,36 @@ class TestDefinitionAndActivationOfRoutines(ProvidedAstUpToFunctionDefinitionLev
 
         new_state = self.evaluate_and_return_state(
             ast, '''primumi signifas
-                indekso estas du
+                asignu du al indekso
                 poste dum indekso ne estas pli granda ol cent tiam
                     cxuprimu indekso
-                    poste se brilo de sxambalulo estas egala al cent tiam
+                    poste se sxambalulo sxaltas tiam
                         sxaltu indeksa de sxambaluloj
                         poste presu indekso
                     alie
                         malsxaltu indeksa de sxambaluloj
                     finu
-                    poste indekso estas indekso pli unu
+                    poste asignu indekso pli unu al indekso
                 finu
                 finu''', smart_home)
 
-        def turn_light_green_if_prime(number):
+        def turn_light_on_if_prime(number):
             if is_prime(number):
-                new_state.variables['sxambalulo'].properties[
-                    'brilo'] = 100
+                new_state.variables['sxambalulo'].turnOn()
             else:
-                new_state.variables['sxambalulo'].properties[
-                    'brilo'] = 0
+                new_state.variables['sxambalulo'].turnOff()
 
+        new_state.variables['sxambalulo'] = \
+            atypes.Appliance(atypes.ApplianceTypes.LIGHT, 'sxambalulo')
         new_state.variables['sxambaluloj'] = []
         for i in range(100):
             new_state.variables['sxambaluloj'] += \
                 [atypes.Appliance(atypes.ApplianceTypes.LIGHT, i)]
-        new_state.method_dict['cxuprimu'] = turn_light_green_if_prime
+        new_state.method_dict['cxuprimu'] = turn_light_on_if_prime
         new_state.method_dict['presu'] = add_prime_to_list
         new_state.method_dict['primumu']()
 
         assert 25 == len(self.prime_list)
         for i in range(2, 100):
-            assert is_prime(i) == new_state.variables['sxambaluloj'][i - 1].isTurnedOn
+            assert is_prime(i) == new_state.variables['sxambaluloj'][i - 1].isTurnedOn()
             assert is_prime(i) == (i in self.prime_list)

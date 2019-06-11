@@ -6,23 +6,80 @@ from test_utils import mocks
 from test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided
 
 
+def parsed_value_of(ast, expr, state=None):
+    node = ast.parse(expr)
+    return node.evaluate(state)[1]
+
+
 class CanAssertNodeType(object):
     @staticmethod
     def assertThatExpressionIsOfNodeType(ast, expr, nodeType):
         assert isinstance(ast.parse(expr), nodeType)
 
 
-class TestNameAndNumeratorAstNodes(PartialNameLevelAstProvided, CanAssertNodeType):
+class TestVerbalNumbers(ExpressionLevelAstProvided):
+    @staticmethod
+    def assertVerbalNumberValue(numerical_value, token):
+        # assert ReservedWord.VERBAL_DIGIT.value == token.type
+        assert numerical_value == token.value
+
+    def test_canParseDigit0(self, ast):
+        assert parsed_value_of(ast, "nul") == 0
+
+    def test_canParseDigit1(self, ast):
+        assert parsed_value_of(ast, "unu") == 1
+
+    def test_canParseDigit2(self, ast):
+        assert parsed_value_of(ast, "du") == 2
+
+    def test_canParseDigit3(self, ast):
+        assert parsed_value_of(ast, "tri") == 3
+
+    def test_canParseDigit4(self, ast):
+        assert parsed_value_of(ast, "kvar") == 4
+
+    def test_canParseDigit5(self, ast):
+        assert parsed_value_of(ast, "kvin") == 5
+
+    def test_canParseDigit6(self, ast):
+        assert parsed_value_of(ast, "ses") == 6
+
+    def test_canParseDigit7(self, ast):
+        assert parsed_value_of(ast, "sep") == 7
+
+    def test_canParseDigit8(self, ast):
+        assert parsed_value_of(ast, "ok") == 8
+
+    def test_canParseDigit9(self, ast):
+        assert parsed_value_of(ast, "naux") == 9
+
+    def test_canParseNumber10(self, ast):
+        assert parsed_value_of(ast, "dek") == 10
+
+    def test_canParseNumber20(self, ast):
+        assert parsed_value_of(ast, "dudek") == 20
+
+    def test_canParseNumber100(self, ast):
+        assert parsed_value_of(ast, "cent") == 100
+
+    def test_canParseNumber248(self, ast):
+        assert parsed_value_of(ast, "ducent kvardek ok") == 248
+
+    def test_canParseFractionHalf(self, ast):
+        assert parsed_value_of(ast, "duono") == 1 / 2
+
+    def test_canParseFractionQuarter(self, ast):
+        assert parsed_value_of(ast, "kvarono") == 1 / 4
+
+
+class TestNameAndOrdinalAstNodes(PartialNameLevelAstProvided, CanAssertNodeType):
     def test_parsedAdjectiveReturnsDescriptionNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "bela", Node.Description)
-
-    def test_parsedKeywordLaReturnsNoneNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "la", Node.NoneNode)
 
     def test_twoParsedAdjectivesReturnsDescriptionNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "bela bona", Node.Description)
 
-    def test_parsedDigitalNumeratorReturnsDescriptionNode(self, ast):
+    def test_parsedDigitalOrdinalReturnsDescriptionNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "unua", Node.Description)
 
 
@@ -66,14 +123,52 @@ class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType)
     def test_fieldAccessReturnsDereferenceNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "sxa mbo de lulo", Node.Dereference)
 
-    def test_useOfNumeratorReturnsArrayAccessNode(self, ast):
+    def test_useOfOrdinalVariableReturnsArrayAccessNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "sxa mba de lulo", Node.ArrayAccess)
+
+    def test_useOfIndefiniteOrdinalNumberReturnsArrayAccessNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "unua de sxambaluloj", Node.ArrayAccess)
+
+    def test_useOfDefiniteOrdinalNumberReturnsArrayAccessNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "la unua de sxambaluloj", Node.ArrayAccess)
 
 
 class TestReferenceSemantics(ExpressionLevelAstProvided):
     @pytest.fixture
     def state(self):
         return mocks.Bunch(variables={})
+
+    def test_nounVariableValueCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "sxambalulo"
+        state.variables[variable_name] = 1
+        assert ast.parse(variable_name).getter(state) == 1
+
+    def test_adjectiveNounVariableCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "sxamba lulo"
+        state.variables[variable_name] = 2
+        assert ast.parse(variable_name).getter(state) == 2
+
+    def test_ordinalNounVariableCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "tria sxambalulo"
+        state.variables[variable_name] = 3
+        assert ast.parse(variable_name).getter(state) == 3
+
+    def test_definiteOrdinalNounVariableCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "qvara sxambalulo"
+        definite_variable_name = "la " + variable_name
+        state.variables[variable_name] = 4
+        assert ast.parse(definite_variable_name).getter(state) == 4
+
+    def test_indefiniteLargeOrdinalNounVariableCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "kvindek kvara sxambalulo"
+        state.variables[variable_name] = 54
+        assert ast.parse(variable_name).getter(state) == 54
+
+    def test_definiteLargeOrdinalNounVariableCanBeAssessedAsExpression(self, ast, state):
+        variable_name = "kvindek kvina sxambalulo"
+        definite_variable_name = "la " + variable_name
+        state.variables[variable_name] = 55
+        assert ast.parse(definite_variable_name).getter(state) == 55
 
     def test_variableSetterCanBeUsedToChangeVariableValue(self, ast, state):
         variable_name = "sxambalulo"
@@ -128,6 +223,12 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
         ast.parse(variable_name).setter(state, 6)
         assert 6 == state.variables["ampoloj"][0]
 
+    def test_definiteArticleArrayAccessWorksJustAsWellAsIndefinite(self, ast, state):
+        variable_name = "la unua de ampoloj"
+        state.variables["ampoloj"] = [1]
+        assert ast.parse(variable_name).getter(state) == 1
+        assert parsed_value_of(ast, variable_name, state) == 1
+
     def test_canAssignIntoIndexOfExistingArray(self, ast, state):
         variable_name = "dua de ampoloj"
         setter = ast.parse(variable_name).setter
@@ -144,11 +245,6 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
         setter(state, 5)
         assert 5 == ast.parse(variable_name).getter(state)
         assert 5 == state.variables["ampoloj"][1]
-
-
-def parsed_value_of(ast, expr, state=None):
-    node = ast.parse(expr)
-    return node.evaluate(state)[1]
 
 
 class TestAstMathExpressions(ExpressionLevelAstProvided):
@@ -178,6 +274,10 @@ class TestAstMathExpressions(ExpressionLevelAstProvided):
         assert -42 == parsed_value_of(ast, "sep fojoj malpli ses")
         assert 1 == parsed_value_of(ast, "7+-6")
         assert 1 == parsed_value_of(ast, "sep pli malpli ses")
+
+    def test_parenthesesCanAlterCalculationOrder(self, ast):
+        assert 9 == parsed_value_of(ast, "(1+2)*3")
+        assert 9 == parsed_value_of(ast, "krampo unu pli du malkrampo fojoj tri")
 
     def test_sameDigitCannotBeSpecifiedTwice(self, ast):
         with pytest.raises(ast_bld.EsperantoSyntaxError):

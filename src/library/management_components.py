@@ -53,7 +53,8 @@ class Domsagxo(object):
 
     def stop_scheduler(self):
         self.scheduler_is_running = False
-        self.scheduler_runner.join()
+        if self.scheduler_runner is not None:
+            self.scheduler_runner.join()
 
     def addAppliance(self, appliance):
         if appliance.name in self.variables:
@@ -98,8 +99,8 @@ class Domsagxo(object):
 
     def requestDeviceAddition(self, appliance_type, appliance_name=None):
         if appliance_name is None:
-            for numerator in range(1, 9):
-                appliance_name = digitNames[numerator] + "a " + appliance_type
+            for ordinal in range(1, 9):
+                appliance_name = digitNames[ordinal] + "a " + appliance_type
                 if not self.recognizes(appliance_name):
                     break
         if self.recognizes(appliance_name):
@@ -109,13 +110,13 @@ class Domsagxo(object):
 
     def requestDeviceActivation(self, *devices):
         def turnOnDevice(device):
-            device.isTurnedOn = True
+            device.turnOn()
 
         self.performActionOnAllDevices(devices, turnOnDevice)
 
     def requestDeviceDeActivation(self, *devices):
         def turnOffDevice(device):
-            device.isTurnedOn = False
+            device.turnOff()
 
         self.performActionOnAllDevices(devices, turnOffDevice)
 

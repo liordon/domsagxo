@@ -31,10 +31,10 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         assert 7 == new_state["nigra kato"]
         assert 'kato' not in new_state
 
-    def test_reservedAdjectivesCanBeUsedForVariableNamesOutOfReservedContext(self, ast):
-        new_state = evaluate_and_return_state_variables(ast, "malgranda kato estas 7")
+    def test_reservedAdjectivesCanBeReclaimedForVariableNamesOutOfReservedContext(self, ast):
+        new_state = evaluate_and_return_state_variables(ast, "asignu 7 al malgranda kato")
         assert 7 == new_state["malgranda kato"]
-        new_state = evaluate_and_return_state_variables(ast, "granda kato estas 17")
+        new_state = evaluate_and_return_state_variables(ast, "asignu 17 al granda kato")
         assert 17 == new_state["granda kato"]
 
     def test_definiteNounsBecomeIndefinite(self, ast):
@@ -47,24 +47,24 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
 
     def test_ifStatementContentIsNotEvaluatedIfConditionIsFalse(self, ast):
         assert "kato" not in evaluate_and_return_state_variables(
-            ast, "se malvero tiam kato estas sep finu")
+            ast, "se malvero tiam asignu sep al kato finu")
 
     def test_ifStatementContentIsEvaluatedIfConditionIsTrue(self, ast):
         state = \
-            evaluate_and_return_state_variables(ast, "se vero tiam kato estas sep finu")
+            evaluate_and_return_state_variables(ast, "se vero tiam asignu sep al kato finu")
         assert 7 == state["kato"]
 
     def test_elseStatementContentIsEvaluatedIfConditionIsFalse(self, ast):
         new_state = \
             evaluate_and_return_state_variables(ast,
-                                                "se malvero tiam kato estas sep "
-                                                "alie kato estas naux finu")
+                                                "se malvero tiam asignu sep al kato "
+                                                "alie asignu naux al kato finu")
         assert 9 == new_state["kato"]
 
     @pytest.mark.timeout(1)
     def test_canDefineSimpleWhileLoopThatDoesNotEvaluate(self, ast):
         assert "kato" not in evaluate_and_return_state_variables(
-            ast, "dum malvero tiam kato estas sep finu")
+            ast, "dum malvero tiam asignu sep al kato finu")
 
     @pytest.mark.timeout(1)
     def test_canDefineWhileLoopThatEvaluatesOnce(self, ast):
@@ -73,7 +73,7 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         new_state = \
             evaluate_and_return_state_variables(ast,
                                                 "dum kato estas pli granda ol nul tiam "
-                                                "kato estas kato-1 finu",
+                                                "asignu kato-1 al kato finu",
                                                 manager)
         assert 0 == new_state["kato"]
 
@@ -84,16 +84,39 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         new_state = \
             evaluate_and_return_state_variables(ast,
                                                 "dum kato estas pli granda ol nul tiam "
-                                                "kato estas kato-1 finu",
+                                                "asignu kato-1 al kato finu",
                                                 manager)
         assert 0 == new_state["kato"]
 
-    def test_canTurnVariablesIntoNumeratorsViaChangeFromNounToAdjective(self, ast):
+    def test_canTurnVariablesIntoOrdinalsViaChangeFromNounToAdjective(self, ast):
         manager = mng_co.Domsagxo()
         manager.variables["indekso"] = 2
         manager.variables["ampoloj"] = [1, 2, 3]
         assert 2 == evaluate_and_return_state_variables(
-            ast, "kato estas indeksa de ampoloj", manager)['kato']
+            ast, "asignu indeksa de ampoloj al kato", manager)['kato']
+
+    def test_canNotInvokeNonExistentRoutine(self, ast):
+        with pytest.raises(KeyError):
+            evaluate_and_return_state_variables(ast, "sxamnalulu kvardek du")
+
+    def test_canInvokeRoutineWithArguments(self, ast):
+        # noinspection PyUnusedLocal
+        def mock_routine(arg):
+            pass
+
+        smart_home = mng_co.Domsagxo()
+        smart_home.method_dict["sxambalulu"] = mock_routine
+        # should execute without exception
+        evaluate_and_return_state_variables(ast, "sxambalulu kvardek du", smart_home)
+
+    def test_canInvokeRoutineWithoutArguments(self, ast):
+        def mock_routine():
+            pass
+
+        smart_home = mng_co.Domsagxo()
+        smart_home.method_dict["sxambalulu"] = mock_routine
+        # should execute without exception
+        evaluate_and_return_state_variables(ast, "sxambalulu", smart_home)
 
 
 class TestTimedAstStatements(StatementLevelAstProvided, SmartHomeManagerProvided):
@@ -136,17 +159,17 @@ class TestAstPrograms(object):
             ast.parse("12")
 
     def test_canParseASingleCommandAsProgram(self, ast):
-        ast.parse("kato estas sep")
+        ast.parse("asignu sep al kato")
 
     def test_canExecuteTwoCommandsSequentially(self, ast):
         variables = evaluate_and_return_state_variables(
-            ast, "kato estas kvar poste hundo estas kvin")
+            ast, "asignu kvar al kato poste asignu kvin al hundo")
         assert 4 == variables["kato"]
         assert 5 == variables["hundo"]
 
     def test_canExecuteTwoCommandsInParallel(self, ast):
         variables = evaluate_and_return_state_variables(
-            ast, "kato estas kvin samtempe hundo estas kvar")
+            ast, "asignu kvin al kato samtempe asignu kvar al hundo")
         assert 5 == variables["kato"]
         assert 4 == variables["hundo"]
 
@@ -160,17 +183,47 @@ class TestAstPrograms(object):
         new_manager, value = ast.parse('''revenu poste kato = 10''').evaluate(initial_state)
         assert "kato" not in new_manager.variables
 
+    def test_canAssignReturnValueOfFunction(self, ast):
+        variables = evaluate_and_return_state_variables(ast,
+                                                        '''sxambaluli signifas revenu nul finu
+                                                        poste sxambalulu
+                                                        poste asignu gxi al kato''')
+        assert variables['kato'] == 0
+
     def test_returnStopsWhileLoopFromContinuing(self, ast, initial_state):
-        manager, value = ast.parse('''
-        kato estas naux
+        variables = evaluate_and_return_state_variables(ast, '''
+        asignu naux al kato
         poste dum kato estas pli granda ol nul tiam
-            kato estas kato-1
+            asignu kato-1 al kato
             poste se kato estas egala al tri tiam
                 revenu
             finu
         finu
-        ''').evaluate(initial_state)
-        assert 3 == manager.variables["kato"]
+        ''')
+        assert variables["kato"] == 3
+
+    def test_applianceStateCanBeQueriedWithPresentVerbs(self, ast, initial_state):
+        variables = evaluate_and_return_state_variables(ast, '''
+        aldonu lumon
+        poste se unua lumo sxaltas tiam
+            asignu unu al muso
+        finu
+        poste sxaltu unuan lumon
+        poste se unua lumo sxaltas tiam
+            asignu du al kato
+        finu
+        poste malsxaltu unuan lumon
+        poste se unua lumo sxaltas tiam
+            asignu tri al hundo
+        finu
+        ''')
+        with pytest.raises(KeyError):
+            assert variables["muso"] is None
+
+        assert variables["kato"] == 2
+
+        with pytest.raises(KeyError):
+            assert variables["hundo"] is None
 
 
 @pytest.mark.timeout(10)

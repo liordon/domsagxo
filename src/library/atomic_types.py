@@ -9,16 +9,31 @@ class Appliance(object):
     def __init__(self, app_type, name):
         self.name = name
         self.type = app_type
-        self.isTurnedOn = False
+        self.properties = {}
+        self.stateQueries = {}
         self.createStateComponents()
+        self.stateQueries[ApplianceQueries.IS_ON.value] = False
 
-    # noinspection PyAttributeOutsideInit
     def createStateComponents(self):
         if self.type is ApplianceTypes.LIGHT:
             self.properties = {
                 ApplianceProperties.BRIGHTNESS.value: 1,
                 ApplianceProperties.COLOR.value     : Color.WHITE.value
             }
+        elif self.type is ApplianceTypes.BOILER:
+            self.properties = {
+                ApplianceProperties.CURRENT_TEMPERATURE.value: 0,
+                ApplianceProperties.DESIRED_TEMPERATURE.value: 100
+            }
 
     def setStateComponent(self, state_component, value):
         self.properties[state_component] = value
+
+    def turnOn(self):
+        self.stateQueries[ApplianceQueries.IS_ON.value] = True
+
+    def turnOff(self):
+        self.stateQueries[ApplianceQueries.IS_ON.value] = False
+
+    def isTurnedOn(self):
+        return self.stateQueries[ApplianceQueries.IS_ON.value]

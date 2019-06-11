@@ -1,14 +1,21 @@
-from compilation.esp_lexer import PartOfSpeech, UnalphabeticTerminal, ReservedWord
-from test_utils.providers import LexerProvided
+import pytest
+
+from compilation.definitions import PartOfSpeech, UnalphabeticTerminal, ReservedWord
+from test_utils.providers import EsperantoLexerProvided
 
 
-class TestPartsOfSpeech(LexerProvided):
+class TestPartsOfSpeech(EsperantoLexerProvided):
 
-    def test_adjectivesAreNotCategorizedAsWords(self, lexer):
+    def test_adjectivesAreNotCategorizedAsMereWords(self, lexer):
         lexer.input("blanka")
         token = lexer.token()
         self.assertPartOfSpeechForGivenToken(token, PartOfSpeech.ADJECTIVE)
         assert token.value == "blanka"
+
+    def test_numberWithAdjectiveEndingIsOrdinal(self, lexer):
+        lexer.input("unua")
+        token = lexer.token()
+        assert PartOfSpeech.ORDINAL.value == token.type
 
     def test_ImperativeVerbsAreNotCategorizedAsWords(self, lexer):
         lexer.input("presu")
@@ -33,12 +40,30 @@ class TestPartsOfSpeech(LexerProvided):
         assert lexer.token().value == 'muso'
         assert lexer.token().value == 'musoj'
 
+    def test_accusativeAdjectivesAreEvaluatedWithoutTheAccusativeCase(self, lexer):
+        lexer.input("belan belajn")
+        assert lexer.token().value == 'bela'
+        assert lexer.token().value == 'belaj'
 
-class TestReservedWords(LexerProvided):
+    def test_doesNotAcceptAccusativeInAbnormalPlaces(self, lexer):
+        self.assertTerminalNotMatchingPartOfSpeech(lexer, "sxambalulin", PartOfSpeech.V_INF)
+        self.assertTerminalNotMatchingPartOfSpeech(lexer, "sxambalulasn", PartOfSpeech.V_PRES)
+        self.assertTerminalNotMatchingPartOfSpeech(lexer, "sxambalulun", PartOfSpeech.V_IMP)
+        self.assertTerminalNotMatchingPartOfSpeech(lexer, "unun", UnalphabeticTerminal.NUMBER)
+
+    def assertTerminalNotMatchingPartOfSpeech(self, lexer, terminal, part_of_speech):
+        lexer.input(terminal)
+        with pytest.raises(Exception):
+            assert lexer.token().type != part_of_speech.value
+
+
+class TestReservedWords(EsperantoLexerProvided):
+
+    def test_theWordAsignuIsRecognizedForAssignment(self, lexer):
+        lexer.input("asignu")
+        self.assertPartOfSpeechForNextToken(lexer, ReservedWord.PUT)
 
     def test_theWordEstasIsEquivalentToEqualsSign(self, lexer):
-        lexer.input("estas")
-        self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.ASSIGN)
         lexer.input("=")
         self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.ASSIGN)
 
@@ -58,6 +83,10 @@ class TestReservedWords(LexerProvided):
         lexer.input("42")
         assert 42 == lexer.token().value
 
+    def test_cantParseIllegalDigitCombination(self, lexer):
+        lexer.input("dudu")
+        assert ReservedWord.VERBAL_DIGIT.value != lexer.token().type
+
     def test_booleanReservedWords_TrueFalse(self, lexer):
         lexer.input("vero")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.TRUE)
@@ -73,6 +102,16 @@ class TestReservedWords(LexerProvided):
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.TIMES)
         lexer.input("partoj")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.PARTS)
+
+    def test_words_rightLeftParenthesis_areReservedForMath(self, lexer):
+        lexer.input("(")
+        self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.L_PAREN)
+        lexer.input(")")
+        self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.R_PAREN)
+        lexer.input("krampo")
+        self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.L_PAREN)
+        lexer.input("malkrampo")
+        self.assertPartOfSpeechForNextToken(lexer, UnalphabeticTerminal.R_PAREN)
 
     def test_timeUnitsAreRecognizedTimeIndicationsAndNotNouns(self, lexer):
         lexer.input("jaro")
@@ -138,8 +177,12 @@ class TestReservedWords(LexerProvided):
         lexer.input("samtempe")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.SIMULTANEOUSLY)
 
+    def test_theWord_it_isConsideredANounInOrderToGrantVariableAccess(self, lexer):
+        lexer.input("gxi")
+        self.assertPartOfSpeechForNextToken(lexer, PartOfSpeech.NOUN)
 
-class TestStrings(LexerProvided):
+
+class TestStrings(EsperantoLexerProvided):
     def test_theWords_leftQuotationRightQuotation_createAStringToken(self, lexer):
         lexer.input("maldekstra citilo dekstra citilo")
         token = lexer.token()
@@ -174,7 +217,32 @@ class TestStrings(LexerProvided):
     def test_literalQuotationMarksDoNotLeaveLeadingOrTrailingSpaces(self, lexer):
         lexer.input("maldekstra citilo kato dekstra citilo")
         token = lexer.token()
-        assert "kato" == token.value
+        assert token.value == "kato"
+
+    def test_canUseShortQuotationKeywords(self, lexer):
+        lexer.input("citilo kato malcitilo")
+        token = lexer.token()
+        assert token.value == "kato"
+
+    def test_cannotMixCitationTypesWhenDefiningAString(self, lexer):
+        lexer.input("maldekstra citilo '")
+        assert UnalphabeticTerminal.STRING.value != lexer.token().type
+        lexer.input("maldekstra citilo \"")
+        assert UnalphabeticTerminal.STRING.value != lexer.token().type
+        # unmatched ' or " are not even legal in this grammar, so they have to be caught.
+        # this is still considered valid as far as I am concerned, but I don't want to
+        # expect it as a part of the test.
+        from compilation.esperanto_lexer import SemanticError
+        try:
+            lexer.input("' dekstra citilo")
+            assert UnalphabeticTerminal.STRING.value != lexer.token().type
+        except SemanticError:
+            pass
+        try:
+            lexer.input("\" dekstra citilo")
+            assert UnalphabeticTerminal.STRING.value != lexer.token().type
+        except SemanticError:
+            pass
 
     def test_literalQuotationMarksCannotHavePrefixesOrSuffixes(self, lexer):
         lexer.input("maldekstra citiloj dekstra citilo")
@@ -187,7 +255,7 @@ class TestStrings(LexerProvided):
         assert UnalphabeticTerminal.STRING.value != lexer.token().type
 
 
-class TestMultipleTokenSequences(LexerProvided):
+class TestMultipleTokenSequences(EsperantoLexerProvided):
 
     @staticmethod
     def getTokenList(lexer):
@@ -199,92 +267,9 @@ class TestMultipleTokenSequences(LexerProvided):
         return res
 
     def test_canParseSeveralTokensTogether(self, lexer):
-        lexer.input("kato ludas hun hundo")
+        lexer.input("kato ludas kun hundo")
         assert 4 == len(self.getTokenList(lexer))
 
     def test_canParseSimpleAdditionExpression(self, lexer):
         lexer.input("1+1")
         assert 3 == len(self.getTokenList(lexer))
-
-
-class TestVerbalNumbers(LexerProvided):
-    @staticmethod
-    def assertVerbalNumberValue(numerical_value, token):
-        assert ReservedWord.VERBAL_DIGIT.value == token.type
-        assert numerical_value == token.value
-
-    def test_canParseDigit0(self, lexer):
-        lexer.input("nul")
-        self.assertVerbalNumberValue(0, lexer.token())
-
-    def test_canParseDigit1(self, lexer):
-        lexer.input("unu")
-        self.assertVerbalNumberValue(1, lexer.token())
-
-    def test_canParseDigit2(self, lexer):
-        lexer.input("du")
-        self.assertVerbalNumberValue(2, lexer.token())
-
-    def test_canParseDigit3(self, lexer):
-        lexer.input("tri")
-        self.assertVerbalNumberValue(3, lexer.token())
-
-    def test_canParseDigit4(self, lexer):
-        lexer.input("kvar")
-        self.assertVerbalNumberValue(4, lexer.token())
-
-    def test_canParseDigit5(self, lexer):
-        lexer.input("kvin")
-        self.assertVerbalNumberValue(5, lexer.token())
-
-    def test_canParseDigit6(self, lexer):
-        lexer.input("ses")
-        self.assertVerbalNumberValue(6, lexer.token())
-
-    def test_canParseDigit7(self, lexer):
-        lexer.input("sep")
-        self.assertVerbalNumberValue(7, lexer.token())
-
-    def test_canParseDigit8(self, lexer):
-        lexer.input("ok")
-        self.assertVerbalNumberValue(8, lexer.token())
-
-    def test_canParseDigit9(self, lexer):
-        lexer.input("naux")
-        self.assertVerbalNumberValue(9, lexer.token())
-
-    def test_canParseNumber10(self, lexer):
-        lexer.input("dek")
-        self.assertVerbalNumberValue(10, lexer.token())
-
-    def test_canParseNumber20(self, lexer):
-        lexer.input("dudek")
-        self.assertVerbalNumberValue(20, lexer.token())
-
-    def test_canParseNumber100(self, lexer):
-        lexer.input("cent")
-        self.assertVerbalNumberValue(100, lexer.token())
-
-    def test_canParseNumber248(self, lexer):
-        lexer.input("ducent kvardek ok")
-        self.assertVerbalNumberValue(200, lexer.token())
-        self.assertVerbalNumberValue(40, lexer.token())
-        self.assertVerbalNumberValue(8, lexer.token())
-
-    def test_cantParseIllegalDigitCombination(self, lexer):
-        lexer.input("dudu")
-        assert ReservedWord.VERBAL_DIGIT.value != lexer.token().type
-
-    def test_canParseFractionHalf(self, lexer):
-        lexer.input("duono")
-        self.assertVerbalNumberValue(1 / 2, lexer.token())
-
-    def test_canParseFractionQuarter(self, lexer):
-        lexer.input("kvarono")
-        self.assertVerbalNumberValue(1 / 4, lexer.token())
-
-    def test_numberWithAdjectiveEndingIsNumerator(self, lexer):
-        lexer.input("unua")
-        token = lexer.token()
-        assert PartOfSpeech.NUMERATOR.value == token.type
-        assert 1 == token.value

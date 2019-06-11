@@ -3,15 +3,15 @@ import datetime
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
-import compilation.esp_lexer as lxr
+import compilation.esperanto_lexer as eo_lxr
 from library.management_components import Horaro, Domsagxo
 from test_utils.mocks import MockClock
 
 
-class LexerProvided(object):
+class EsperantoLexerProvided(object):
     @pytest.fixture
     def lexer(self):
-        return lxr.build()
+        return eo_lxr.build()
 
     @staticmethod
     def assertPartOfSpeechForGivenToken(token, partOfSpeech):
@@ -32,6 +32,20 @@ class ExpressionLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
         return ast_bld.build(start=ast_bld.Var.EXPRESSION.value)
+
+
+class FunctionDefinitionLevelAstProvided(object):
+    @staticmethod
+    def evaluate_and_return_state(ast, statement, initial_state=None):
+        if initial_state is None:
+            initial_state = Domsagxo()  # so as not to put a mutable default
+        ast_parse = ast.parse(statement)
+        state, nothing = ast_parse.evaluate(initial_state)
+        return state
+
+    @pytest.fixture
+    def ast(self):
+        return ast_bld.build(start=ast_bld.Var.ROUTINE_DEFINITION.value)
 
 
 class StatementLevelAstProvided(object):

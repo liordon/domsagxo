@@ -3,7 +3,7 @@ import math
 import ply.yacc as yacc
 
 import compilation.node as Node
-from compilation.esp_lexer import UnalphabeticTerminal as UaTer, PartOfSpeech as POS, \
+from compilation.esperanto_lexer import UnalphabeticTerminal as UaTer, PartOfSpeech as POS, \
     ReservedWord as ResWord, tokens
 from library.atomic_types import *
 
@@ -33,15 +33,16 @@ class Var(Enum):
     ADJECTIVE = 'Vadjective'
     TERM = 'Vterm'
     FACTOR = 'Vfactor'
-    FUNCTION_INVOCATION = 'Vfunction_invocation'
+    ROUTINE_INVOCATION = 'Vroutine_invocation'
     NUMBER_LITERAL = 'Vnumber_literal'
-    HOUR_NUMERATOR = 'Vhour_numerator'
+    HOUR_ORDINAL = 'Vhour_ordinal'
     PARTIAL_TIME_SPAN = 'Vpartial_time_span'
-    FUNCTION_ARGUMENTS = 'Varguments'
-    FUNCTION_ARGUMENT = 'Vsingle_argument'
+    ROUTINE_ARGUMENTS = 'Varguments'
+    ROUTINE_ARGUMENT = 'Vsingle_argument'
     PARAMETERS = 'Vparameters'
-    FUNCTION_DEFINITION = 'Vfunction_definition'
+    ROUTINE_DEFINITION = 'Vroutine_definition'
     RELATION = 'Vrelation'
+    LARGE_ORDINAL = 'Vlarge_ordinal'
 
 
 def RULE(product, rule_list):
@@ -57,36 +58,86 @@ def RULE(product, rule_list):
     return set_rule
 
 
+digitNames = {
+    "nul" : 0,
+    "unu" : 1,
+    "du"  : 2,
+    "tri" : 3,
+    "kvar": 4,
+    "kvin": 5,
+    "ses" : 6,
+    "sep" : 7,
+    "ok"  : 8,
+    "naŭ" : 9,
+    "naux": 9,
+    ""    : 1
+}
+
+
+def parseDigit(name):
+    if name[-3:] == "ono":
+        name = name[:-3]
+        return 1 / digitNames[name]
+
+    multiplier = 1
+    if name[-3:] == "dek":
+        name = name[:-3]
+        multiplier = 10
+    elif name[-4:] == "cent":
+        name = name[:-4]
+        multiplier = 100
+
+    return digitNames[name] * multiplier
+
+
+def parseEntireNumber(number):
+    total = 0
+    for word in number:
+        current = parseDigit(word)
+        if total > 0 and (current > total or numbers_share_digit(total, current)):
+            raise EsperantoSyntaxError("illegal verbal number combination: "
+                                       + " ".join(number))
+        total += current
+    return total
+
+
 def get_digit(number, digit):
     return number // 10 ** digit % 10
+
+
+def numbers_share_digit(number1, number2):
+    for digit in range(min(int(math.log10(number1)), int(math.log10(number2))) + 1):
+        if get_digit(number1, digit) != 0 and get_digit(number2, digit) != 0:
+            return True
+    return False
 
 
 def build(start=None):
     # noinspection PyUnusedLocal
     allTokenTypes = tokens  # just so the import will be considered meaningful.
 
-    @RULE(Var.PROGRAM, [[Var.BLOCK]])
+    @RULE(Var.PROGRAM, [[Var.BLOCK], ])
     def p_program_block(p):
         p[0] = p[1]
 
     @RULE(Var.BLOCK, [[Var.STATEMENT],
                       [Var.BLOCK, ResWord.AND_THEN, Var.STATEMENT],
-                      [Var.BLOCK, ResWord.SIMULTANEOUSLY, Var.STATEMENT]])
+                      [Var.BLOCK, ResWord.SIMULTANEOUSLY, Var.STATEMENT], ])
     def p_block_separatedStatements(p):
         if len(p) == 2:
             p[0] = Node.Program(None, p[1])
         else:
             p[0] = Node.Program(p[1], p[3])
 
-    @RULE(Var.STATEMENT, [[Var.FUNCTION_DEFINITION],
-                          [Var.FUNCTION_INVOCATION],
+    @RULE(Var.STATEMENT, [[Var.ROUTINE_DEFINITION],
+                          [Var.ROUTINE_INVOCATION],
                           [Var.ASSIGN_STATEMENT],
                           [Var.RETURN_STATEMENT],
                           [Var.IF_STATEMENT],
                           [Var.WHILE_LOOP],
                           [Var.DELAYED_STATEMENT],
                           [Var.SCHEDULED_STATEMENT],
-                          [Var.REPEATING_STATEMENT]])
+                          [Var.REPEATING_STATEMENT], ])
     def p_statement_anyKind(p):
         p[0] = p[1]
 
@@ -94,54 +145,78 @@ def build(start=None):
 
     @RULE(Var.IF_STATEMENT, [[ResWord.IF, Var.EXPRESSION, ResWord.THEN, Var.BLOCK, ResWord.END],
                              [ResWord.IF, Var.EXPRESSION, ResWord.THEN, Var.BLOCK,
-                              ResWord.ELSE, Var.BLOCK, ResWord.END]])
+                              ResWord.ELSE, Var.BLOCK, ResWord.END], ])
     def p_ifStatement_ifCondition(p):
         if len(p) == 6:
             p[0] = Node.ConditionalStatement(p[2], p[4], None)
         else:
             p[0] = Node.ConditionalStatement(p[2], p[4], p[6])
 
-    @RULE(Var.WHILE_LOOP, [[ResWord.DURING, Var.EXPRESSION, ResWord.THEN, Var.BLOCK, ResWord.END]])
+    @RULE(Var.WHILE_LOOP,
+          [[ResWord.DURING, Var.EXPRESSION, ResWord.THEN, Var.BLOCK, ResWord.END], ])
     def p_whileLoop_loopBlock(p):
         p[0] = Node.LoopStatement(p[2], p[4])
 
-    @RULE(Var.DELAYED_STATEMENT, [[Var.STATEMENT, ResWord.AFTER, Var.TIME_SPAN]])
+    @RULE(Var.DELAYED_STATEMENT, [[Var.STATEMENT, ResWord.AFTER, Var.TIME_SPAN], ])
     def p_delayedStatement_delayAndAction(p):
         p[0] = Node.DelayedStatement(p[1], p[3])
 
-    @RULE(Var.SCHEDULED_STATEMENT, [[Var.STATEMENT, ResWord.AT, Var.TIME_POINT]])
+    @RULE(Var.SCHEDULED_STATEMENT, [[Var.STATEMENT, ResWord.AT, Var.TIME_POINT], ])
     def p_scheduledStatement_timeAndAction(p):
         p[0] = Node.ScheduledStatement(p[1], p[3])
 
-    @RULE(Var.REPEATING_STATEMENT, [[Var.STATEMENT, ResWord.EVERY, Var.TIME_SPAN]])
+    @RULE(Var.REPEATING_STATEMENT, [[Var.STATEMENT, ResWord.EVERY, Var.TIME_SPAN], ])
     def p_repeatingStatement_repetitionAndAction(p):
         p[0] = Node.RepeatedStatement(p[1], p[3])
 
-    @RULE(Var.ASSIGN_STATEMENT, [[Var.VARIABLE, UaTer.ASSIGN, Var.EXPRESSION]])
-    def p_assignStatement_assign(p):
+    @RULE(Var.ASSIGN_STATEMENT, [[ResWord.PUT, Var.EXPRESSION, ResWord.TO, Var.VARIABLE], ])
+    def p_assignStatement_verbalAssign(p):
+        p[0] = Node.VariableAssignment(p[4], p[2])
+
+    @RULE(Var.ASSIGN_STATEMENT, [[Var.VARIABLE, UaTer.ASSIGN, Var.EXPRESSION], ])
+    def p_assignStatement_signedAssign(p):
         p[0] = Node.VariableAssignment(p[1], p[3])
 
-    @RULE(Var.RETURN_STATEMENT, [[ResWord.RETURN]])
+    @RULE(Var.RETURN_STATEMENT, [[ResWord.RETURN], ])
     def p_returnStatement_return(p):
-        p[0] = Node.ReturnValue()
+        p[0] = Node.ReturnValue(None)
+
+    @RULE(Var.RETURN_STATEMENT, [[ResWord.RETURN, Var.EXPRESSION], ])
+    def p_returnStatement_returnValue(p):
+        p[0] = Node.ReturnValue(p[2])
 
     # ---------------------       variable name definitions     ----------------------------#
 
-    @RULE(Var.VARIABLE, [[Var.NAME, ResWord.OF, Var.VARIABLE]])
+    @RULE(Var.VARIABLE, [[Var.NAME, ResWord.OF, Var.VARIABLE], ])
     def p_variable_dereference(p):
         p[0] = Node.Dereference(p[1], p[3])
 
-    @RULE(Var.VARIABLE, [[Var.PARTIAL_NAME, ResWord.OF, Var.VARIABLE],
-                         [POS.NUMERATOR, ResWord.OF, Var.VARIABLE]])
-    def p_variable_arrayAccess(p):
+    @RULE(Var.VARIABLE, [[Var.PARTIAL_NAME, ResWord.OF, Var.VARIABLE], ])
+    def p_variable_arrayAccessViaVariable(p):
         p[0] = Node.ArrayAccess(p[1], p[3])
 
-    @RULE(Var.VARIABLE, [[Var.NAME]])
+    @RULE(Var.LARGE_ORDINAL, [[Var.NUMBER_LITERAL, POS.ORDINAL],
+                              [POS.ORDINAL], ])
+    def p_largeOrdinal_NumberAndLargeOrdinal(p):
+        if len(p) > 2:
+            p[0] = p[1] + [p[2][:-1]]
+        else:
+            p[0] = [p[1][:-1]]
+
+    @RULE(Var.VARIABLE, [[Var.LARGE_ORDINAL, ResWord.OF, Var.VARIABLE], ])
+    def p_variable_arrayAccessViaOrdinal(p):
+        p[0] = Node.ArrayAccess(Node.Number(parseEntireNumber(p[1])), p[3])
+
+    @RULE(Var.VARIABLE, [[Var.NAME], ])
     def p_variable_name(p):
         p[0] = p[1]
 
+    @RULE(Var.VARIABLE, [[ResWord.THE, Var.VARIABLE], ])
+    def p_variable_definiteArticle(p):
+        p[0] = p[2]
+
     @RULE(Var.NAME, [[POS.NOUN],
-                     [Var.PARTIAL_NAME, POS.NOUN]])
+                     [Var.PARTIAL_NAME, POS.NOUN], ])
     def p_name_partialNameAndNoun(p):
         if len(p) == 3:
             p[0] = Node.VariableName(p[2], p[1])
@@ -149,7 +224,7 @@ def build(start=None):
             p[0] = Node.VariableName(p[1], Node.NoneNode())
 
     @RULE(Var.PARTIAL_NAME, [[Var.PARTIAL_NAME, Var.ADJECTIVE],
-                             [Var.ADJECTIVE]])
+                             [Var.ADJECTIVE], ])
     def p_partialName_partialNameAndAdjective(p):
         if len(p) == 3:
             p[0] = Node.Description(p[2], p[1])
@@ -158,38 +233,37 @@ def build(start=None):
 
     @RULE(Var.ADJECTIVE, [[ResWord.GREATER],
                           [ResWord.SMALLER],
-                          [POS.ADJECTIVE],
-                          [POS.NUMERATOR]])
-    def p_adjective_normalAdjectiveOrWeaklyReservedWord(p):
+                          [POS.ADJECTIVE], ])
+    def p_adjective_normalAdjectiveOrReclaimedWeaklyReservedWord(p):
         p[0] = str(p[1])
 
-    @RULE(Var.PARTIAL_NAME, [[ResWord.THE]])
-    def p_partialName_la(p):
-        p[0] = Node.NoneNode()
+    @RULE(Var.ADJECTIVE, [[Var.LARGE_ORDINAL], ])
+    def p_adjective_reclaimedOrdinal(p):
+        p[0] = " ".join(p[1]) + "a"
 
     # -------------------------   mathematical calculations   -----------------------------#
     @RULE(Var.EXPRESSION, [[Var.EXPRESSION, UaTer.PLUS, Var.TERM],
-                           [Var.EXPRESSION, ResWord.MORE, Var.TERM]])
+                           [Var.EXPRESSION, ResWord.MORE, Var.TERM], ])
     def p_expression_plus(p):
         p[0] = Node.Add(p[1], p[3])
 
     @RULE(Var.EXPRESSION, [[Var.EXPRESSION, UaTer.MINUS, Var.TERM],
-                           [Var.EXPRESSION, ResWord.LESS, Var.TERM]])
+                           [Var.EXPRESSION, ResWord.LESS, Var.TERM], ])
     def p_expression_minus(p):
         p[0] = Node.Subtract(p[1], p[3])
 
     @RULE(Var.TERM, [[Var.TERM, UaTer.TIMES, Var.FACTOR],
-                     [Var.TERM, ResWord.TIMES, Var.FACTOR]])
+                     [Var.TERM, ResWord.TIMES, Var.FACTOR], ])
     def p_term_multiply(p):
         p[0] = Node.Multiply(p[1], p[3])
 
     @RULE(Var.TERM, [[Var.TERM, UaTer.DIVIDE, Var.FACTOR],
-                     [Var.TERM, ResWord.PARTS, Var.FACTOR]])
+                     [Var.TERM, ResWord.PARTS, Var.FACTOR], ])
     def p_term_div(p):
         p[0] = Node.Divide(p[1], p[3])
 
     @RULE(Var.FACTOR, [[UaTer.MINUS, Var.FACTOR],
-                       [ResWord.LESS, Var.FACTOR]])
+                       [ResWord.LESS, Var.FACTOR], ])
     def p_factor_unaryMinus(p):
         p[0] = Node.Subtract(Node.Number(0), p[2])
 
@@ -199,52 +273,51 @@ def build(start=None):
     def p_expression_term(p):
         p[0] = p[1]
 
-    @RULE(Var.TERM, [[Var.FACTOR]])
+    @RULE(Var.TERM, [[Var.FACTOR], ])
     def p_term_factor(p):
         p[0] = p[1]
 
-    @RULE(Var.FACTOR, [[UaTer.NUMBER],
-                       [Var.NUMBER_LITERAL]])
-    def p_factor_num(p):
+    @RULE(Var.FACTOR, [[UaTer.NUMBER], ])
+    def p_factor_number(p):
         p[0] = Node.Number(p[1])
 
+    @RULE(Var.FACTOR, [[Var.NUMBER_LITERAL], ])
+    def p_factor_numberLiteral(p):
+        p[0] = Node.Number(parseEntireNumber(p[1]))
+
     @RULE(Var.NUMBER_LITERAL, [[ResWord.VERBAL_DIGIT],
-                               [Var.NUMBER_LITERAL, ResWord.VERBAL_DIGIT]])
+                               [Var.NUMBER_LITERAL, ResWord.VERBAL_DIGIT], ])
     def p_verbal_number(p):
         if len(p) == 2:
-            p[0] = p[1]
+            p[0] = [p[1]]
         else:
-            for digit in range(min(int(math.log10(p[1])), int(math.log10(p[2]))) + 1):
-                if get_digit(p[1], digit) != 0 and get_digit(p[2], digit) != 0:
-                    raise EsperantoSyntaxError("illegal verbal number combination: "
-                                               + str(p[1]) + " and " + str(p[2]))
-            p[0] = p[1] + p[2]
+            p[0] = p[1] + [p[2]]
 
-    @RULE(Var.FACTOR, [[Var.VARIABLE]])
+    @RULE(Var.FACTOR, [[Var.VARIABLE], ])
     def p_factor_noun(p):
         p[0] = p[1]
 
-    @RULE(Var.FACTOR, [[UaTer.L_PAREN, Var.EXPRESSION, UaTer.R_PAREN]])
+    @RULE(Var.FACTOR, [[UaTer.L_PAREN, Var.EXPRESSION, UaTer.R_PAREN], ])
     def p_factor_expr(p):
         p[0] = p[2]
 
     # ----------------------------   boolean calculations    ------------------------- #
-    @RULE(Var.RELATION, [[UaTer.ASSIGN, ResWord.EQUAL, ResWord.TO]])
+    @RULE(Var.RELATION, [[ResWord.IS, ResWord.EQUAL, ResWord.TO], ])
     def p_relation_equal(p):
         p[0] = Node.Comparison.Relation.EQUAL
 
-    @RULE(Var.RELATION, [[UaTer.ASSIGN, ResWord.MORE, ResWord.GREATER, ResWord.THAN],
-                         [UaTer.ASSIGN, ResWord.MORE, ResWord.GREATER,
-                          ResWord.OR, ResWord.EQUAL, ResWord.TO]])
+    @RULE(Var.RELATION, [[ResWord.IS, ResWord.MORE, ResWord.GREATER, ResWord.THAN],
+                         [ResWord.IS, ResWord.MORE, ResWord.GREATER,
+                          ResWord.OR, ResWord.EQUAL, ResWord.TO], ])
     def p_relation_greatnessAndEquality(p):
         if len(p) == 5:
             p[0] = Node.Comparison.Relation.GREATER
         else:
             p[0] = Node.Comparison.Relation.GREATER_OR_EQUAL
 
-    @RULE(Var.RELATION, [[UaTer.ASSIGN, ResWord.MORE, ResWord.SMALLER,
+    @RULE(Var.RELATION, [[ResWord.IS, ResWord.MORE, ResWord.SMALLER,
                           ResWord.OR, ResWord.EQUAL, ResWord.TO],
-                         [UaTer.ASSIGN, ResWord.MORE, ResWord.SMALLER, ResWord.THAN]])
+                         [ResWord.IS, ResWord.MORE, ResWord.SMALLER, ResWord.THAN], ])
     def p_relation_smallnessAndEquality(p):
         if len(p) == 5:
             p[0] = Node.Comparison.Relation.LESSER
@@ -252,94 +325,89 @@ def build(start=None):
             p[0] = Node.Comparison.Relation.LESSER_OR_EQUAL
 
     @RULE(Var.EXPRESSION, [[Var.EXPRESSION, Var.RELATION, Var.EXPRESSION],
-                           [Var.EXPRESSION, ResWord.NOT, Var.RELATION, Var.EXPRESSION]])
+                           [Var.EXPRESSION, ResWord.NOT, Var.RELATION, Var.EXPRESSION], ])
     def p_expression_sizeComparison(p):
         if len(p) == 4:
             p[0] = Node.Comparison(p[1], p[2], p[3])
         else:
             p[0] = Node.Comparison(p[1], p[3], p[4]).reverse()
 
-    @RULE(Var.EXPRESSION, [[Var.EXPRESSION, ResWord.BOTH, Var.EXPRESSION]])
+    @RULE(Var.EXPRESSION, [[Var.EXPRESSION, ResWord.BOTH, Var.EXPRESSION], ])
     def p_expression_booleanAnd(p):
         p[0] = Node.LogicAnd(p[1], p[3])
 
-    @RULE(Var.EXPRESSION, [[Var.EXPRESSION, ResWord.OR, Var.EXPRESSION]])
+    @RULE(Var.EXPRESSION, [[Var.EXPRESSION, ResWord.OR, Var.EXPRESSION], ])
     def p_expression_booleanOr(p):
         p[0] = Node.LogicOr(p[1], p[3])
 
-    @RULE(Var.EXPRESSION, [[ResWord.NOT, Var.EXPRESSION]])
+    @RULE(Var.EXPRESSION, [[ResWord.NOT, Var.EXPRESSION], ])
     def p_expression_booleanNot(p):
         p[0] = Node.LogicNot(p[2])
 
+    @RULE(Var.EXPRESSION, [[Var.VARIABLE, POS.V_PRES], ])
+    def p_expression_stateQuery(p):
+        p[0] = Node.QueryState(p[1], p[2])
+
     # ----------------------------   literals and constants    ------------------------- #
-    @RULE(Var.EXPRESSION, [[ResWord.NONE]])
+    @RULE(Var.EXPRESSION, [[ResWord.NONE], ])
     def p_expression_none(p):
         p[0] = Node.NoneNode()
 
-    @RULE(Var.EXPRESSION, [[ResWord.TRUE]])
+    @RULE(Var.EXPRESSION, [[ResWord.TRUE], ])
     def p_expression_true(p):
         p[0] = Node.Boolean(True)
 
-    @RULE(Var.EXPRESSION, [[ResWord.FALSE]])
+    @RULE(Var.EXPRESSION, [[ResWord.FALSE], ])
     def p_expression_false(p):
         p[0] = Node.Boolean(False)
 
-    @RULE(Var.EXPRESSION, [[UaTer.STRING]])
+    @RULE(Var.EXPRESSION, [[UaTer.STRING], ])
     def p_expression_string(p):
         p[0] = Node.String(p[1])
 
-    @RULE(Var.TIME_POINT, [[Var.HOUR_NUMERATOR, ResWord.AND, Var.NUMBER_LITERAL]])
+    @RULE(Var.TIME_POINT, [[ResWord.THE, Var.LARGE_ORDINAL, ResWord.AND, Var.NUMBER_LITERAL], ])
     def p_time_point(p):
-        p[0] = p[1]
-        if p[3] < 1:
-            p[3] = int(60 * p[3])
-        if p[3] >= 60:
-            raise EsperantoSyntaxError("Illegal number of minutes entered: " + str(p[3]))
-        p[0] = Node.TimePoint(hour=p[1], minute=Node.Number(p[3]))
+        parsed_hour = parseEntireNumber(p[2])
+        parsed_minutes = parseEntireNumber(p[4])
+        if parsed_minutes < 1:
+            parsed_minutes = int(60 * parsed_minutes)
+        if parsed_minutes >= 60:
+            raise EsperantoSyntaxError("Illegal number of minutes entered: " + str(parsed_minutes))
+        p[0] = Node.TimePoint(hour=Node.Number(parsed_hour), minute=Node.Number(parsed_minutes))
 
-    @RULE(Var.TIME_POINT, [[Var.HOUR_NUMERATOR, ResWord.TIME_INDICATION]])
+    @RULE(Var.TIME_POINT, [[ResWord.THE, Var.LARGE_ORDINAL, ResWord.TIME_INDICATION], ])
     def p_round_time_point(p):
-        if len(p) > 2 and p[2] != "horo":
+        if p[3] != "horo":
             raise EsperantoSyntaxError(
                 "wrong hour format. expected hour descriptor, then minute number.")
-        p[0] = Node.TimePoint(hour=p[1])
+        p[0] = Node.TimePoint(hour=Node.Number(parseEntireNumber(p[2])))
 
-    @RULE(Var.HOUR_NUMERATOR, [[ResWord.THE, POS.NUMERATOR],
-                               [ResWord.THE, Var.NUMBER_LITERAL, POS.NUMERATOR]])
-    def p_hour_numerator(p):
-        p[0] = p[2]
-        if len(p) > 3:
-            p[0] += p[3]
-        if p[0] > 24:
-            raise EsperantoSyntaxError(
-                "Illegal hour entered: " + str(p[0]) + ". we use a 24h system")
-        p[0] = Node.Number(p[0])
-
-    @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, ResWord.AND, Var.PARTIAL_TIME_SPAN]])
+    @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, ResWord.AND, Var.PARTIAL_TIME_SPAN], ])
     def p_time_span_kaj_time_span(p):
         p[0] = Node.TimeUnion(p[1], p[3])
 
-    @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, ResWord.AND, Var.NUMBER_LITERAL]])
+    @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, ResWord.AND, Var.NUMBER_LITERAL], ])
     def p_time_fractions(p):
-        if p[3] >= 1:
-            raise EsperantoSyntaxError("Illegal time span format, recieved: "
-                                       + str(p[3]) + " when expected fraction")
-        p[0] = Node.TimeFractionAddition(p[1], Node.Number(p[3]))
+        parsed_fraction = parseEntireNumber(p[3])
+        if parsed_fraction >= 1:
+            raise EsperantoSyntaxError("Illegal time span format, recieved: " + " ".join(p[3])
+                                       + " (" + str(parsed_fraction) + ") when expected fraction")
+        p[0] = Node.TimeFractionAddition(p[1], Node.Number(parsed_fraction))
 
-    @RULE(Var.TIME_SPAN, [[Var.PARTIAL_TIME_SPAN]])
+    @RULE(Var.TIME_SPAN, [[Var.PARTIAL_TIME_SPAN], ])
     def p_time_spans_escalation(p):
         p[0] = p[1]
 
-    @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, Var.PARTIAL_TIME_SPAN]])
+    @RULE(Var.TIME_SPAN, [[Var.TIME_SPAN, Var.PARTIAL_TIME_SPAN], ])
     def p_time_spans_consecutive(p):
         p[0] = Node.TimeUnion(p[1], p[2])
 
     @RULE(Var.PARTIAL_TIME_SPAN, [[ResWord.TIME_INDICATION],
-                                  [Var.NUMBER_LITERAL, ResWord.TIME_INDICATION]])
+                                  [Var.NUMBER_LITERAL, ResWord.TIME_INDICATION], ])
     def p_time_span(p):
         if len(p) > 2:
             time_unit = p[2]
-            amount = p[1]
+            amount = parseEntireNumber(p[1])
         else:
             time_unit = p[1]
             amount = 1
@@ -364,52 +432,69 @@ def build(start=None):
                              Node.Number(minutes),
                              Node.Number(seconds))
 
-    # ------------------------    function invocation and definition   --------------------- #
-    @RULE(Var.FUNCTION_INVOCATION, [[POS.V_IMP, Var.FUNCTION_ARGUMENTS]])
-    def p_function_call(p):
-        p[0] = Node.FunctionInvocation(p[1], p[2])
+    # ------------------------    routine invocation and definition   --------------------- #
+    @RULE(Var.ROUTINE_INVOCATION, [[POS.V_IMP, Var.ROUTINE_ARGUMENTS], ])
+    def p_routineInvocation_imperativeVerbAndArguments(p):
+        p[0] = Node.RoutineInvocation(p[1], p[2])
 
-    @RULE(Var.FUNCTION_ARGUMENTS, [[Var.FUNCTION_ARGUMENT],
-                                   [Var.FUNCTION_ARGUMENTS, Var.DELIMITER, Var.FUNCTION_ARGUMENT]])
-    def p_function_arguments(p):
+    @RULE(Var.ROUTINE_INVOCATION, [[POS.V_IMP], ])
+    def p_routineInvocation_lonelyImperativeVerb(p):
+        # noinspection PyTypeChecker
+        p[0] = Node.RoutineInvocation(p[1], [])
+
+    @RULE(Var.ROUTINE_ARGUMENTS, [[Var.ROUTINE_ARGUMENT],
+                                  [Var.ROUTINE_ARGUMENTS, Var.DELIMITER,
+                                   Var.ROUTINE_ARGUMENT], ])
+    def p_routineArguments_argumentAndAdditionalExpression(p):
         if len(p) == 2:
             p[0] = [p[1]]
         else:
             p[0] = p[1] + [p[3]]
 
-    @RULE(Var.FUNCTION_ARGUMENT, [[Var.EXPRESSION]])
-    def p_first_function_argument(p):
+    @RULE(Var.ROUTINE_ARGUMENT, [[Var.EXPRESSION], ])
+    def p_routineArgument_firstExpression(p):
         p[0] = p[1]
 
     @RULE(Var.PARAMETERS, [[Var.NAME],
-                           [Var.PARAMETERS, Var.DELIMITER, Var.NAME]])
+                           [Var.PARAMETERS, Var.DELIMITER, Var.NAME], ])
     def p_inputArg_NOUN(p):
         if len(p) == 2:
             p[0] = [p[1]]
         else:
             p[0] = p[1] + [p[3]]
 
-    @RULE(Var.PARAMETERS, [[]])
+    @RULE(Var.PARAMETERS, [[], ])
     def p_inputArg_nothing(p):
         p[0] = []
 
-    @RULE(Var.FUNCTION_DEFINITION,
-          [[POS.V_INF, Var.PARAMETERS, ResWord.THIS_WAY, Var.BLOCK, ResWord.END]])
-    def p_funcDef_nameAndArgs(p):
-        p[0] = Node.FunctionDefinition(p[1][:-1] + "u", p[2], p[4])
+    @RULE(Var.ROUTINE_DEFINITION,
+          [[POS.V_INF, Var.PARAMETERS, ResWord.THIS_WAY, Var.BLOCK, ResWord.END], ])
+    def p_routineDefinition_nameAndArgs(p):
+        p[0] = Node.RoutineDefinition(p[1][:-1] + "u", p[2], p[4])
 
     @RULE(Var.DELIMITER, [[UaTer.DELIMITER],
                           [POS.PREPOSITION],
                           [ResWord.TO],
-                          [ResWord.AND]])
+                          [ResWord.AND], ])
     def p_delimiter_prepositionOrComma(p):
         p[0] = p[1]
 
     # Error rule for syntax errors
     # noinspection PyUnusedLocal
     def p_error(p):
-        raise EsperantoSyntaxError("Syntax error in input: " + str(p))
+        symbol_stack_trace = ""
+        for symbol in ast_builder.symstack[1:]:
+            # noinspection PyUnresolvedReferences
+            if isinstance(symbol, yacc.YaccSymbol) and isinstance(symbol.value, Node.AstNode):
+                # noinspection PyUnresolvedReferences
+                symbol_stack_trace += symbol.value.pretty_print()
+            else:
+                symbol_stack_trace += str(symbol)
+            symbol_stack_trace += "\n"
+        raise EsperantoSyntaxError("Syntax error in input: " + str(p) +
+                                   "\nOn parse tree:\n" + symbol_stack_trace)
 
+    global ast_builder
     ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, errorlog=yacc.NullLogger())
     return ast_builder
 
@@ -419,7 +504,7 @@ class Object(object):
 
 
 if __name__ == "__main__":
-    import compilation.esp_lexer as lxr
+    import compilation.esperanto_lexer as lxr
     import sys
 
     lxr.build()

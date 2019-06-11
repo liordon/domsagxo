@@ -194,7 +194,7 @@ class TestTimedActions(TimeManagerWithSimulativeClockProvided):
         scd.runSetTime(datetime.timedelta(hours=21))
         assert 1 == self.counter
 
-    def test_unscheduledEventCancelationGivesError(self, scd, increaser):
+    def test_unscheduledEventCancellationGivesError(self, scd, increaser):
         scd.runSetTime(datetime.timedelta(hours=5))
         scd.enter(datetime.time(4, 00), increaser)
         scd.enter(datetime.time(8, 00), increaser)

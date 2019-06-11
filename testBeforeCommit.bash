@@ -13,19 +13,21 @@ fi
 export PYTHONPATH
 echo "python path is: $PYTHONPATH"
 
+astPath="$sourceDir/compilation/abstract_syntax_tree.py"
+
+doubleMethods=`grep "def " $astPath | cut -d"(" -f1 | sort | uniq -c | grep -v " 1 " | wc -l`
+
+if [[ $doubleMethods -ne 0 ]] ; then
+	echo "you have several methods with the same name in your AST file:"
+	echo "$astPath"
+	grep "def " $astPath | cut -d"(" -f1 | sort | uniq -c | grep -v " 1 " 
+fi
+
 git stash save --keep-index --include-untracked "set aside untracked changes"
 
 python -m pytest --timeout=2 ${testDir}
 pytestRes="$?"
 
-python ${sourceDir}/compilation/abstract_syntax_tree.py -c
-conflicts=`grep "reduce/reduce" ${sourceDir}/compilation/parser.out`
-
-if [ ! -z "$conflicts" ]; then
-        echo "you have reduce/reduce conflicts! X_X"
-	echo $conflicts
-	successFlag=1
-fi
 
 if [[ $pytestRes -ne 0 ]] ; then
 	echo "some of your tests failed! :("
@@ -37,9 +39,6 @@ if [[ $successFlag -ne 0 ]] ; then
 	git stash pop
 	exit $successFlag
 fi
-
-python $sourceDir/scripts/extract_current_rules.py -w
-git add $gitRoot/Manuscripts/MscThesis/raw-grammar-rules.tex
 
 git stash pop
 exit 0
