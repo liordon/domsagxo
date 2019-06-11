@@ -179,7 +179,11 @@ def build(start=None):
 
     @RULE(Var.RETURN_STATEMENT, [[ResWord.RETURN], ])
     def p_returnStatement_return(p):
-        p[0] = Node.ReturnValue()
+        p[0] = Node.ReturnValue(None)
+
+    @RULE(Var.RETURN_STATEMENT, [[ResWord.RETURN, Var.EXPRESSION], ])
+    def p_returnStatement_returnValue(p):
+        p[0] = Node.ReturnValue(p[2])
 
     # ---------------------       variable name definitions     ----------------------------#
 

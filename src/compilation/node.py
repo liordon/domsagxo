@@ -355,12 +355,14 @@ class RoutineInvocation(AstNode):
 
 
 class ReturnValue(AstNode):
-    def __init__(self):
-        super(ReturnValue, self).__init__()
+    def __init__(self, return_value):
+        super(ReturnValue, self).__init__(return_value)
 
-    def _method(self, state):
+    def _method(self, state, return_value):
+        if return_value is not None:
+            state, evaluated_return_value = return_value.evaluate(state)
+            state.variables['gxi'] = evaluated_return_value
         return state, nextAction.RETURN
-
 
 class RoutineDefinition(AstNode):
     def __init__(self, function_name, argument_names, command_subtree):
@@ -379,7 +381,9 @@ class RoutineDefinition(AstNode):
                                 str(len(argument_list)) + "were given.")
             for i in range(len(argument_list)):
                 closure.variables[argument_names[i].getContainedName()] = argument_list[i]
-            abstract_syntax_tree.evaluate(closure)
+            colsure, action = abstract_syntax_tree.evaluate(closure)
+            if action == nextAction.RETURN and 'gxi' in closure.variables.keys():
+                state.variables['gxi'] = closure.variables['gxi']
             return nextAction.GO_ON
 
         return subtree_function

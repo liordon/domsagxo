@@ -39,6 +39,19 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         assert number_of_predefined_functions + 1 == len(new_state.method_dict)
         assert 'sxambalulu' in new_state.method_dict.keys()
 
+    def test_canDefineRoutineReturningValue(self, ast):
+        number_of_predefined_functions = len(mgmt_cmp.Domsagxo().method_dict)
+        new_state = self.evaluate_and_return_state(ast,
+                                                   '''sxambaluli signifas revenu nul finu''')
+        assert number_of_predefined_functions + 1 == len(new_state.method_dict)
+        assert 'sxambalulu' in new_state.method_dict.keys()
+
+    def test_returnValueIsSavedInVariableItAfterFunctionCall(self, ast):
+        new_state = self.evaluate_and_return_state(ast,
+                                                   '''sxambaluli signifas revenu nul finu''')
+        new_state.method_dict['sxambalulu']()
+        assert new_state.variables['gxi'] == 0
+
     def test_cannotPassMoreArgumentsThanPlannedToUserDefinedFunction(self, ast):
         new_state = self.evaluate_and_return_state(
             ast, '''memori sxambalulo signifas revenu finu''')

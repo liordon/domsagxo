@@ -66,10 +66,11 @@ def t_TWORD(t):
     elif t.value in prepositions:
         t.type = PartOfSpeech.PREPOSITION.value
     else:
-        t.value = re.sub(r'n$', "", t.value)
-        if re.search(r'((o)|(oj))$', t.value):
+        if re.search(r'(oj?n?)$', t.value):
+            t.value = re.sub(r'n$', "", t.value)
             t.type = PartOfSpeech.NOUN.value
-        elif re.search(r'((a)|(aj))$', t.value):
+        elif re.search(r'(aj?n?)$', t.value):
+            t.value = re.sub(r'n$', "", t.value)
             if digitRe.fullmatch(t.value[0:-1]) and t.value[-1] == 'a':
                 t.type = PartOfSpeech.ORDINAL.value
             else:

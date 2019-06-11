@@ -183,8 +183,15 @@ class TestAstPrograms(object):
         new_manager, value = ast.parse('''revenu poste kato = 10''').evaluate(initial_state)
         assert "kato" not in new_manager.variables
 
+    def test_canAssignReturnValueOfFunction(self, ast):
+        variables = evaluate_and_return_state_variables(ast,
+                                                        '''sxambaluli signifas revenu nul finu
+                                                        poste sxambalulu
+                                                        poste asignu gxi al kato''')
+        assert variables['kato'] == 0
+
     def test_returnStopsWhileLoopFromContinuing(self, ast, initial_state):
-        manager, value = ast.parse('''
+        variables = evaluate_and_return_state_variables(ast, '''
         asignu naux al kato
         poste dum kato estas pli granda ol nul tiam
             asignu kato-1 al kato
@@ -192,11 +199,11 @@ class TestAstPrograms(object):
                 revenu
             finu
         finu
-        ''').evaluate(initial_state)
-        assert 3 == manager.variables["kato"]
+        ''')
+        assert variables["kato"] == 3
 
     def test_applianceStateCanBeQueriedWithPresentVerbs(self, ast, initial_state):
-        manager, value = ast.parse('''
+        variables = evaluate_and_return_state_variables(ast, '''
         aldonu lumon
         poste se unua lumo sxaltas tiam
             asignu unu al muso
@@ -209,14 +216,14 @@ class TestAstPrograms(object):
         poste se unua lumo sxaltas tiam
             asignu tri al hundo
         finu
-        ''').evaluate(initial_state)
+        ''')
         with pytest.raises(KeyError):
-            assert manager.variables["muso"] is None
+            assert variables["muso"] is None
 
-        assert 2 == manager.variables["kato"]
+        assert variables["kato"] == 2
 
         with pytest.raises(KeyError):
-            assert manager.variables["hundo"] is None
+            assert variables["hundo"] is None
 
 
 @pytest.mark.timeout(10)

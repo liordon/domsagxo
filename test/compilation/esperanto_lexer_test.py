@@ -1,10 +1,12 @@
+import pytest
+
 from compilation.definitions import PartOfSpeech, UnalphabeticTerminal, ReservedWord
 from test_utils.providers import EsperantoLexerProvided
 
 
 class TestPartsOfSpeech(EsperantoLexerProvided):
 
-    def test_adjectivesAreNotCategorizedAsWords(self, lexer):
+    def test_adjectivesAreNotCategorizedAsMereWords(self, lexer):
         lexer.input("blanka")
         token = lexer.token()
         self.assertPartOfSpeechForGivenToken(token, PartOfSpeech.ADJECTIVE)
@@ -37,6 +39,22 @@ class TestPartsOfSpeech(EsperantoLexerProvided):
         lexer.input("muson musojn")
         assert lexer.token().value == 'muso'
         assert lexer.token().value == 'musoj'
+
+    def test_accusativeAdjectivesAreEvaluatedWithoutTheAccusativeCase(self, lexer):
+        lexer.input("belan belajn")
+        assert lexer.token().value == 'bela'
+        assert lexer.token().value == 'belaj'
+
+    def test_doesNotAcceptAccusativeInAbnormalPlaces(self, lexer):
+        self.assertTerminalNotMatchingPartOfSpeech(lexer, "sxambalulin", PartOfSpeech.V_INF)
+        self.assertTerminalNotMatchingPartOfSpeech(lexer, "sxambalulasn", PartOfSpeech.V_PRES)
+        self.assertTerminalNotMatchingPartOfSpeech(lexer, "sxambalulun", PartOfSpeech.V_IMP)
+        self.assertTerminalNotMatchingPartOfSpeech(lexer, "unun", UnalphabeticTerminal.NUMBER)
+
+    def assertTerminalNotMatchingPartOfSpeech(self, lexer, terminal, part_of_speech):
+        lexer.input(terminal)
+        with pytest.raises(Exception):
+            assert lexer.token().type != part_of_speech.value
 
 
 class TestReservedWords(EsperantoLexerProvided):
@@ -158,6 +176,10 @@ class TestReservedWords(EsperantoLexerProvided):
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.AND_THEN)
         lexer.input("samtempe")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.SIMULTANEOUSLY)
+
+    def test_theWord_it_isConsideredANounInOrderToGrantVariableAccess(self, lexer):
+        lexer.input("gxi")
+        self.assertPartOfSpeechForNextToken(lexer, PartOfSpeech.NOUN)
 
 
 class TestStrings(EsperantoLexerProvided):

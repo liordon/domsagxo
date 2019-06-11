@@ -90,6 +90,8 @@ reserved_words = {
     "finu"     : ReservedWord.END.value,
     "fojoj"    : ReservedWord.TIMES.value,
     "granda"   : ReservedWord.GREATER.value,
+    "gxi"      : PartOfSpeech.NOUN.value,
+    "gxin"     : PartOfSpeech.NOUN.value,
     "je"       : ReservedWord.AT.value,
     "kaj"      : ReservedWord.AND.value,
     "krampo"   : UnalphabeticTerminal.L_PAREN.value,
