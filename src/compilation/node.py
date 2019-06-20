@@ -280,7 +280,7 @@ class Program(AstNode):
 class TimeSpan(AstNode):
     def __init__(self, days=Number(0), hours=Number(0), minutes=Number(0), seconds=Number(0)):
         super(TimeSpan, self).__init__(days=days, hours=hours, minutes=minutes,
-                                       seconds=seconds)
+            seconds=seconds)
 
     def _method(self, state, *args, **kwargs):
         evaluated_kwargs = {}
@@ -364,6 +364,7 @@ class ReturnValue(AstNode):
             state.variables['gxi'] = evaluated_return_value
         return state, nextAction.RETURN
 
+
 class RoutineDefinition(AstNode):
     def __init__(self, function_name, argument_names, command_subtree):
         super(RoutineDefinition, self).__init__(function_name, argument_names, command_subtree)
@@ -377,7 +378,7 @@ class RoutineDefinition(AstNode):
                 raise TypeError(str(function_name) + "() expects " +
                                 str(len(argument_names)) + "arguments:\n\t" +
                                 str([name.getContainedName() for name in
-                                     argument_names]) + "\nbut " +
+                                    argument_names]) + "\nbut " +
                                 str(len(argument_list)) + "were given.")
             for i in range(len(argument_list)):
                 closure.variables[argument_names[i].getContainedName()] = argument_list[i]
@@ -400,12 +401,12 @@ class RoutineDefinition(AstNode):
         inner_args = self.args[1]
         for i in range(len(inner_args)):
             res += "\n" + pretty_print(inner_args[i], indent + "\t" + branch_form(False),
-                                       i == len(inner_args) - 1)
+                i == len(inner_args) - 1)
         inner_args = self.args[2:]
         for i in range(len(inner_args)):
             child = inner_args[i]
             res += "\n" + child.pretty_print(indent + branch_form(last_child),
-                                             i == len(inner_args) - 1)
+                i == len(inner_args) - 1)
 
         return res
 
@@ -441,7 +442,7 @@ class DelayedStatement(AstNode, ExecutionWrapper):
     def _method(self, state, statement, delay):
         state, evaluated_delay = delay.evaluate(state)
         state.scheduler.enter(evaluated_delay,
-                              self.delayed_evaluation(state, statement))
+            self.delayed_evaluation(state, statement))
         return state, evaluated_delay
 
 
@@ -453,7 +454,7 @@ class ScheduledStatement(AstNode, ExecutionWrapper):
     def _method(self, state, statement, delay):
         state, evaluated_time = delay.evaluate(state)
         state.scheduler.enter(evaluated_time,
-                              self.delayed_evaluation(state, statement))
+            self.delayed_evaluation(state, statement))
         return state, evaluated_time
 
 

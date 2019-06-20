@@ -21,8 +21,8 @@ class TestTimePointGeneration(object):
 
     def test_canGenerateConstrainedRandomTimePoint(self):
         time_point = generateRandom(PossibleRandomType.TIME_POINT.value,
-                                    datetime.time(9, 20),
-                                    datetime.time(9, 50))
+            datetime.time(9, 20),
+            datetime.time(9, 50))
         assert isinstance(time_point, datetime.time)
         assert 9 == time_point.hour
         assert 50 > time_point.minute
@@ -30,8 +30,8 @@ class TestTimePointGeneration(object):
 
     def test_canGenerateRandomTimePointWithOverflowToNextHour(self):
         time_point = generateRandom(PossibleRandomType.TIME_POINT.value,
-                                    datetime.time(12, 59),
-                                    datetime.time(13, 50))
+            datetime.time(12, 59),
+            datetime.time(13, 50))
         assert isinstance(time_point, datetime.time)
         assert (59 == time_point.minute) if time_point.hour == 12 \
             else (13 == time_point.hour and 50 > time_point.minute)
@@ -45,24 +45,24 @@ class TestTimeSpanGeneration(object):
 
     def test_canGenerateConstrainedRandomTimeSpan(self):
         time_span = generateRandom(PossibleRandomType.TIME_SPAN.value,
-                                   datetime.timedelta(seconds=1),
-                                   datetime.timedelta(minutes=1))
+            datetime.timedelta(seconds=1),
+            datetime.timedelta(minutes=1))
         assert isinstance(time_span, datetime.timedelta)
         assert 60 > time_span.seconds
         assert 1 <= time_span.seconds
 
     def test_canGenerateLargeConstrainedRandomTimeSpan(self):
         time_span = generateRandom(PossibleRandomType.TIME_SPAN.value,
-                                   datetime.timedelta(hours=1),
-                                   datetime.timedelta(hours=2))
+            datetime.timedelta(hours=1),
+            datetime.timedelta(hours=2))
         assert isinstance(time_span, datetime.timedelta)
         assert 2 * 3600 > time_span.seconds
         assert 3600 <= time_span.seconds
 
     def test_canGenerateRandomTimeSpanWithOverflow(self):
         time_span = generateRandom(PossibleRandomType.TIME_SPAN.value,
-                                   datetime.timedelta(minutes=59),
-                                   datetime.timedelta(hours=2))
+            datetime.timedelta(minutes=59),
+            datetime.timedelta(hours=2))
         assert isinstance(time_span, datetime.timedelta)
         assert 2 * 3600 > time_span.seconds
         assert 59 * 60 <= time_span.seconds
@@ -198,7 +198,7 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         smart_home.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
 
         brightness = smart_home.getPropertyOfAppliance(app_nm1,
-                                                       ApplianceProperties.BRIGHTNESS.value)
+            ApplianceProperties.BRIGHTNESS.value)
 
         assert 1 == brightness
 
@@ -208,7 +208,7 @@ class TestApplianceCommands(SmartHomeManagerProvided):
         smart_home.setPropertyOfAppliance(app_nm1, ApplianceProperties.BRIGHTNESS.value, .15)
 
         assert .15 == smart_home.getPropertyOfAppliance(app_nm1,
-                                                        ApplianceProperties.BRIGHTNESS.value)
+            ApplianceProperties.BRIGHTNESS.value)
 
     def test_canAlterLightBrightnessForEntireGroup(self, smart_home):
         smart_home.addAppliance(Appliance(ApplianceTypes.LIGHT, app_nm1))
@@ -220,8 +220,8 @@ class TestApplianceCommands(SmartHomeManagerProvided):
             group_of_all_lights, ApplianceProperties.BRIGHTNESS.value, .15)
 
         assert .15 == smart_home.getPropertyOfAppliance(app_nm1,
-                                                        ApplianceProperties.BRIGHTNESS.value)
+            ApplianceProperties.BRIGHTNESS.value)
         assert .15 == smart_home.getPropertyOfAppliance(app_nm2,
-                                                        ApplianceProperties.BRIGHTNESS.value)
+            ApplianceProperties.BRIGHTNESS.value)
         assert .15 == smart_home.getPropertyOfAppliance(app_nm3,
-                                                        ApplianceProperties.BRIGHTNESS.value)
+            ApplianceProperties.BRIGHTNESS.value)

@@ -118,7 +118,7 @@ def create_air_conditioner(name, row=0, col=0):
         air_conditioner.properties[
             ApplianceProperties.CURRENT_TEMPERATURE.value] = current_temperature
         app.setMeter(name, current_temperature * (100 / desired_temperature),
-                     " " + is_on_character + " " + name)
+            " " + is_on_character + " " + name)
 
     app.registerEvent(update_gui)
     return air_conditioner
@@ -174,7 +174,7 @@ if clock_type == ClockType.REAL:
 else:
     simulative_time = MockClock()
     scheduler = Horaro(time_function=simulative_time.get_current_time,
-                       delay_function=simulative_time.increase_time)
+        delay_function=simulative_time.increase_time)
     smart_home = Domsagxo(scheduler)
 smart_home.method_dict["haltu"] = smart_home.scheduler.runSetTime
 smart_home.method_dict['anoncu'] = announce_in_multimedia

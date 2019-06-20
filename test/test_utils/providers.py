@@ -60,7 +60,7 @@ class TimeManagerWithSimulativeClockProvided(object):
     def scd(self):
         simulative_time = MockClock()
         return Horaro(time_function=simulative_time.get_current_time,
-                      delay_function=simulative_time.increase_time)
+            delay_function=simulative_time.increase_time)
 
     @pytest.fixture
     def increaser(self):
@@ -93,7 +93,7 @@ class SmartHomeManagerProvided(object):
     def smart_home(self):
         simulative_time = MockClock()
         scheduler = Horaro(time_function=simulative_time.get_current_time,
-                           delay_function=simulative_time.increase_time)
+            delay_function=simulative_time.increase_time)
         return Domsagxo(scheduler)
 
     @staticmethod

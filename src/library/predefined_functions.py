@@ -34,8 +34,8 @@ def generateRandom(type_to_generate, lower_bound=None, upper_bound=None):
         if both_bounds_were_given:
             return generateConstrainedTimeSpan(lower_bound, upper_bound)
         return datetime.timedelta(hours=randrange(0, 24),
-                                  minutes=randrange(0, 60),
-                                  seconds=randrange(0, 60))
+            minutes=randrange(0, 60),
+            seconds=randrange(0, 60))
 
     if both_bounds_were_given:
         return randrange(lower_bound, upper_bound)

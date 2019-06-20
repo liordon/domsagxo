@@ -4,8 +4,8 @@ import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
 from library.atomic_types import Appliance
-from library.predefined_values import ApplianceTypes, ApplianceQueries, Color
 from library.management_components import Domsagxo
+from library.predefined_values import ApplianceTypes, ApplianceQueries, Color
 
 
 def parsed_value_of(ast, expr, state=None):
@@ -200,14 +200,14 @@ class TestAstApplianceManagement(object):
     def test_canTurnOnAllLights(self, ast, manager):
         state = evaluate_and_return_state(ast, "sxaltu la lumojn", manager)
         for appliance in [variable for variable in state.variables.values()
-                          if isinstance(variable, Appliance)]:
+            if isinstance(variable, Appliance)]:
             if appliance.type is ApplianceTypes.LIGHT:
                 assert appliance.isTurnedOn() is True
 
     def test_nonLightAppliancesAreUnaffectedByLightsCommand(self, ast, manager):
         evaluate_and_return_state(ast, "sxaltu la lumojn", manager)
         for appliance in [app for app in manager.variables.values() if
-                          isinstance(app, Appliance)]:
+            isinstance(app, Appliance)]:
             if appliance.type is ApplianceTypes.LIGHT:
                 assert appliance.isTurnedOn() is True
             elif appliance.type is not ApplianceTypes.LIGHT:

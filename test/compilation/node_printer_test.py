@@ -45,15 +45,15 @@ def test_canUsePrettyPrintFunctionOnAtomicNodeTypes():
 def test_canUsePrettyPrintOnVariablesAndArrays():
     assert VariableName('lulo', NoneNode()).pretty_print() == "└- <lulo>"
     assert VariableName('lulo',
-                        Description('mba', Description('sxa', NoneNode()))
-                        ).pretty_print() == \
+        Description('mba', Description('sxa', NoneNode()))
+    ).pretty_print() == \
            "└- <sxa mba lulo>"
     # assert ArrayAccess(3, 'sxamba').pretty_print() == "└- <sxamba lulo>"
 
 
 def test_canPrettyPrintVariableAssignments():
     varAss = VariableAssignment(VariableName('lulo', NoneNode()),
-                                VariableName('sxambo', NoneNode()))
+        VariableName('sxambo', NoneNode()))
     assert varAss.pretty_print() == \
            "└- VariableAssignment" + \
            "\n\t├- <lulo>" + \
@@ -92,8 +92,9 @@ def test_routineInvocationsShouldBePrettyPrintedWithTheirArguments():
 
 
 def test_routineDefinitionsShouldBePrettyPrintedWithTheirStatements():
-    assert RoutineDefinition("sxambalulu", ["kato", "hundo"], VariableAssignment(VariableName('lulo', NoneNode()),
-                                VariableName('sxambo', NoneNode()))
+    assert RoutineDefinition("sxambalulu", ["kato", "hundo"],
+        VariableAssignment(VariableName('lulo', NoneNode()),
+            VariableName('sxambo', NoneNode()))
     ).pretty_print() == \
            "└- RoutineDefinition: sxambalulu" + \
            "\n\t├- Arguments:" + \
@@ -107,8 +108,8 @@ def test_routineDefinitionsShouldBePrettyPrintedWithTheirStatements():
 def test_canUsePrettyPrintFunctionToPrintManyDescendantNodes():
     pretty_print = AstNode(
         AstNode(AstNode(),
-                AstNode(AstNode(), AstNode(), AstNode())
-                )
+            AstNode(AstNode(), AstNode(), AstNode())
+        )
     ).pretty_print()
 
     assert pretty_print == \

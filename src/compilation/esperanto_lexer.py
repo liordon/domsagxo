@@ -44,7 +44,8 @@ timeUnitRe = re.compile(r"(jaro|monato|semajno|tago|horo|minuto|sekundo)j?\b")
 
 
 def t_string(t):
-    r"""('.*?')|(".*?")|(\bmaldekstra\scitilo\b.*?\bdekstra\scitilo\b)|(\bcitilo\b.*?\bmalcitilo\b)"""
+    r"""('.*?')|(".*?")|(\bmaldekstra\scitilo\b.*?\bdekstra\scitilo\b)|(
+    \bcitilo\b.*?\bmalcitilo\b)"""
     if t.value.startswith("maldekstra citilo"):
         t.value = t.value[18:-15]
     if t.value.startswith("citilo"):

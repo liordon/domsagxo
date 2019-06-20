@@ -57,8 +57,8 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
     def test_elseStatementContentIsEvaluatedIfConditionIsFalse(self, ast):
         new_state = \
             evaluate_and_return_state_variables(ast,
-                                                "se malvero tiam asignu sep al kato "
-                                                "alie asignu naux al kato finu")
+                "se malvero tiam asignu sep al kato "
+                "alie asignu naux al kato finu")
         assert 9 == new_state["kato"]
 
     @pytest.mark.timeout(1)
@@ -72,9 +72,9 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         manager.variables["kato"] = 1
         new_state = \
             evaluate_and_return_state_variables(ast,
-                                                "dum kato estas pli granda ol nul tiam "
-                                                "asignu kato-1 al kato finu",
-                                                manager)
+                "dum kato estas pli granda ol nul tiam "
+                "asignu kato-1 al kato finu",
+                manager)
         assert 0 == new_state["kato"]
 
     @pytest.mark.timeout(5)
@@ -83,9 +83,9 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         manager.variables["kato"] = 5
         new_state = \
             evaluate_and_return_state_variables(ast,
-                                                "dum kato estas pli granda ol nul tiam "
-                                                "asignu kato-1 al kato finu",
-                                                manager)
+                "dum kato estas pli granda ol nul tiam "
+                "asignu kato-1 al kato finu",
+                manager)
         assert 0 == new_state["kato"]
 
     def test_canTurnVariablesIntoOrdinalsViaChangeFromNounToAdjective(self, ast):
@@ -185,9 +185,9 @@ class TestAstPrograms(object):
 
     def test_canAssignReturnValueOfFunction(self, ast):
         variables = evaluate_and_return_state_variables(ast,
-                                                        '''sxambaluli signifas revenu nul finu
-                                                        poste sxambalulu
-                                                        poste asignu gxi al kato''')
+            '''sxambaluli signifas revenu nul finu
+            poste sxambalulu
+            poste asignu gxi al kato''')
         assert variables['kato'] == 0
 
     def test_returnStopsWhileLoopFromContinuing(self, ast, initial_state):
@@ -237,15 +237,15 @@ class TestLargeScalePhenomena(RealTimeSmartHomeManagerProvided_CarefulVolatile):
     def test_tasksCanBeAddedToSchedulerWhileItIsBusyWithOthers(self, smart_home, polling_interval):
         smart_home.start_scheduler()
         smart_home.scheduler.enter(datetime.timedelta(seconds=polling_interval * 1.5), time.sleep,
-                                   (polling_interval * 2,))
+            (polling_interval * 2,))
         time.sleep(polling_interval * 5)
         self.assert_that_the_scheduler_is_alive(smart_home)
 
     def test_tasksCanBeSubmittedFasterThanPollingTime(self, smart_home, polling_interval):
         smart_home.start_scheduler()
         smart_home.scheduler.enter(datetime.timedelta(seconds=polling_interval * 0.01), time.sleep,
-                                   (polling_interval * 2,))
+            (polling_interval * 2,))
         time.sleep(polling_interval * 0.5)
         smart_home.scheduler.enter(datetime.timedelta(seconds=polling_interval * 0.01), time.sleep,
-                                   (polling_interval * 2,))
+            (polling_interval * 2,))
         self.assert_that_the_scheduler_is_alive(smart_home)

@@ -89,7 +89,7 @@ if __name__ == "__main__":
     # print(
     with open('domsa.tex', 'w', encoding='utf8') as outFile:
         highlight(code, lexer, formatter,
-                  outFile)
+            outFile)
         # )
     # )
     # for token in lexer.get_tokens_unprocessed(code):

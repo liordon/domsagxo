@@ -64,7 +64,7 @@ class TestTimedActions(TimeManagerWithSimulativeClockProvided):
         assert dawn_of_time.second == zero_day.second
 
     def test_mockSchedulerAdvancesAccordingToSpecifiedTime(self, scd, dawn_of_time,
-                                                           one_sec, one_min, one_day):
+            one_sec, one_min, one_day):
         scd.runSetTime(one_sec)
         scd.runSetTime(one_min)
         scd.runSetTime(one_day)
@@ -97,7 +97,7 @@ class TestTimedActions(TimeManagerWithSimulativeClockProvided):
     def test_repeatingTaskScheduledForPastTimeTodayIsOverflowedToTomorrow(self, scd, increaser):
         scd.runSetTime(datetime.timedelta(hours=5))
         scd.startAtTimeRepeatAtInterval(datetime.time(4, 00),
-                                        datetime.timedelta(seconds=24 * 60 * 60), increaser)
+            datetime.timedelta(seconds=24 * 60 * 60), increaser)
 
         assert 0 == self.counter
         scd.runSetTime(datetime.timedelta(hours=23))
@@ -107,8 +107,8 @@ class TestTimedActions(TimeManagerWithSimulativeClockProvided):
 
     def test_taskCanBeScheduledForFutureDate(self, scd, dawn_of_time, increaser):
         scd.enter(datetime.datetime(year=dawn_of_time.year,
-                                    month=dawn_of_time.month,
-                                    day=3, hour=4), increaser)
+            month=dawn_of_time.month,
+            day=3, hour=4), increaser)
         scd.runSetTime(datetime.timedelta(hours=4))
 
         assert 0 == self.counter
@@ -123,7 +123,7 @@ class TestTimedActions(TimeManagerWithSimulativeClockProvided):
     def test_repeatAtCustomTime(self, scd, increaser):
         scd.runSetTime(datetime.timedelta(hours=5))
         scd.startAtTimeRepeatAtInterval(datetime.time(4, 00),
-                                        datetime.timedelta(hours=2, minutes=10), increaser)
+            datetime.timedelta(hours=2, minutes=10), increaser)
 
         assert 0 == self.counter
         scd.runSetTime(datetime.timedelta(hours=1, minutes=10))

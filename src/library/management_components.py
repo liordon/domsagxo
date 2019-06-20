@@ -186,8 +186,8 @@ class Horaro(object):
         now = self.getDate()
         if isinstance(time_point, datetime.time):
             delay = datetime.timedelta(hours=time_point.hour - now.hour,
-                                       minutes=time_point.minute - now.minute,
-                                       seconds=time_point.second - now.second)
+                minutes=time_point.minute - now.minute,
+                seconds=time_point.second - now.second)
             if delay.total_seconds() > 0:
                 return delay.total_seconds()
             return delay.total_seconds() + 24 * 60 * 60

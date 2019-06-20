@@ -15,7 +15,7 @@ nouns = [
 fractions = ["half", "third", "thirds", "quarter", "quarters"]
 digits = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
 teens = ["eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
-         "nineteen"]
+    "nineteen"]
 decades = ["ten", "twenty", "thirty", "fourty", "fifty", "sixty", "seventy", "eighty", "ninety"]
 largeAmounts = ["hundred", "thousand", "million", "billion"]
 
