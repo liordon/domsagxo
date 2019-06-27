@@ -177,9 +177,27 @@ class TestReservedWords(EsperantoLexerProvided):
         lexer.input("samtempe")
         self.assertPartOfSpeechForNextToken(lexer, ReservedWord.SIMULTANEOUSLY)
 
-    def test_theWord_it_isConsideredANounInOrderToGrantVariableAccess(self, lexer):
+    def test_theWord_it_hasItsOwnType(self, lexer):
         lexer.input("gxi")
-        self.assertPartOfSpeechForNextToken(lexer, PartOfSpeech.NOUN)
+        self.assertPartOfSpeechForNextToken(lexer, ReservedWord.IT)
+
+    def test_theWord_it_resultsInNominativeTokenEvenWhenAccusative(self, lexer):
+        lexer.input("gxin")
+        token = lexer.token()
+        self.assertPartOfSpeechForGivenToken(token, ReservedWord.IT)
+        assert token.value == "gxi"
+
+    def test_theWord_it_losesEsperantoLetterWhenLexed(self, lexer):
+        lexer.input("ĝi")
+        token = lexer.token()
+        self.assertPartOfSpeechForGivenToken(token, ReservedWord.IT)
+        assert token.value == "gxi"
+
+    def test_theWord_it_losesEsperantoLetterAndAccusativeCaseWhenLexed(self, lexer):
+        lexer.input("ĝin")
+        token = lexer.token()
+        self.assertPartOfSpeechForGivenToken(token, ReservedWord.IT)
+        assert token.value == "gxi"
 
 
 class TestStrings(EsperantoLexerProvided):

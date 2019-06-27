@@ -183,11 +183,18 @@ class TestAstPrograms(object):
         new_manager, value = ast.parse('''revenu poste kato = 10''').evaluate(initial_state)
         assert "kato" not in new_manager.variables
 
-    def test_canAssignReturnValueOfFunction(self, ast):
+    def test_canAssignReturnValueOfFunctionWithoutAccusativeCase(self, ast):
         variables = evaluate_and_return_state_variables(ast,
             '''sxambaluli signifas revenu nul finu
             poste sxambalulu
             poste asignu gxi al kato''')
+        assert variables['kato'] == 0
+
+    def test_canAssignReturnValueOfFunctionWithAccusativeCase(self, ast):
+        variables = evaluate_and_return_state_variables(ast,
+            '''sxambaluli signifas revenu nul finu
+            poste sxambalulu
+            poste asignu gxin al kato''')
         assert variables['kato'] == 0
 
     def test_returnStopsWhileLoopFromContinuing(self, ast, initial_state):

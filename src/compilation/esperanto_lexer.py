@@ -57,9 +57,9 @@ def t_string(t):
 
 
 def t_TWORD(t):
-    r"""[a-z]+"""
+    r"""[a-zĉĝĥĵŝŭA-ZĈĜĤĴŜŬ]+"""
     if reserved_words.keys().__contains__(t.value):
-        t.type = reserved_words[t.value]
+        determine_type_and_value_of_reserved_words(t)
     elif digitRe.fullmatch(t.value):
         t.type = ReservedWord.VERBAL_DIGIT.value
     elif timeUnitRe.fullmatch(t.value):
@@ -83,6 +83,12 @@ def t_TWORD(t):
         elif re.search(r'as$', t.value):
             t.type = PartOfSpeech.V_PRES.value
     return t
+
+
+def determine_type_and_value_of_reserved_words(t):
+    t.type = reserved_words[t.value]
+    if t.type == ReservedWord.IT.value:
+        t.value = ReservedWord.IT.value[1:]
 
 
 # A string containing ignored characters (spaces and tabs)

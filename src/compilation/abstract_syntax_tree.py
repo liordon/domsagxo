@@ -215,7 +215,8 @@ def build(start=None):
     def p_variable_definiteArticle(p):
         p[0] = p[2]
 
-    @RULE(Var.NAME, [[POS.NOUN],
+    @RULE(Var.NAME, [[ResWord.IT],
+        [POS.NOUN],
         [Var.PARTIAL_NAME, POS.NOUN], ])
     def p_name_partialNameAndNoun(p):
         if len(p) == 3:

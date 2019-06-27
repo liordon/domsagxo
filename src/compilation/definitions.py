@@ -34,6 +34,7 @@ class ReservedWord(Enum):
     IF = 'Tse'
     IN = 'Ten'
     IS = 'Testas'
+    IT = 'Tgxi'
     LESS = 'Tmalpli'
     MORE = 'Tpli'
     NONE = 'Tnenio'
@@ -90,8 +91,10 @@ reserved_words = {
     "finu"     : ReservedWord.END.value,
     "fojoj"    : ReservedWord.TIMES.value,
     "granda"   : ReservedWord.GREATER.value,
-    "gxi"      : PartOfSpeech.NOUN.value,
-    "gxin"     : PartOfSpeech.NOUN.value,
+    "gxi"      : ReservedWord.IT.value,
+    "gxin"     : ReservedWord.IT.value,
+    "ĝi"       : ReservedWord.IT.value,
+    "ĝin"      : ReservedWord.IT.value,
     "je"       : ReservedWord.AT.value,
     "kaj"      : ReservedWord.AND.value,
     "krampo"   : UnalphabeticTerminal.L_PAREN.value,

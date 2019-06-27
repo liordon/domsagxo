@@ -132,6 +132,12 @@ class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType)
     def test_useOfDefiniteOrdinalNumberReturnsArrayAccessNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "la unua de sxambaluloj", Node.ArrayAccess)
 
+    def test_useOfKeywordItIsAValidExpressionUntoItself(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "gxi", Node.VariableName)
+        self.assertThatExpressionIsOfNodeType(ast, "gxin", Node.VariableName)
+        self.assertThatExpressionIsOfNodeType(ast, "ĝi", Node.VariableName)
+        self.assertThatExpressionIsOfNodeType(ast, "ĝin", Node.VariableName)
+
 
 class TestReferenceSemantics(ExpressionLevelAstProvided):
     @pytest.fixture
