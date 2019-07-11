@@ -16,9 +16,9 @@ class SyntaxLexerProvided(object):
     @staticmethod
     def assertAllTokensOfSameType(token_list, desired_type):
         for token_type, content in token_list:
-            if Whitespace == token_type:
+            if token_type == Whitespace:
                 continue
-            assert desired_type == token_type
+            assert token_type == desired_type, "token " + content + " had the wrong type"
 
     @staticmethod
     def assertTokensTypeSequence(token_list, types_list):
