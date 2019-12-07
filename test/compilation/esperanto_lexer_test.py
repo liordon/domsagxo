@@ -15,7 +15,7 @@ class TestPartsOfSpeech(EsperantoLexerProvided):
     def test_numberWithAdjectiveEndingIsOrdinal(self, lexer):
         lexer.input("unua")
         token = lexer.token()
-        assert PartOfSpeech.ORDINAL.value == token.type
+        self.assertPartOfSpeechForGivenToken(PartOfSpeech.ORDINAL, token)
 
     def test_uTerminatedWordsAreImperativeVerbs(self, lexer):
         lexer.input("presu")
