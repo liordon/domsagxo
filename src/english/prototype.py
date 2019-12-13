@@ -1,22 +1,25 @@
 import nltk
 
-from compilation.definitions import PartOfSpeech
+from compilation.definitions import PartOfSpeech, ReservedWord
 
 
 class Token(object):
+    NlpTagSimplifier = {
+        "DT" : ReservedWord.THE.value,
+        "IN" : PartOfSpeech.PREPOSITION.value,
+        "JJ" : PartOfSpeech.ADJECTIVE.value,
+        "JJS": PartOfSpeech.ADJECTIVE.value,
+        "NN" : PartOfSpeech.NOUN.value,
+        "NNS": PartOfSpeech.NOUN.value,
+        "RB" : PartOfSpeech.ORDINAL.value,
+        "VB" : PartOfSpeech.V_IMP.value,
+        "VBZ": PartOfSpeech.V_PRES.value,
+    }
 
     def __init__(self, token_tuple):
         (str, val) = token_tuple
-        print("str: {} val: {}".format(str,val))
-        if val == "NN":
-            self.type = PartOfSpeech.NOUN.value
-        elif val == "JJ":
-            self.type = PartOfSpeech.ADJECTIVE.value
-        elif val == "RB":
-            self.type = PartOfSpeech.ORDINAL.value
-        elif val == "VB":
-            self.type = PartOfSpeech.V_IMP.value
-
+        print("str: {} val: {}".format(str, val))
+        self.type = self.NlpTagSimplifier[val]
         self.value = str
 
 
