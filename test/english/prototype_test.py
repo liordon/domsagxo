@@ -1,7 +1,7 @@
 import pytest
 
 from compilation.definitions import PartOfSpeech, ReservedWord
-from english.prototype import Prototype, Token
+from englishPrototype.english_lexer import EnglishLexer, Token
 from test_utils.providers import PartOfSpeechVerifier
 
 
@@ -31,7 +31,7 @@ class TestBasicTokenConversionFromNlpToPos(object):
 class EnglishLexerProvided(PartOfSpeechVerifier):
     @pytest.fixture
     def lexer(self):
-        return Prototype()
+        return EnglishLexer()
 
 
 class TestEnglishParserPrototype(EnglishLexerProvided):
@@ -65,3 +65,18 @@ class TestEnglishParserPrototype(EnglishLexerProvided):
     def test_canIdentifyGoAsAnImperativeVerb(self, lexer):
         lexer.input("go")
         self.assertPartOfSpeechForNextTokenOfLexer(PartOfSpeech.V_IMP, lexer)
+
+
+def extract_all_tokens(lexer):
+    return [t for t in lexer]
+
+
+class TestEnglishLexerPrototypeOnCommands(EnglishLexerProvided):
+
+    def test_turningOnTheLights(self, lexer):
+        lexer.input("turn on the lights")
+
+        token_type_list = [t.type for t in (extract_all_tokens(lexer))]
+        # assert PartOfSpeech.V_IMP.value in token_type_list
+        assert ReservedWord.THE.value in token_type_list
+        assert PartOfSpeech.NOUN.value in token_type_list
