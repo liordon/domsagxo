@@ -1,5 +1,6 @@
 # coding=utf8
 import syntax_high_light.engluento as engluento
+import syntax_high_light.talon_keywords as talon
 from pygments import highlight
 from pygments.formatters.latex import LatexFormatter
 from pygments.lexer import RegexLexer
@@ -80,6 +81,23 @@ class EngluentoLexer(RegexLexer):
         ]
     }
 
+
+class TalonLexer(RegexLexer):
+    name = "Talon Keyword Lexer"
+    aliases = ['talon']
+    tokens = {
+        'root'  : [
+            (r'\bphrase\b', Name.Function),
+            (r'\d+', Number),
+            (regexFromWordList(talon.f_keys), Number),
+            (regexFromWordList(talon.arrows + talon.modifiers), Name),
+            (regexFromWordList(talon.alpha_alt + talon.simple_keys + talon.alternate_keys), Keyword),
+            (regexFromWordList(talon.symbols), Operator),
+            (r'\s+', Whitespace),
+						(r'[\'`",\.\:\+\-\=\*\\/]', Operator),
+						(r'[a-zA-Z]+', Generic),
+        ],
+    }
 
 if __name__ == "__main__":
     print("started")

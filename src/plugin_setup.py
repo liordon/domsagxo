@@ -8,6 +8,7 @@ setup(
          [pygments.lexers]
          domsagxo = syntax_high_light.pygment_lexer:DomsagxoLexer
          engluento = syntax_high_light.pygment_lexer:EngluentoLexer
+         talon = syntax_high_light.pygment_lexer:TalonLexer
          [pygments.styles]
          domsagxoStyle = syntax_high_light.pygment_style:DomsagxoStyle
      """
