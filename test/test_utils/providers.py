@@ -8,18 +8,20 @@ from library.management_components import Horaro, Domsagxo
 from test_utils.mocks import MockClock
 
 
-class EsperantoLexerProvided(object):
-    @pytest.fixture
-    def lexer(self):
-        return eo_lxr.build()
-
+class PartOfSpeechVerifier(object):
     @staticmethod
-    def assertPartOfSpeechForGivenToken(token, partOfSpeech):
+    def assertPartOfSpeechForGivenToken(partOfSpeech, token):
         assert partOfSpeech.value == token.type
 
     @staticmethod
-    def assertPartOfSpeechForNextToken(lexer, partOfSpeech):
+    def assertPartOfSpeechForNextTokenOfLexer(partOfSpeech, lexer):
         assert partOfSpeech.value == lexer.token().type
+
+
+class EsperantoLexerProvided(PartOfSpeechVerifier):
+    @pytest.fixture
+    def lexer(self):
+        return eo_lxr.build()
 
 
 class PartialNameLevelAstProvided(object):
