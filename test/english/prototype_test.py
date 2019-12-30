@@ -66,7 +66,7 @@ def extract_all_tokens(lexer):
 class TestEnglishLexerPrototypeOnCommands(EnglishLexerProvided):
 
     def test_turningOnTheLights(self, lexer):
-        lexer.input("turn on the lights")
+        lexer.input("activate the lights")
 
         token_type_list = [t.types.keys() for t in (extract_all_tokens(lexer))]
         assert PartOfSpeech.V_IMP.value in token_type_list[0]

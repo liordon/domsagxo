@@ -148,7 +148,7 @@ class TestAstPrograms(object):
 
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.Var.PROGRAM.value)
+        return ast_bld.build(start=ast_bld.GrammarVariable.PROGRAM.value)
 
     @pytest.fixture
     def initial_state(self):

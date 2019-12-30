@@ -167,7 +167,7 @@ def create_clock(name, row=0, col=0):
 
 
 lxr.build()
-ast = ast_bld.build(start=ast_bld.Var.PROGRAM.value)
+ast = ast_bld.build(start=ast_bld.GrammarVariable.PROGRAM.value)
 if clock_type == ClockType.REAL:
     smart_home = Domsagxo()
     smart_home.start_scheduler()

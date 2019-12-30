@@ -23,7 +23,7 @@ class DomsagxoLexer(RegexLexer):
     aliases = ['domsagxo']
     filenames = ['*.domsa']
     tokens = {
-        'root'  : [
+        'root': [
             (r'\s+', Whitespace),
             (r'#.*\n', Comment),
             (r'\bla\b', Comment),
@@ -54,7 +54,7 @@ class EngluentoLexer(RegexLexer):
     aliases = ['engluento']
     filenames = ['*.englu']
     tokens = {
-        'root'  : [
+        'root': [
             (alphabet + r'+-?((ation)|(ate)|(ify)|(ing))\b', Name.Function),
             (regexFromWordList(
                 engluento.fractions + engluento.digits + engluento.teens +
@@ -86,7 +86,7 @@ class TalonLexer(RegexLexer):
     name = "Talon Keyword Lexer"
     aliases = ['talon']
     tokens = {
-        'root'  : [
+        'root': [
             (r'\bphrase\b', Name.Function),
             (r'\d+', Number),
             (regexFromWordList(talon.f_keys), Number),
@@ -94,10 +94,11 @@ class TalonLexer(RegexLexer):
             (regexFromWordList(talon.alpha_alt + talon.simple_keys + talon.alternate_keys), Keyword),
             (regexFromWordList(talon.symbols), Operator),
             (r'\s+', Whitespace),
-						(r'[\'`",\.\:\+\-\=\*\\/]', Operator),
-						(r'[a-zA-Z]+', Generic),
+            (r'[\'`",\.\:\+\-\=\*\\/]', Operator),
+            (r'[a-zA-Z]+', Generic),
         ],
     }
+
 
 if __name__ == "__main__":
     print("started")
@@ -106,16 +107,6 @@ if __name__ == "__main__":
     code = """ŝambaluli en la nokton signifas dudek horoj estas egala al la kato en domsaĝo finu"""
     formatter = LatexFormatter(style=DomsagxoStyle)
     formatter.full = True
-    # print(
     with open('domsa.tex', 'w', encoding='utf8') as outFile:
         highlight(code, lexer, formatter,
-            outFile)
-        # )
-    # )
-    # for token in lexer.get_tokens_unprocessed(code):
-    #     print(token)
-    # so_called_regex = re.compile(r"(" + alphabet + ")+" + gobble_spaces)
-    # # print(so_called_regex.pattern)
-    # while 1:
-    #     exp = input(">")
-    #     print(so_called_regex.match(exp) is not None)
+                  outFile)

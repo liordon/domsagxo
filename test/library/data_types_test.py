@@ -18,7 +18,7 @@ def parsed_value_of(ast, expr, state=None):
 class TestAstTimeSpans(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.Var.TIME_SPAN.value)
+        return ast_bld.build(start=ast_bld.GrammarVariable.TIME_SPAN.value)
 
     @staticmethod
     def assertTimeSpan(parse_result, days=0, hours=0, minutes=0, seconds=0):
@@ -76,7 +76,7 @@ class TestAstTimeSpans(object):
 class TestAstTimePoints(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.Var.TIME_POINT.value)
+        return ast_bld.build(start=ast_bld.GrammarVariable.TIME_POINT.value)
 
     @staticmethod
     def assertTimePointValues(parse_result, hour, minutes=0):
@@ -132,7 +132,7 @@ class TestAstTimePoints(object):
 class TestAstRandomGeneration(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.Var.ROUTINE_INVOCATION.value)
+        return ast_bld.build(start=ast_bld.GrammarVariable.ROUTINE_INVOCATION.value)
 
     def test_canGenerateRandomNumber(self, ast):
         parsed_value_of(ast, "hazardu nombro")
@@ -177,7 +177,7 @@ def evaluate_and_return_state(ast, statement, initial_state=None):
 class TestAstApplianceManagement(object):
     @pytest.fixture
     def ast(self):
-        abstract_syntax_tree = ast_bld.build(start=ast_bld.Var.ROUTINE_INVOCATION.value)
+        abstract_syntax_tree = ast_bld.build(start=ast_bld.GrammarVariable.ROUTINE_INVOCATION.value)
         return abstract_syntax_tree
 
     @pytest.fixture
@@ -237,7 +237,7 @@ class TestAstApplianceManagement(object):
 class TestObjectOrientedActions(object):
     @pytest.fixture
     def parser(self):
-        abstract_syntax_tree = ast_bld.build(start=ast_bld.Var.STATEMENT.value)
+        abstract_syntax_tree = ast_bld.build(start=ast_bld.GrammarVariable.STATEMENT.value)
         return abstract_syntax_tree
 
     @pytest.fixture

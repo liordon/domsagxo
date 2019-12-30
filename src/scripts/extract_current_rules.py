@@ -1,6 +1,6 @@
 import sys
 
-from compilation.abstract_syntax_tree import build, Var
+from compilation.abstract_syntax_tree import build, GrammarVariable
 
 
 def convert_name_to_token(token_name):
@@ -27,7 +27,7 @@ def convert_raw_token_to_tex(raw_token):
 
 if __name__ == "__main__":
     print("building grammar")
-    build(start=Var.PROGRAM.value)
+    build(start=GrammarVariable.PROGRAM.value)
 
     parse_rules = {}
 

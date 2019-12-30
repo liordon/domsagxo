@@ -318,7 +318,7 @@ class TestAstBooleanExpressions(ExpressionLevelAstProvided):
 class TestAstRelationalExpressions(ExpressionLevelAstProvided):
     @pytest.fixture
     def relation_ast(self):
-        return ast_bld.build(start=ast_bld.Var.RELATION.value)
+        return ast_bld.build(start=ast_bld.GrammarVariable.RELATION.value)
 
     def test_existsAnEqualityRelation(self, relation_ast):
         node = relation_ast.parse("estas egala al")
