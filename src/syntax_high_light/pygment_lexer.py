@@ -76,7 +76,7 @@ class EngluentoLexer(RegexLexer):
         ],
         'string': [
             ("\"|('')", Keyword, '#pop'),
-            ('(\w+)', String),
+            (r'(\w+)', String),
             (r'\s+', Whitespace),
         ]
     }
