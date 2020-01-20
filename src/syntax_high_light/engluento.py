@@ -1,13 +1,15 @@
 adjectives = [
-    "beutiful", "brown", "front", "first", "tall", "short", "quick", "lazy", "my", "second", "ugly",
+    "beutiful", "brown", "current", "front", "first", "tall", "short", "quick", "lazy", "my", "second", "ugly",
 ]
+
 nouns = [
     "argumet", "arguments", "blinds", "boiler", "brightness", "bulb",
-    "cat", "channel", "child", "contact",
+    "cat", "channel", "child", "color", "contact",
     "dog", "door", "fox", "function", "functions", "Haifa", "Hashmugan",
-    "i", "index", "length", "light", "lights", "list",
+    "i", "index", "lamp", "length", "light", "lights", "list",
     "m", "memories", "marko", "number", "numbers",
-    "other", "oven", "radio", "room", "routine", "routines",
+    "office", "other", "oven", 
+    "radio", "red", "room", "routine", "routines",
     "television", "televisions", "temperature", "time", "traffic",
     "weather", "window",
 ]
