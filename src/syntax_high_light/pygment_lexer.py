@@ -75,7 +75,7 @@ class EngluentoLexer(RegexLexer):
             (r'[\+\-\=\*\\/]', Operator),
         ],
         'string': [
-            ("\"|('')", Keyword, '#pop'),
+            ("\"|('')|(\'\')", Keyword, '#pop'),
             ('(\w+)', String),
             (r'\s+', Whitespace),
         ]
