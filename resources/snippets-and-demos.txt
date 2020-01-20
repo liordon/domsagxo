@@ -1,0 +1,87 @@
+anoncu "saluton" post kvar sekundoj
+
+anoncu "saluton denove" post dek sekundoj poste anoncu "saluton" post kvar sekundoj
+
+anoncu maldekstra citilo saluton denove dekstra citilo post kvin sekundoj poste anoncu maldekstra citilo saluton dekstra citilo post tri sekundoj
+
+sxaltu la lumojn
+
+koloro de enirlumo estas rugxo samtempe koloro de laborlampo estas verdo samtempe koloro de koridora lumo estas bluo
+
+dum indekso estas pli granda ol nul tiam malsxaltu la indeksa de lumoj poste asignu la indekso malpli unu al la indekso finu
+
+se la unua de lumoj sxaltas tiam anoncu "saluton" alie anoncu "gxis la revido" finu
+
+asignu verdo al koloro de la kvindek kvina de lumoj
+
+asignu verdo al la koloro de la kvindek kvina de lumoj
+
+
+primumi signifas
+    asignu du al indekso
+    poste dum indekso ne estas pli granda ol cent tiam
+        cxuprimu indekso
+        poste se sxambalulo sxaltas tiam
+            sxaltu indeksa de ampoloj
+            poste anoncu indekso
+        alie
+            malsxaltu indeksa de ampoloj
+        finu
+        poste asignu indekso pli unu al indekso
+    finu
+finu
+
+
+primumi signifas
+    asignu du al indekso
+    poste dum indekso ne estas pli granda ol cent tiam
+        sxaltu indeksa de ampoloj
+        poste haltu duono sekundoj
+        poste cxuprimu indekso
+        poste haltu duono sekundoj
+        poste se sxambalulo sxaltas tiam
+            asignu verdo al koloro de indeksa de ampoloj
+        alie
+            asignu rugxo al koloro de indeksa de ampoloj
+        finu
+        poste asignu indekso pli unu al indekso
+        poste haltu duono sekundoj
+    finu
+finu
+
+haltu kvar sekundoj 
+poste sxaltu la necesa lumo 
+	samtempe sxaltu la doma kaldrono 
+poste haltu kvin sekundoj 
+poste sxaltu la parolilo 
+	samtempe sxaltu la koridora lumo 
+	samtempe asignu bluo al la koloro de la koridora lumo
+
+sxaltu la lumoj poste
+ asignu la koloro de unua de ampoloj al la koloro de dua de ampoloj
+     cxiu sekundo  poste
+ asignu la koloro de dua de ampoloj al la koloro de tria de ampoloj
+    cxiu sekundo
+
+asignu unu al indekso
+poste dum indekso pli unu ne estas pli granda ol nauxdek naux tiam
+	asignu indekso pli unu al io 
+	poste asignu la koloro de indeksa de ampoloj 
+		al la koloro de ia de ampoloj 
+			cxiu sekundo
+	poste asignu io al indekso
+finu
+
+
+asignu rugxo al koloro de unua de ampoloj
+     cxiu du sekundoj
+asignu bluo al koloro de unua de ampoloj
+     cxiu tri sekundoj
+asignu verdo al koloro de unua de ampoloj
+     cxiu kvin sekundoj
+
+anoncu la volitan temperaturon de ofica klimatizilo
+anoncu la nunan temperaturon de ofica klimatizilo
+
+asignu rugxo al la koloro de laborlampo cxiufoje la nuna temperaturo de kaldrono estas pli granda ol kvardek
+

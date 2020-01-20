@@ -6,6 +6,7 @@ import compilation.abstract_syntax_tree as ast_bld
 from library.atomic_types import Appliance
 from library.management_components import Domsagxo
 from library.predefined_values import ApplianceTypes, ApplianceQueries, Color
+from test_utils.providers import evaluate_and_return_state
 
 
 def parsed_value_of(ast, expr, state=None):
@@ -165,13 +166,6 @@ class TestAstRandomGeneration(object):
         assert isinstance(parse_result, datetime.timedelta)
         assert 180 > parse_result.seconds
         assert 120 <= parse_result.seconds
-
-
-def evaluate_and_return_state(ast, statement, initial_state=None):
-    if initial_state is None:
-        initial_state = Domsagxo()  # so as not to put a mutable default
-    state, nothing = ast.parse(statement).evaluate(initial_state)
-    return state
 
 
 class TestAstApplianceManagement(object):

@@ -26,7 +26,7 @@ class ClockType(Enum):
 def announce_in_multimedia(*args):
     for output in args:
         print(output)
-        os.system('espeak -v eo+f3 "' + str(output) + '"')
+        os.system('espeak -v eo+m3 "' + str(output) + '"')
 
 
 house_type = HouseType.HOUSE

@@ -5,15 +5,10 @@ import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
 import library.management_components as mng_co
+from library.atomic_types import Appliance
+from library.predefined_values import ApplianceTypes, ApplianceProperties, Color
 from test_utils.providers import StatementLevelAstProvided, SmartHomeManagerProvided, \
-    RealTimeSmartHomeManagerProvided_CarefulVolatile
-
-
-def evaluate_and_return_state_variables(ast, statement, initial_state=None):
-    if initial_state is None:
-        initial_state = mng_co.Domsagxo()  # so as not to put a mutable default
-    state, nothing = ast.parse(statement).evaluate(initial_state)
-    return state.variables
+    RealTimeSmartHomeManagerProvided_CarefulVolatile, evaluate_and_return_state, evaluate_and_return_state_variables
 
 
 class TestUntimedAstStatements(StatementLevelAstProvided):
@@ -118,11 +113,22 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         # should execute without exception
         evaluate_and_return_state_variables(ast, "sxambalulu", smart_home)
 
+    def test_integersArePassedToFunctionsByValueNotByReference(self, ast):
+        new_state = evaluate_and_return_state(
+            ast, '''referenci kato signifas
+                        asignu kato pli unu al kato
+                        poste revenu kato
+                    finu''')
+        new_state.variables["kato"] = 1
+        new_state.method_dict['referencu'](3)
+        assert new_state.variables['gxi'] == 4
+        assert new_state.variables["kato"] == 1
+
 
 class TestTimedAstStatements(StatementLevelAstProvided, SmartHomeManagerProvided):
 
     def test_canUseDelayedActionToAddLight(self, ast, smart_home):
-        manager, value = ast.parse("aldonu lumon post sekundo").evaluate(smart_home)
+        manager, value = ast.parse("aldonu lumon je unu sekundo").evaluate(smart_home)
         self.assertNumberOfNewAppliances(0, manager)
         self.fastForwardBy(smart_home, seconds=1)
         self.assertNumberOfNewAppliances(1, manager)
@@ -142,6 +148,41 @@ class TestTimedAstStatements(StatementLevelAstProvided, SmartHomeManagerProvided
         self.assertNumberOfNewAppliances(1, manager)
         self.fastForwardBy(smart_home, minutes=1)
         self.assertNumberOfNewAppliances(2, manager)
+
+    def test_delayedActionsSaveAClosureOfTheirDictationState(self, ast, smart_home):
+        light_bulb = Appliance(ApplianceTypes.LIGHT, "bulbazoro")
+        smart_home.variables["hundo"] = 2
+        smart_home.addAppliance(light_bulb)
+        smart_home, value = ast.parse("asignu hundo al brilo de bulbazoro je unu sekundo").evaluate(smart_home)
+        smart_home.variables["hundo"] = 10
+
+        self.fastForwardBy(smart_home, seconds=2)
+        assert smart_home.variables["bulbazoro"].properties[ApplianceProperties.BRIGHTNESS.value] == 2
+
+    def test_canUseRepeatedActionToPropagateLampColor(self, ast, smart_home):
+        light_bulbs = []
+        for i in range(100):
+            light_bulb = Appliance(ApplianceTypes.LIGHT, f"{i + 1:03d}")
+            light_bulb.properties[ApplianceProperties.COLOR.value] = Color.WHITE.value
+            smart_home.addAppliance(light_bulb)
+            light_bulbs += [light_bulb]
+        smart_home.variables["ampoloj"] = light_bulbs
+        smart_home.variables["indekso"] = 1
+        smart_home, value = ast.parse("""
+            dum indekso estas pli malgranda ol cent tiam
+                asignu indekso pli unu al io 
+                poste asignu la koloro de indeksa de ampoloj 
+                    al la koloro de ia de ampoloj
+                poste asignu io al indekso
+            finu cxiu sekundo""").evaluate(smart_home)
+        for bulb in smart_home.variables["ampoloj"]:
+            assert bulb.properties[ApplianceProperties.COLOR.value] == Color.WHITE.value
+
+        smart_home.variables["ampoloj"][0].properties[ApplianceProperties.COLOR.value] = Color.RED.value
+        self.fastForwardBy(smart_home, seconds=1)
+        for bulb in smart_home.variables["ampoloj"]:
+            print(bulb.name)
+            assert bulb.properties[ApplianceProperties.COLOR.value] == Color.RED.value
 
 
 class TestAstPrograms(object):

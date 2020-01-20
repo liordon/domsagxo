@@ -378,7 +378,7 @@ class RoutineDefinition(AstNode):
                 raise TypeError(str(function_name) + "() expects " +
                                 str(len(argument_names)) + "arguments:\n\t" +
                                 str([name.getContainedName() for name in
-                                    argument_names]) + "\nbut " +
+                                     argument_names]) + "\nbut " +
                                 str(len(argument_list)) + "were given.")
             for i in range(len(argument_list)):
                 closure.variables[argument_names[i].getContainedName()] = argument_list[i]
@@ -401,12 +401,12 @@ class RoutineDefinition(AstNode):
         inner_args = self.args[1]
         for i in range(len(inner_args)):
             res += "\n" + pretty_print(inner_args[i], indent + "\t" + branch_form(False),
-                i == len(inner_args) - 1)
+                                                      i == len(inner_args) - 1)
         inner_args = self.args[2:]
         for i in range(len(inner_args)):
             child = inner_args[i]
             res += "\n" + child.pretty_print(indent + branch_form(last_child),
-                i == len(inner_args) - 1)
+                                             i == len(inner_args) - 1)
 
         return res
 
@@ -428,10 +428,12 @@ class ConditionalStatement(AstNode):
 class ExecutionWrapper(object):
     @staticmethod
     def delayed_evaluation(state, statement):
-        def evaluate():
-            return statement.evaluate(state)
+        def evaluate(closure):
+            return lambda: statement.evaluate(closure)
 
-        return evaluate
+        cloned_state = copy.copy(state)
+        cloned_state.variables = copy.copy(state.variables)
+        return evaluate(cloned_state)
 
 
 class DelayedStatement(AstNode, ExecutionWrapper):

@@ -157,7 +157,7 @@ def build(start=None):
     def p_whileLoop_loopBlock(p):
         p[0] = node.LoopStatement(p[2], p[4])
 
-    @RULE(GrammarVariable.DELAYED_STATEMENT, [[GrammarVariable.STATEMENT, ResWord.AFTER, GrammarVariable.TIME_SPAN], ])
+    @RULE(GrammarVariable.DELAYED_STATEMENT, [[GrammarVariable.STATEMENT, ResWord.AT, GrammarVariable.TIME_SPAN], ])
     def p_delayedStatement_delayAndAction(p):
         p[0] = node.DelayedStatement(p[1], p[3])
 

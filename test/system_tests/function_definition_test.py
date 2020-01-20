@@ -4,7 +4,7 @@ import pytest
 
 import library.atomic_types as atypes
 import library.management_components as mgmt_cmp
-from test_utils.providers import FunctionDefinitionLevelAstProvided
+from test_utils.providers import FunctionDefinitionLevelAstProvided, evaluate_and_return_state
 
 
 def all_true(argument_list):
@@ -34,34 +34,34 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
 
     def test_canDefineSimpleReturningRoutine(self, ast):
         number_of_predefined_functions = len(mgmt_cmp.Domsagxo().method_dict)
-        new_state = self.evaluate_and_return_state(ast,
+        new_state = evaluate_and_return_state(ast,
             '''sxambaluli signifas revenu finu''')
         assert number_of_predefined_functions + 1 == len(new_state.method_dict)
         assert 'sxambalulu' in new_state.method_dict.keys()
 
     def test_canDefineRoutineReturningValue(self, ast):
         number_of_predefined_functions = len(mgmt_cmp.Domsagxo().method_dict)
-        new_state = self.evaluate_and_return_state(ast,
+        new_state = evaluate_and_return_state(ast,
             '''sxambaluli signifas revenu nul finu''')
         assert number_of_predefined_functions + 1 == len(new_state.method_dict)
         assert 'sxambalulu' in new_state.method_dict.keys()
 
     def test_returnValueIsSavedInVariableItAfterFunctionCall(self, ast):
-        new_state = self.evaluate_and_return_state(ast,
+        new_state = evaluate_and_return_state(ast,
             '''sxambaluli signifas revenu nul finu''')
         new_state.method_dict['sxambalulu']()
         assert new_state.variables['gxi'] == 0
 
     def test_cannotPassMoreArgumentsThanPlannedToUserDefinedFunction(self, ast):
-        new_state = self.evaluate_and_return_state(
+        new_state = evaluate_and_return_state(
             ast, '''memori sxambalulo signifas revenu finu''')
         with pytest.raises(TypeError):
             new_state.method_dict['memoru'](1, 2)
 
     def test_functionArgumentsDoNotMigrateBetweenFunctions(self, ast):
-        new_state = self.evaluate_and_return_state(
+        new_state = evaluate_and_return_state(
             ast, '''forgesi sxambalulo signifas revenu finu''')
-        new_state = self.evaluate_and_return_state(
+        new_state = evaluate_and_return_state(
             ast, '''memori signifas asignu sxambalulo al kato finu''', new_state)
         new_state.method_dict['forgesu'](100)
         # forgesi now knows a variable called sxambalulo
@@ -70,14 +70,14 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
             # memori doesn't know about sxambalulo
 
     def test_routinesCanChangeApplianceState(self, ast, smart_home):
-        new_state = self.evaluate_and_return_state(
+        new_state = evaluate_and_return_state(
             ast, '''sxangxi signifas asignu kvardek al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['sxangxu']()
         assert 40 == new_state.variables["sxambalulo"].properties["brilo"]
 
     def test_routinesCanAccessAppliancesDefinedAfterThemselves(self, ast):
         initial_state = mgmt_cmp.Domsagxo()
-        new_state = self.evaluate_and_return_state(
+        new_state = evaluate_and_return_state(
             ast, '''sxangxi signifas asignu kvardek al brilo de sxambalulo finu''', initial_state)
         new_state.addAppliance(
             appliance=atypes.Appliance(atypes.ApplianceTypes.LIGHT, "sxambalulo"))
@@ -85,7 +85,7 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         assert 40 == new_state.variables["sxambalulo"].properties["brilo"]
 
     def test_routinesDoNotOverwriteEachOthersArguments(self, ast):
-        new_state = self.evaluate_and_return_state(
+        new_state = evaluate_and_return_state(
             ast, '''
             rekursi sxambalulo signifas
                 se sxambalulo estas egala al nul tiam
@@ -108,10 +108,11 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         for i in range(len(new_state.variables["sxambaluloj"])):
             assert 10 * (i + 1) == new_state.variables["sxambaluloj"][i].properties["brilo"]
 
+
     def test_canDefineMuConstantFunction(self, ast, smart_home):
         """the Mu-recursive constant function has a predefined constant n which it always returns.
         The function is simply: f(x) = n."""
-        new_state = self.evaluate_and_return_state(
+        new_state = evaluate_and_return_state(
             ast, '''konstanti hundo, kato kaj muso signifas
                 asignu sep al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['konstantu'](10, 809, 341)
@@ -120,7 +121,7 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
     def test_canDefineMuSuccessorFunction(self, ast, smart_home):
         """the Mu-recursive successor function recieves an argument and returns it's successor.
         Basically, it's just f(x) = x+1."""
-        new_state = self.evaluate_and_return_state(
+        new_state = evaluate_and_return_state(
             ast, '''posteuli nombro signifas 
                 asignu nombro pli unu al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['posteulu'](41)
@@ -130,7 +131,7 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         """the Mu-recursive projection function (also called the identity function)
         is a function that receives k inputs and returns the ith input without change.
         In this specific example, we accept 2 inputs and return the first one."""
-        new_state = self.evaluate_and_return_state(
+        new_state = evaluate_and_return_state(
             ast, '''elekti hundo kaj kato signifas 
             asignu hundo al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['elektu'](31, 42)
@@ -139,7 +140,7 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
     def test_canDefineFunctionToTellIfANumberIsPrime(self, ast, smart_home):
         """yogi was sassy and said I could not tell the prime numbers apart even if I tried.
         So let's check, since I bet I can do that with several simple functions."""
-        new_state = self.evaluate_and_return_state(
+        new_state = evaluate_and_return_state(
             ast, '''cxuprimi nombro signifas
                 asignu du al unua indekso 
                 poste dum unua indekso fojoj unua indekso 
@@ -170,7 +171,7 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         def add_prime_to_list(additional_prime):
             self.prime_list += [additional_prime]
 
-        new_state = self.evaluate_and_return_state(
+        new_state = evaluate_and_return_state(
             ast, '''primumi signifas
                 asignu du al indekso
                 poste dum indekso ne estas pli granda ol cent tiam

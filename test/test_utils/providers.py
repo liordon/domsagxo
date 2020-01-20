@@ -22,6 +22,17 @@ class PartOfSpeechVerifier(object):
         assert partOfSpeech.value in lexer.token().types.keys()
 
 
+def evaluate_and_return_state(ast, statement, initial_state=None):
+    if initial_state is None:
+        initial_state = Domsagxo()  # so as not to put a mutable default
+    state, nothing = ast.parse(statement).evaluate(initial_state)
+    return state
+
+
+def evaluate_and_return_state_variables(ast, statement, initial_state=None):
+    return evaluate_and_return_state(ast, statement, initial_state).variables
+
+
 class EsperantoLexerProvided(PartOfSpeechVerifier):
     @pytest.fixture
     def lexer(self):
@@ -41,14 +52,6 @@ class ExpressionLevelAstProvided(object):
 
 
 class FunctionDefinitionLevelAstProvided(object):
-    @staticmethod
-    def evaluate_and_return_state(ast, statement, initial_state=None):
-        if initial_state is None:
-            initial_state = Domsagxo()  # so as not to put a mutable default
-        ast_parse = ast.parse(statement)
-        state, nothing = ast_parse.evaluate(initial_state)
-        return state
-
     @pytest.fixture
     def ast(self):
         return ast_bld.build(start=ast_bld.GrammarVariable.ROUTINE_DEFINITION.value)
@@ -66,7 +69,7 @@ class TimeManagerWithSimulativeClockProvided(object):
     def scd(self):
         simulative_time = MockClock()
         return Horaro(time_function=simulative_time.get_current_time,
-                      delay_function=simulative_time.increase_time)
+            delay_function=simulative_time.increase_time)
 
     @pytest.fixture
     def increaser(self):
@@ -99,7 +102,7 @@ class SmartHomeManagerProvided(object):
     def smart_home(self):
         simulative_time = MockClock()
         scheduler = Horaro(time_function=simulative_time.get_current_time,
-                           delay_function=simulative_time.increase_time)
+            delay_function=simulative_time.increase_time)
         return Domsagxo(scheduler)
 
     @staticmethod

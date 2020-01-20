@@ -18,3 +18,29 @@ objects can be created (even defined?)
 
 there is a for loop in the language
 
+
+    def test_canUseRepeatedActionToPropagateLampColor(self, ast, smart_home):
+        light_bulbs = []
+        for i in range(100):
+            light_bulb = Appliance(ApplianceTypes.LIGHT, f"{i + 1:03d}")
+            light_bulb.properties[ApplianceProperties.COLOR.value] = Color.WHITE.value
+            smart_home.addAppliance(light_bulb)
+            light_bulbs += [light_bulb]
+        smart_home.variables["ampoloj"] = light_bulbs
+        smart_home, value = ast.parse("""asignu unu al indekso""").evaluate(smart_home)
+        smart_home, value = ast.parse("""
+            dum indekso ne estas pli granda ol nauxdek naux tiam
+                asignu indekso pli unu al io 
+                poste asignu la koloro de indeksa de ampoloj 
+                    al la koloro de ia de ampoloj 
+                        cxiu sekundo
+                poste asignu io al indekso
+            finu""").evaluate(smart_home)
+        for bulb in smart_home.variables["ampoloj"]:
+            assert bulb.properties[ApplianceProperties.COLOR.value] == Color.WHITE.value
+
+        smart_home.variables["ampoloj"][0].properties[ApplianceProperties.COLOR.value] = Color.RED.value
+        self.fastForwardBy(smart_home, seconds=2)
+        for bulb in smart_home.variables["ampoloj"]:
+            print(bulb.name)
+            assert bulb.properties[ApplianceProperties.COLOR.value] == Color.RED.value

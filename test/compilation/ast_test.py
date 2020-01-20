@@ -1,20 +1,20 @@
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
-import compilation.node as Node
+from compilation import node
 from test_utils import mocks
 from test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided
 
 
 def parsed_value_of(ast, expr, state=None):
-    node = ast.parse(expr)
-    return node.evaluate(state)[1]
+    ast_node = ast.parse(expr)
+    return ast_node.evaluate(state)[1]
 
 
 class CanAssertNodeType(object):
     @staticmethod
-    def assertThatExpressionIsOfNodeType(ast, expr, nodeType):
-        assert isinstance(ast.parse(expr), nodeType)
+    def assertThatExpressionIsOfNodeType(ast, expr, node_type):
+        assert isinstance(ast.parse(expr), node_type)
 
 
 class TestVerbalNumbers(ExpressionLevelAstProvided):
@@ -74,69 +74,69 @@ class TestVerbalNumbers(ExpressionLevelAstProvided):
 
 class TestNameAndOrdinalAstNodes(PartialNameLevelAstProvided, CanAssertNodeType):
     def test_parsedAdjectiveReturnsDescriptionNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "bela", Node.Description)
+        self.assertThatExpressionIsOfNodeType(ast, "bela", node.Description)
 
     def test_twoParsedAdjectivesReturnsDescriptionNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "bela bona", Node.Description)
+        self.assertThatExpressionIsOfNodeType(ast, "bela bona", node.Description)
 
     def test_parsedDigitalOrdinalReturnsDescriptionNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "unua", Node.Description)
+        self.assertThatExpressionIsOfNodeType(ast, "unua", node.Description)
 
 
 class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType):
 
     def test_parsedStringReturnsStringNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "''", Node.String)
+        self.assertThatExpressionIsOfNodeType(ast, "''", node.String)
 
     def test_parsedNumberReturnsNumberNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "1", Node.Number)
+        self.assertThatExpressionIsOfNodeType(ast, "1", node.Number)
 
     def test_parsedVerbalNumberReturnsNumberNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "unu", Node.Number)
+        self.assertThatExpressionIsOfNodeType(ast, "unu", node.Number)
 
     def test_parsedNegativeNumberReturnsOperationNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "-1", Node.Subtract)
-        self.assertThatExpressionIsOfNodeType(ast, "malpli unu", Node.Subtract)
+        self.assertThatExpressionIsOfNodeType(ast, "-1", node.Subtract)
+        self.assertThatExpressionIsOfNodeType(ast, "malpli unu", node.Subtract)
 
     def test_multiplicationReturnsOperationNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "1*1", Node.Multiply)
-        self.assertThatExpressionIsOfNodeType(ast, "unu fojoj unu", Node.Multiply)
+        self.assertThatExpressionIsOfNodeType(ast, "1*1", node.Multiply)
+        self.assertThatExpressionIsOfNodeType(ast, "unu fojoj unu", node.Multiply)
 
     def test_divisionReturnsOperationNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "1/1", Node.Divide)
-        self.assertThatExpressionIsOfNodeType(ast, "unu partoj unu", Node.Divide)
+        self.assertThatExpressionIsOfNodeType(ast, "1/1", node.Divide)
+        self.assertThatExpressionIsOfNodeType(ast, "unu partoj unu", node.Divide)
 
     def test_additionReturnsOperationNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "1+1", Node.Add)
-        self.assertThatExpressionIsOfNodeType(ast, "unu pli unu", Node.Add)
+        self.assertThatExpressionIsOfNodeType(ast, "1+1", node.Add)
+        self.assertThatExpressionIsOfNodeType(ast, "unu pli unu", node.Add)
 
     def test_subtractionReturnsOperationNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "1-1", Node.Subtract)
-        self.assertThatExpressionIsOfNodeType(ast, "unu malpli unu", Node.Subtract)
+        self.assertThatExpressionIsOfNodeType(ast, "1-1", node.Subtract)
+        self.assertThatExpressionIsOfNodeType(ast, "unu malpli unu", node.Subtract)
 
     def test_nounReturnsVariableNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "sxambalulo", Node.VariableName)
+        self.assertThatExpressionIsOfNodeType(ast, "sxambalulo", node.VariableName)
 
     def test_adjectiveAndNounReturnsVariableNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "sxamba lulo", Node.VariableName)
+        self.assertThatExpressionIsOfNodeType(ast, "sxamba lulo", node.VariableName)
 
     def test_fieldAccessReturnsDereferenceNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "sxa mbo de lulo", Node.Dereference)
+        self.assertThatExpressionIsOfNodeType(ast, "sxa mbo de lulo", node.Dereference)
 
     def test_useOfOrdinalVariableReturnsArrayAccessNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "sxa mba de lulo", Node.ArrayAccess)
+        self.assertThatExpressionIsOfNodeType(ast, "sxa mba de lulo", node.ArrayAccess)
 
     def test_useOfIndefiniteOrdinalNumberReturnsArrayAccessNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "unua de sxambaluloj", Node.ArrayAccess)
+        self.assertThatExpressionIsOfNodeType(ast, "unua de sxambaluloj", node.ArrayAccess)
 
     def test_useOfDefiniteOrdinalNumberReturnsArrayAccessNode(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "la unua de sxambaluloj", Node.ArrayAccess)
+        self.assertThatExpressionIsOfNodeType(ast, "la unua de sxambaluloj", node.ArrayAccess)
 
     def test_useOfKeywordItIsAValidExpressionUntoItself(self, ast):
-        self.assertThatExpressionIsOfNodeType(ast, "gxi", Node.VariableName)
-        self.assertThatExpressionIsOfNodeType(ast, "gxin", Node.VariableName)
-        self.assertThatExpressionIsOfNodeType(ast, "ĝi", Node.VariableName)
-        self.assertThatExpressionIsOfNodeType(ast, "ĝin", Node.VariableName)
+        self.assertThatExpressionIsOfNodeType(ast, "gxi", node.VariableName)
+        self.assertThatExpressionIsOfNodeType(ast, "gxin", node.VariableName)
+        self.assertThatExpressionIsOfNodeType(ast, "ĝi", node.VariableName)
+        self.assertThatExpressionIsOfNodeType(ast, "ĝin", node.VariableName)
 
 
 class TestReferenceSemantics(ExpressionLevelAstProvided):
@@ -160,7 +160,7 @@ class TestReferenceSemantics(ExpressionLevelAstProvided):
         assert ast.parse(variable_name).getter(state) == 3
 
     def test_definiteOrdinalNounVariableCanBeAssessedAsExpression(self, ast, state):
-        variable_name = "qvara sxambalulo"
+        variable_name = "kvara sxambalulo"
         definite_variable_name = "la " + variable_name
         state.variables[variable_name] = 4
         assert ast.parse(definite_variable_name).getter(state) == 4
@@ -321,24 +321,24 @@ class TestAstRelationalExpressions(ExpressionLevelAstProvided):
         return ast_bld.build(start=ast_bld.GrammarVariable.RELATION.value)
 
     def test_existsAnEqualityRelation(self, relation_ast):
-        node = relation_ast.parse("estas egala al")
-        assert node is not None
+        ast_node = relation_ast.parse("estas egala al")
+        assert ast_node is not None
 
     def test_existsAGreatnessRelation(self, relation_ast):
-        node = relation_ast.parse("estas pli granda ol")
-        assert node is not None
+        ast_node = relation_ast.parse("estas pli granda ol")
+        assert ast_node is not None
 
     def test_existsAnEqualOrGreatnessRelation(self, relation_ast):
-        node = relation_ast.parse("estas pli granda aux egala al")
-        assert node is not None
+        ast_node = relation_ast.parse("estas pli granda aux egala al")
+        assert ast_node is not None
 
     def test_existsASmallnessRelation(self, relation_ast):
-        node = relation_ast.parse("estas pli malgranda ol")
-        assert node is not None
+        ast_node = relation_ast.parse("estas pli malgranda ol")
+        assert ast_node is not None
 
     def test_existsAnEqualOrSmallnessRelation(self, relation_ast):
-        node = relation_ast.parse("estas pli malgranda aux egala al")
-        assert node is not None
+        ast_node = relation_ast.parse("estas pli malgranda aux egala al")
+        assert ast_node is not None
 
     def test_canEvaluateEqualityBetweenNumberAndItself(self, ast):
         assert parsed_value_of(ast, "unu estas egala al unu")
