@@ -159,6 +159,38 @@ class TestTimedAstStatements(StatementLevelAstProvided, SmartHomeManagerProvided
         self.fastForwardBy(smart_home, seconds=2)
         assert smart_home.variables["bulbazoro"].properties[ApplianceProperties.BRIGHTNESS.value] == 2
 
+    def test_canTriggerActionOnceConditionIsMet(self, ast, smart_home):
+        light_bulb = Appliance(ApplianceTypes.LIGHT, "bulbazoro")
+        light_bulb2 = Appliance(ApplianceTypes.LIGHT, "cxarmandero")
+        smart_home.addAppliance(light_bulb)
+        smart_home.addAppliance(light_bulb2)
+        smart_home, value = ast.parse("asignu kvardek du al brilo de bulbazoro unufoje la koloro de cxarmandero estas egala al rugxo").evaluate(smart_home)
+
+        self.fastForwardBy(smart_home, seconds=2)
+        assert smart_home.variables["bulbazoro"].properties[ApplianceProperties.BRIGHTNESS.value] != 42
+        smart_home.variables["cxarmandero"].properties[ApplianceProperties.COLOR.value] = Color.RED.value
+        self.fastForwardBy(smart_home, seconds=2)
+        assert smart_home.variables["bulbazoro"].properties[ApplianceProperties.BRIGHTNESS.value] == 42
+
+    def test_canTriggerActionWheneverConditionIsMet(self, ast, smart_home):
+        light_bulb = Appliance(ApplianceTypes.LIGHT, "bulbazoro")
+        light_bulb2 = Appliance(ApplianceTypes.LIGHT, "cxarmandero")
+        smart_home.addAppliance(light_bulb)
+        smart_home.addAppliance(light_bulb2)
+        smart_home, value = ast.parse("asignu brilo de bulbazoro pli unu al brilo de bulbazoro "
+                                      "cxiufoje la koloro de cxarmandero estas egala al rugxo").evaluate(smart_home)
+
+        self.fastForwardBy(smart_home, seconds=2)
+        assert smart_home.variables["bulbazoro"].properties[ApplianceProperties.BRIGHTNESS.value] == 1
+        smart_home.variables["cxarmandero"].properties[ApplianceProperties.COLOR.value] = Color.RED.value
+        self.fastForwardBy(smart_home, seconds=2)
+        assert smart_home.variables["bulbazoro"].properties[ApplianceProperties.BRIGHTNESS.value] == 2
+        smart_home.variables["cxarmandero"].properties[ApplianceProperties.COLOR.value] = Color.BLUE.value
+        self.fastForwardBy(smart_home, seconds=2)
+        smart_home.variables["cxarmandero"].properties[ApplianceProperties.COLOR.value] = Color.RED.value
+        self.fastForwardBy(smart_home, seconds=2)
+        assert smart_home.variables["bulbazoro"].properties[ApplianceProperties.BRIGHTNESS.value] == 3
+
     def test_canUseRepeatedActionToPropagateLampColor(self, ast, smart_home):
         light_bulbs = []
         for i in range(100):

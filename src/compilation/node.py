@@ -429,7 +429,7 @@ class ExecutionWrapper(object):
     @staticmethod
     def delayed_evaluation(state, statement):
         def evaluate(closure):
-            return lambda: statement.evaluate(closure)
+            return lambda: statement.evaluate(closure)[1]
 
         cloned_state = copy.copy(state)
         cloned_state.variables = copy.copy(state.variables)
@@ -458,6 +458,28 @@ class ScheduledStatement(AstNode, ExecutionWrapper):
         state.scheduler.enter(evaluated_time,
             self.delayed_evaluation(state, statement))
         return state, evaluated_time
+
+
+class OnceStatement(AstNode, ExecutionWrapper):
+
+    def __init__(self, statement, trigger):
+        super(OnceStatement, self).__init__(statement, trigger)
+
+    def _method(self, state, statement, trigger):
+        state.scheduler.enterAtTrigger(self.delayed_evaluation(state, trigger),
+            self.delayed_evaluation(state, statement))
+        return state, None
+
+
+class WheneverStatement(AstNode, ExecutionWrapper):
+
+    def __init__(self, statement, trigger):
+        super(WheneverStatement, self).__init__(statement, trigger)
+
+    def _method(self, state, statement, trigger):
+        state.scheduler.repeatAtTrigger(self.delayed_evaluation(state, trigger),
+            self.delayed_evaluation(state, statement))
+        return state, None
 
 
 class RepeatedStatement(AstNode, ExecutionWrapper):
