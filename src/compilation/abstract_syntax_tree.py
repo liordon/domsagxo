@@ -43,6 +43,8 @@ class GrammarVariable(Enum):
     ROUTINE_DEFINITION = 'V_routine_definition'
     RELATION = 'V_relation'
     LARGE_ORDINAL = 'V_large_ordinal'
+    ONCE_STATEMENT = 'V_once_statement'
+    WHENEVER_STATEMENT = 'V_whenever_statement'
 
 
 def RULE(product, rule_list):
@@ -121,8 +123,8 @@ def build(start=None):
         p[0] = p[1]
 
     @RULE(GrammarVariable.BLOCK, [[GrammarVariable.STATEMENT],
-                                  [GrammarVariable.BLOCK, ResWord.AND_THEN, GrammarVariable.STATEMENT],
-                                  [GrammarVariable.BLOCK, ResWord.SIMULTANEOUSLY, GrammarVariable.STATEMENT], ])
+        [GrammarVariable.BLOCK, ResWord.AND_THEN, GrammarVariable.STATEMENT],
+        [GrammarVariable.BLOCK, ResWord.SIMULTANEOUSLY, GrammarVariable.STATEMENT], ])
     def p_block_separatedStatements(p):
         if len(p) == 2:
             p[0] = node.Program(None, p[1])
@@ -130,22 +132,25 @@ def build(start=None):
             p[0] = node.Program(p[1], p[3])
 
     @RULE(GrammarVariable.STATEMENT, [[GrammarVariable.ROUTINE_DEFINITION],
-                                      [GrammarVariable.ROUTINE_INVOCATION],
-                                      [GrammarVariable.ASSIGN_STATEMENT],
-                                      [GrammarVariable.RETURN_STATEMENT],
-                                      [GrammarVariable.IF_STATEMENT],
-                                      [GrammarVariable.WHILE_LOOP],
-                                      [GrammarVariable.DELAYED_STATEMENT],
-                                      [GrammarVariable.SCHEDULED_STATEMENT],
-                                      [GrammarVariable.REPEATING_STATEMENT], ])
+        [GrammarVariable.ROUTINE_INVOCATION],
+        [GrammarVariable.ASSIGN_STATEMENT],
+        [GrammarVariable.RETURN_STATEMENT],
+        [GrammarVariable.IF_STATEMENT],
+        [GrammarVariable.WHILE_LOOP],
+        [GrammarVariable.DELAYED_STATEMENT],
+        [GrammarVariable.SCHEDULED_STATEMENT],
+        [GrammarVariable.ONCE_STATEMENT],
+        [GrammarVariable.WHENEVER_STATEMENT],
+        [GrammarVariable.REPEATING_STATEMENT], ])
     def p_statement_anyKind(p):
         p[0] = p[1]
 
     # ------------------------     statement definitions     --------------------------#
 
-    @RULE(GrammarVariable.IF_STATEMENT, [[ResWord.IF, GrammarVariable.EXPRESSION, ResWord.THEN, GrammarVariable.BLOCK, ResWord.END],
-                                         [ResWord.IF, GrammarVariable.EXPRESSION, ResWord.THEN, GrammarVariable.BLOCK,
-                                          ResWord.ELSE, GrammarVariable.BLOCK, ResWord.END], ])
+    @RULE(GrammarVariable.IF_STATEMENT,
+        [[ResWord.IF, GrammarVariable.EXPRESSION, ResWord.THEN, GrammarVariable.BLOCK, ResWord.END],
+            [ResWord.IF, GrammarVariable.EXPRESSION, ResWord.THEN, GrammarVariable.BLOCK,
+                ResWord.ELSE, GrammarVariable.BLOCK, ResWord.END], ])
     def p_ifStatement_ifCondition(p):
         if len(p) == 6:
             p[0] = node.ConditionalStatement(p[2], p[4], None)
@@ -153,7 +158,7 @@ def build(start=None):
             p[0] = node.ConditionalStatement(p[2], p[4], p[6])
 
     @RULE(GrammarVariable.WHILE_LOOP,
-          [[ResWord.DURING, GrammarVariable.EXPRESSION, ResWord.THEN, GrammarVariable.BLOCK, ResWord.END], ])
+        [[ResWord.DURING, GrammarVariable.EXPRESSION, ResWord.THEN, GrammarVariable.BLOCK, ResWord.END], ])
     def p_whileLoop_loopBlock(p):
         p[0] = node.LoopStatement(p[2], p[4])
 
@@ -165,11 +170,21 @@ def build(start=None):
     def p_scheduledStatement_timeAndAction(p):
         p[0] = node.ScheduledStatement(p[1], p[3])
 
-    @RULE(GrammarVariable.REPEATING_STATEMENT, [[GrammarVariable.STATEMENT, ResWord.EVERY, GrammarVariable.TIME_SPAN], ])
+    @RULE(GrammarVariable.REPEATING_STATEMENT,
+        [[GrammarVariable.STATEMENT, ResWord.EVERY, GrammarVariable.TIME_SPAN], ])
     def p_repeatingStatement_repetitionAndAction(p):
         p[0] = node.RepeatedStatement(p[1], p[3])
 
-    @RULE(GrammarVariable.ASSIGN_STATEMENT, [[ResWord.PUT, GrammarVariable.EXPRESSION, ResWord.TO, GrammarVariable.VARIABLE], ])
+    @RULE(GrammarVariable.ONCE_STATEMENT, [[GrammarVariable.STATEMENT, ResWord.ONCE, GrammarVariable.EXPRESSION], ])
+    def p_onceStatement_actionAndTrigger(p):
+        p[0] = node.OnceStatement(p[1], p[3])
+
+    @RULE(GrammarVariable.WHENEVER_STATEMENT, [[GrammarVariable.STATEMENT, ResWord.WHENEVER, GrammarVariable.EXPRESSION], ])
+    def p_wheneverStatement_actionAndTrigger(p):
+        p[0] = node.WheneverStatement(p[1], p[3])
+
+    @RULE(GrammarVariable.ASSIGN_STATEMENT,
+        [[ResWord.PUT, GrammarVariable.EXPRESSION, ResWord.TO, GrammarVariable.VARIABLE], ])
     def p_assignStatement_verbalAssign(p):
         p[0] = node.VariableAssignment(p[4], p[2])
 
@@ -196,7 +211,7 @@ def build(start=None):
         p[0] = node.ArrayAccess(p[1], p[3])
 
     @RULE(GrammarVariable.LARGE_ORDINAL, [[GrammarVariable.NUMBER_LITERAL, PoS.ORDINAL],
-                                          [PoS.ORDINAL], ])
+        [PoS.ORDINAL], ])
     def p_largeOrdinal_NumberAndLargeOrdinal(p):
         if len(p) > 2:
             p[0] = p[1] + [p[2][:-1]]
@@ -216,8 +231,8 @@ def build(start=None):
         p[0] = p[2]
 
     @RULE(GrammarVariable.NAME, [[ResWord.IT],
-                                 [PoS.NOUN],
-                                 [GrammarVariable.PARTIAL_NAME, PoS.NOUN], ])
+        [PoS.NOUN],
+        [GrammarVariable.PARTIAL_NAME, PoS.NOUN], ])
     def p_name_partialNameAndNoun(p):
         if len(p) == 3:
             p[0] = node.VariableName(p[2], p[1])
@@ -225,7 +240,7 @@ def build(start=None):
             p[0] = node.VariableName(p[1], node.NoneNode())
 
     @RULE(GrammarVariable.PARTIAL_NAME, [[GrammarVariable.PARTIAL_NAME, GrammarVariable.ADJECTIVE],
-                                         [GrammarVariable.ADJECTIVE], ])
+        [GrammarVariable.ADJECTIVE], ])
     def p_partialName_partialNameAndAdjective(p):
         if len(p) == 3:
             p[0] = node.Description(p[2], p[1])
@@ -233,8 +248,8 @@ def build(start=None):
             p[0] = node.Description(p[1])
 
     @RULE(GrammarVariable.ADJECTIVE, [[ResWord.GREATER],
-                                      [ResWord.SMALLER],
-                                      [PoS.ADJECTIVE], ])
+        [ResWord.SMALLER],
+        [PoS.ADJECTIVE], ])
     def p_adjective_normalAdjectiveOrReclaimedWeaklyReservedWord(p):
         p[0] = str(p[1])
 
@@ -244,33 +259,33 @@ def build(start=None):
 
     # -------------------------   mathematical calculations   -----------------------------#
     @RULE(GrammarVariable.EXPRESSION, [[GrammarVariable.EXPRESSION, UaTer.PLUS, GrammarVariable.TERM],
-                                       [GrammarVariable.EXPRESSION, ResWord.MORE, GrammarVariable.TERM], ])
+        [GrammarVariable.EXPRESSION, ResWord.MORE, GrammarVariable.TERM], ])
     def p_expression_plus(p):
         p[0] = node.Add(p[1], p[3])
 
     @RULE(GrammarVariable.EXPRESSION, [[GrammarVariable.EXPRESSION, UaTer.MINUS, GrammarVariable.TERM],
-                                       [GrammarVariable.EXPRESSION, ResWord.LESS, GrammarVariable.TERM], ])
+        [GrammarVariable.EXPRESSION, ResWord.LESS, GrammarVariable.TERM], ])
     def p_expression_minus(p):
         p[0] = node.Subtract(p[1], p[3])
 
     @RULE(GrammarVariable.TERM, [[GrammarVariable.TERM, UaTer.TIMES, GrammarVariable.FACTOR],
-                                 [GrammarVariable.TERM, ResWord.TIMES, GrammarVariable.FACTOR], ])
+        [GrammarVariable.TERM, ResWord.TIMES, GrammarVariable.FACTOR], ])
     def p_term_multiply(p):
         p[0] = node.Multiply(p[1], p[3])
 
     @RULE(GrammarVariable.TERM, [[GrammarVariable.TERM, UaTer.DIVIDE, GrammarVariable.FACTOR],
-                                 [GrammarVariable.TERM, ResWord.PARTS, GrammarVariable.FACTOR], ])
+        [GrammarVariable.TERM, ResWord.PARTS, GrammarVariable.FACTOR], ])
     def p_term_div(p):
         p[0] = node.Divide(p[1], p[3])
 
     @RULE(GrammarVariable.FACTOR, [[UaTer.MINUS, GrammarVariable.FACTOR],
-                                   [ResWord.LESS, GrammarVariable.FACTOR], ])
+        [ResWord.LESS, GrammarVariable.FACTOR], ])
     def p_factor_unaryMinus(p):
         p[0] = node.Subtract(node.Number(0), p[2])
 
     @RULE(GrammarVariable.EXPRESSION, [[GrammarVariable.TERM],
-                                       [GrammarVariable.TIME_POINT],
-                                       [GrammarVariable.TIME_SPAN], ])
+        [GrammarVariable.TIME_POINT],
+        [GrammarVariable.TIME_SPAN], ])
     def p_expression_term(p):
         p[0] = p[1]
 
@@ -287,7 +302,7 @@ def build(start=None):
         p[0] = node.Number(parseEntireNumber(p[1]))
 
     @RULE(GrammarVariable.NUMBER_LITERAL, [[ResWord.VERBAL_DIGIT],
-                                           [GrammarVariable.NUMBER_LITERAL, ResWord.VERBAL_DIGIT], ])
+        [GrammarVariable.NUMBER_LITERAL, ResWord.VERBAL_DIGIT], ])
     def p_verbal_number(p):
         if len(p) == 2:
             p[0] = [p[1]]
@@ -308,8 +323,8 @@ def build(start=None):
         p[0] = node.Comparison.Relation.EQUAL
 
     @RULE(GrammarVariable.RELATION, [[ResWord.IS, ResWord.MORE, ResWord.GREATER, ResWord.THAN],
-                                     [ResWord.IS, ResWord.MORE, ResWord.GREATER,
-                          ResWord.OR, ResWord.EQUAL, ResWord.TO], ])
+        [ResWord.IS, ResWord.MORE, ResWord.GREATER,
+            ResWord.OR, ResWord.EQUAL, ResWord.TO], ])
     def p_relation_greatnessAndEquality(p):
         if len(p) == 5:
             p[0] = node.Comparison.Relation.GREATER
@@ -317,16 +332,17 @@ def build(start=None):
             p[0] = node.Comparison.Relation.GREATER_OR_EQUAL
 
     @RULE(GrammarVariable.RELATION, [[ResWord.IS, ResWord.MORE, ResWord.SMALLER,
-                                      ResWord.OR, ResWord.EQUAL, ResWord.TO],
-                                     [ResWord.IS, ResWord.MORE, ResWord.SMALLER, ResWord.THAN], ])
+        ResWord.OR, ResWord.EQUAL, ResWord.TO],
+        [ResWord.IS, ResWord.MORE, ResWord.SMALLER, ResWord.THAN], ])
     def p_relation_smallnessAndEquality(p):
         if len(p) == 5:
             p[0] = node.Comparison.Relation.LESSER
         else:
             p[0] = node.Comparison.Relation.LESSER_OR_EQUAL
 
-    @RULE(GrammarVariable.EXPRESSION, [[GrammarVariable.EXPRESSION, GrammarVariable.RELATION, GrammarVariable.EXPRESSION],
-                                       [GrammarVariable.EXPRESSION, ResWord.NOT, GrammarVariable.RELATION, GrammarVariable.EXPRESSION], ])
+    @RULE(GrammarVariable.EXPRESSION,
+        [[GrammarVariable.EXPRESSION, GrammarVariable.RELATION, GrammarVariable.EXPRESSION],
+            [GrammarVariable.EXPRESSION, ResWord.NOT, GrammarVariable.RELATION, GrammarVariable.EXPRESSION], ])
     def p_expression_sizeComparison(p):
         if len(p) == 4:
             p[0] = node.Comparison(p[1], p[2], p[3])
@@ -366,7 +382,8 @@ def build(start=None):
     def p_expression_string(p):
         p[0] = node.String(p[1])
 
-    @RULE(GrammarVariable.TIME_POINT, [[ResWord.THE, GrammarVariable.LARGE_ORDINAL, ResWord.AND, GrammarVariable.NUMBER_LITERAL], ])
+    @RULE(GrammarVariable.TIME_POINT,
+        [[ResWord.THE, GrammarVariable.LARGE_ORDINAL, ResWord.AND, GrammarVariable.NUMBER_LITERAL], ])
     def p_time_point(p):
         parsed_hour = parseEntireNumber(p[2])
         parsed_minutes = parseEntireNumber(p[4])
@@ -404,7 +421,7 @@ def build(start=None):
         p[0] = node.TimeUnion(p[1], p[2])
 
     @RULE(GrammarVariable.PARTIAL_TIME_SPAN, [[ResWord.TIME_INDICATION],
-                                              [GrammarVariable.NUMBER_LITERAL, ResWord.TIME_INDICATION], ])
+        [GrammarVariable.NUMBER_LITERAL, ResWord.TIME_INDICATION], ])
     def p_time_span(p):
         if len(p) > 2:
             time_unit = p[2]
@@ -429,9 +446,9 @@ def build(start=None):
         else:
             seconds = amount
         p[0] = node.TimeSpan(node.Number(days),
-                             node.Number(hours),
-                             node.Number(minutes),
-                             node.Number(seconds))
+            node.Number(hours),
+            node.Number(minutes),
+            node.Number(seconds))
 
     # ------------------------    routine invocation and definition   --------------------- #
     @RULE(GrammarVariable.ROUTINE_INVOCATION, [[PoS.V_IMP, GrammarVariable.ROUTINE_ARGUMENTS], ])
@@ -444,8 +461,8 @@ def build(start=None):
         p[0] = node.RoutineInvocation(p[1], [])
 
     @RULE(GrammarVariable.ROUTINE_ARGUMENTS, [[GrammarVariable.ROUTINE_ARGUMENT],
-                                              [GrammarVariable.ROUTINE_ARGUMENTS, GrammarVariable.DELIMITER,
-                                               GrammarVariable.ROUTINE_ARGUMENT], ])
+        [GrammarVariable.ROUTINE_ARGUMENTS, GrammarVariable.DELIMITER,
+            GrammarVariable.ROUTINE_ARGUMENT], ])
     def p_routineArguments_argumentAndAdditionalExpression(p):
         if len(p) == 2:
             p[0] = [p[1]]
@@ -457,7 +474,7 @@ def build(start=None):
         p[0] = p[1]
 
     @RULE(GrammarVariable.PARAMETERS, [[GrammarVariable.NAME],
-                                       [GrammarVariable.PARAMETERS, GrammarVariable.DELIMITER, GrammarVariable.NAME], ])
+        [GrammarVariable.PARAMETERS, GrammarVariable.DELIMITER, GrammarVariable.NAME], ])
     def p_inputArg_NOUN(p):
         if len(p) == 2:
             p[0] = [p[1]]
@@ -469,14 +486,14 @@ def build(start=None):
         p[0] = []
 
     @RULE(GrammarVariable.ROUTINE_DEFINITION,
-          [[PoS.V_INF, GrammarVariable.PARAMETERS, ResWord.THIS_WAY, GrammarVariable.BLOCK, ResWord.END], ])
+        [[PoS.V_INF, GrammarVariable.PARAMETERS, ResWord.THIS_WAY, GrammarVariable.BLOCK, ResWord.END], ])
     def p_routineDefinition_nameAndArgs(p):
         p[0] = node.RoutineDefinition(p[1][:-1] + "u", p[2], p[4])
 
     @RULE(GrammarVariable.DELIMITER, [[UaTer.DELIMITER],
-                                      [PoS.PREPOSITION],
-                                      [ResWord.TO],
-                                      [ResWord.AND], ])
+        [PoS.PREPOSITION],
+        [ResWord.TO],
+        [ResWord.AND], ])
     def p_delimiter_prepositionOrComma(p):
         p[0] = p[1]
 
@@ -516,7 +533,7 @@ if __name__ == "__main__":
         demo_state = Object()
         demo_state.variables = {}
         print("This is a limited AST demo.\n",
-              "it can only deal with simple arithmetic and variable usage")
+            "it can only deal with simple arithmetic and variable usage")
 
         while True:
             txt = input(">")

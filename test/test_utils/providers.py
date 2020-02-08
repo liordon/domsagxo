@@ -4,6 +4,7 @@ import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esperanto_lexer as eo_lxr
+from english_prototype.english_lexer import BeamToken
 from library.management_components import Horaro, Domsagxo
 from test_utils.mocks import MockClock
 
@@ -135,3 +136,13 @@ class RealTimeSmartHomeManagerProvided_CarefulVolatile(object):
         assert smart_home.scheduler_runner.is_alive()
         smart_home.stop_scheduler()
         assert not smart_home.scheduler_runner.is_alive()
+
+
+class BeamTokensProvided(object):
+    @pytest.fixture
+    def single_tag_token(self):
+        return BeamToken(("kite", {"noun": 1}))
+
+    @pytest.fixture
+    def multiple_tag_token(self):
+        return BeamToken(("love", {"noun": 0.5, "verb": 0.125}))
