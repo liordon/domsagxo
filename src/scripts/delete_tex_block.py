@@ -60,7 +60,7 @@ class BlockDeleter(object):
 if __name__ == "__main__":
     block_type = sys.argv[1]
     block_deleter = BlockDeleter(block_type)
-    for line in fileinput.input():
+    for line in sys.stdin:
         output_line = block_deleter.deleteBlockFrom(line)
         if output_line != '':
             print(output_line)
