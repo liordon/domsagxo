@@ -141,12 +141,25 @@ class TestEnglishParserPrototype(EnglishLexerProvided):
         lexer.input("go")
         self.assertOnePossiblePartOfSpeechForNextTokenOfLexer(PartOfSpeech.V_IMP, lexer)
 
+    def test_canIdentifyRelationalOperators(self, lexer):
+        lexer.input("is greater than")
+        self.assertOnePossiblePartOfSpeechForNextTokenOfLexer(ReservedWord.IS, lexer)
+        self.assertOnePossiblePartOfSpeechForNextTokenOfLexer(ReservedWord.GREATER, lexer)
+        self.assertOnePossiblePartOfSpeechForNextTokenOfLexer(ReservedWord.THAN, lexer)
+
+        lexer.input("is lesser or equal to")
+        self.assertOnePossiblePartOfSpeechForNextTokenOfLexer(ReservedWord.IS, lexer)
+        self.assertOnePossiblePartOfSpeechForNextTokenOfLexer(ReservedWord.SMALLER, lexer)
+        self.assertOnePossiblePartOfSpeechForNextTokenOfLexer(ReservedWord.OR, lexer)
+        self.assertOnePossiblePartOfSpeechForNextTokenOfLexer(ReservedWord.EQUAL, lexer)
+        self.assertOnePossiblePartOfSpeechForNextTokenOfLexer(ReservedWord.TO, lexer)
+
 
 def extract_all_tokens(lexer):
     return [t for t in lexer]
 
 
-class TestEnglishLexerPrototypeOnCommands(EnglishLexerProvided):
+class TestEnglishLexerFindingPossibleTags(EnglishLexerProvided):
 
     def test_turningOnTheLights(self, lexer):
         lexer.input("activate the lights")
@@ -163,6 +176,15 @@ class TestEnglishLexerPrototypeOnCommands(EnglishLexerProvided):
         assert ReservedWord.PUT.value in token_type_list[0]
         assert UnalphabeticTerminal.NUMBER.value in token_type_list[1]
         assert ReservedWord.TO.value in token_type_list[2]
+        assert PartOfSpeech.NOUN.value in token_type_list[3]
+
+    def test_lockTheFrontDoor(self, lexer):
+        lexer.input("lock the front door")
+
+        token_type_list = [t.types.keys() for t in (extract_all_tokens(lexer))]
+        assert PartOfSpeech.V_IMP.value in token_type_list[0]
+        assert ReservedWord.THE.value in token_type_list[1]
+        assert PartOfSpeech.ADJECTIVE.value in token_type_list[2]
         assert PartOfSpeech.NOUN.value in token_type_list[3]
 
 

@@ -26,7 +26,8 @@ class ClockType(Enum):
 def announce_in_multimedia(*args):
     for output in args:
         print(output)
-        os.system('espeak -v eo+m3 "' + str(output) + '"')
+        app.setLabel("Reply", output)
+        # os.system('espeak -v eo+m3 "' + str(output) + '"')
 
 
 house_type = HouseType.HOUSE
@@ -178,6 +179,8 @@ else:
     smart_home = Domsagxo(scheduler)
 smart_home.method_dict["haltu"] = smart_home.scheduler.runSetTime
 smart_home.method_dict['anoncu'] = announce_in_multimedia
+smart_home.variables['saluto'] = "saluton mondo!"
+smart_home.variables['mia nomo'] = "Lioro!"
 
 with gui("virtuala domo", showIcon=False) as app:
     app.addLabel("title", "Welcome to Domsagxo", colspan=2)
@@ -221,6 +224,9 @@ with gui("virtuala domo", showIcon=False) as app:
 
     app.addLabel("l9", "speech:")
     app.addTextArea("Speech", row=3, column=1, colspan=2)
+
+    app.addLabel("20", "reply:")
+    app.addLabel("Reply", "Speech", row=4, column=1, colspan=2)
 
     app.addButtons(["Submit", "Cancel"], press, row=5, colspan=3)
     app.enableEnter(press)
