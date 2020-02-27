@@ -30,6 +30,7 @@ class DomsagxoLexer(RegexLexer):
             (r'\.|:', Comment),
             (digitRe.pattern, Number),
             (r'(maldekstra )?citilo', Keyword, 'string'),
+            (r'"', Keyword, 'string'),
             (timeUnitRe.pattern, Generic.TypeIndicator),
             (r'\b(kaj|poste|samtempe)\b', Generic.Separator),
             (r',', Generic.Separator),
@@ -43,7 +44,9 @@ class DomsagxoLexer(RegexLexer):
         ],
         'string': [
             ('(dekstra |mal)citilo', Keyword, '#pop'),
+            ('"', Keyword, '#pop'),
             ('((' + alphabet + ')+)', String),
+            ('[,\.\?]', String),
             (r'\s+', Whitespace),
         ]
     }
@@ -67,6 +70,7 @@ class EngluentoLexer(RegexLexer):
             (r'"|``', Keyword, 'string'),
             (r'#.*\n', Comment),
             (r'(?i)\b(a|(the))\b', Comment),
+            (r'\?', Comment),
             (r'\d+', Number),
             (r'(week|day|hour|minute|second)s?', Generic.TypeIndicator),
             (r'\band\b|,|\.|:', Generic.Separator),
@@ -77,6 +81,7 @@ class EngluentoLexer(RegexLexer):
         'string': [
             ("\"|('')|(\'\')", Keyword, '#pop'),
             ('(\w+)', String),
+            ('[,\.\?]', String),
             (r'\s+', Whitespace),
         ]
     }

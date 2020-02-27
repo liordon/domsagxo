@@ -1,5 +1,6 @@
 adjectives = [
-    "beutiful", "brown", "current", "front", "first", "tall", "short", "quick", "lazy", "my", "second", "ugly",
+    "beutiful", "brown", "current", "favourite", "front", "first", "tall", 
+    "short", "silly", "quick", "lazy", "lucky", "my", "second", "ugly",
 ]
 
 nouns = [
@@ -7,7 +8,7 @@ nouns = [
     "cat", "channel", "child", "color", "contact",
     "dog", "door", "fox", "function", "functions", "Haifa", "Hashmugan",
     "i", "index", "lamp", "length", "light", "lights", "list",
-    "m", "memories", "marko", "number", "numbers",
+    "m", "memories", "marko", "name", "number", "numbers",
     "office", "other", "oven", 
     "radio", "red", "room", "routine", "routines",
     "television", "televisions", "temperature", "time", "traffic",
@@ -22,9 +23,9 @@ decades = ["ten", "twenty", "thirty", "fourty", "fifty", "sixty", "seventy", "ei
 largeAmounts = ["hundred", "thousand", "million", "billion"]
 
 verbs = [
-    "add", "announce", "check primality", "close", "compose", "ground", "open", "lock", "minimize",
+    "add", "announce", "check primality", "close", "compose", "ground", "open", "listen", "lock", "minimize",
     "play", "pretend", "project", "randomize", "recurse", "replace", "report",
-    "sub-compose", "successor", "square", "turn off", "turn on", "turns off", "turns on",
+    "sillyname", "sub-compose", "successor", "square", "turn off", "turn on", "turns off", "turns on",
 ]
 
 keywords = [
