@@ -18,10 +18,6 @@ class CanAssertNodeType(object):
 
 
 class TestVerbalNumbers(ExpressionLevelAstProvided):
-    @staticmethod
-    def assertVerbalNumberValue(numerical_value, token):
-        # assert ReservedWord.VERBAL_DIGIT.value == token.type
-        assert numerical_value == token.value
 
     def test_canParseDigit0(self, ast):
         assert parsed_value_of(ast, "nul") == 0
