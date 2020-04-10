@@ -5,7 +5,9 @@ import pytest
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esperanto_lexer as eo_lxr
 from english_prototype.english_lexer import BeamToken
+from library import management_components as mgmt_cmp, atomic_types as atypes
 from library.management_components import Horaro, Domsagxo
+from test_utils import mocks
 from test_utils.mocks import MockClock
 
 
@@ -25,7 +27,7 @@ class PartOfSpeechVerifier(object):
 
 def evaluate_and_return_state(ast, statement, initial_state=None):
     if initial_state is None:
-        initial_state = Domsagxo()  # so as not to put a mutable default
+        initial_state = mocks.Bunch(variables={}, method_dict={})  # so as not to put a mutable default
     state, nothing = ast.parse(statement).evaluate(initial_state)
     return state
 
@@ -62,6 +64,12 @@ class StatementLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
         return ast_bld.build(start=ast_bld.GrammarVariable.STATEMENT.value)
+
+
+class MockSmartHomeStateVariablesProvided(object):
+    @pytest.fixture
+    def state(self):
+        return mocks.Bunch(variables={}, method_dict={})
 
 
 class TimeManagerWithSimulativeClockProvided(object):
@@ -146,3 +154,12 @@ class BeamTokensProvided(object):
     @pytest.fixture
     def multiple_tag_token(self):
         return BeamToken(("love", {"noun": 0.5, "verb": 0.125}))
+
+
+class ProvidedSmartHomeWithLightBulb(object):
+    @pytest.fixture
+    def smart_home(self):
+        smart_home = mgmt_cmp.Domsagxo()
+        light_bulb = atypes.Appliance(atypes.ApplianceTypes.LIGHT, "sxambalulo")
+        smart_home.addAppliance(light_bulb)
+        return smart_home

@@ -4,7 +4,8 @@ import pytest
 
 import library.atomic_types as atypes
 import library.management_components as mgmt_cmp
-from test_utils.providers import FunctionDefinitionLevelAstProvided, evaluate_and_return_state
+from test_utils.providers import FunctionDefinitionLevelAstProvided, evaluate_and_return_state, \
+    ProvidedSmartHomeWithLightBulb
 
 
 def all_true(argument_list):
@@ -20,30 +21,19 @@ def is_prime(number):
     return all_true([number % i for i in range(2, int(math.sqrt(number)) + 1)])
 
 
-class ProvidedSmartHomeWithLightBulb(object):
-    @pytest.fixture
-    def smart_home(self):
-        smart_home = mgmt_cmp.Domsagxo()
-        light_bulb = atypes.Appliance(atypes.ApplianceTypes.LIGHT, "sxambalulo")
-        smart_home.addAppliance(light_bulb)
-        return smart_home
-
-
 class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
     ProvidedSmartHomeWithLightBulb):
 
-    def test_canDefineSimpleReturningRoutine(self, ast):
-        number_of_predefined_functions = len(mgmt_cmp.Domsagxo().method_dict)
+    def test_canDefiningSimpleReturningRoutineAddsItToMethodDict(self, ast):
         new_state = evaluate_and_return_state(ast,
             '''sxambaluli signifas revenu finu''')
-        assert number_of_predefined_functions + 1 == len(new_state.method_dict)
+        assert 1 == len(new_state.method_dict)
         assert 'sxambalulu' in new_state.method_dict.keys()
 
-    def test_canDefineRoutineReturningValue(self, ast):
-        number_of_predefined_functions = len(mgmt_cmp.Domsagxo().method_dict)
+    def test_canDefiningRoutineReturningValueAddsItToMethodDict(self, ast):
         new_state = evaluate_and_return_state(ast,
             '''sxambaluli signifas revenu nul finu''')
-        assert number_of_predefined_functions + 1 == len(new_state.method_dict)
+        assert 1 == len(new_state.method_dict)
         assert 'sxambalulu' in new_state.method_dict.keys()
 
     def test_returnValueIsSavedInVariableItAfterFunctionCall(self, ast):

@@ -296,7 +296,7 @@ class TestAstPrograms(object):
         poste se unua lumo sxaltas tiam
             asignu tri al hundo
         finu
-        ''')
+        ''', initial_state)
         with pytest.raises(KeyError):
             assert variables["muso"] is None
 

@@ -208,14 +208,14 @@ class TestAstApplianceManagement(object):
                 assert appliance.isTurnedOn() is False
 
     def test_canAddAnonymousApplianceToSmartHomeViaSpeech(self, ast):
-        manager = evaluate_and_return_state(ast, "aldonu lumon")
+        manager = evaluate_and_return_state(ast, "aldonu lumon", Domsagxo())
         self.assertNumberOfNewAppliances(1, manager)
         # assert "lumo" not in manager.variables.keys() #lumo became a reserved word.
         assert "unua lumo" in manager.variables.keys()
         assert manager.variables["unua lumo"].type is ApplianceTypes.LIGHT
 
     def test_whenAddingTwoAnonymousAppliancesOneReceivesSerialNumber(self, ast):
-        manager = evaluate_and_return_state(ast, "aldonu lumon")
+        manager = evaluate_and_return_state(ast, "aldonu lumon", Domsagxo())
         manager = evaluate_and_return_state(ast, "aldonu lumon", manager)
         self.assertNumberOfNewAppliances(2, manager)
         assert "unua lumo" in manager.variables.keys()

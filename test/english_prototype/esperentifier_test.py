@@ -1,8 +1,8 @@
 import pytest
 from english_prototype.esperantifier import *
 from compilation.definitions import PartOfSpeech, ReservedWord, UnalphabeticTerminal
-from library.management_components import Domsagxo
-from test_utils.providers import StatementLevelAstProvided, evaluate_and_return_state_variables
+from test_utils.providers import StatementLevelAstProvided, evaluate_and_return_state_variables, \
+    MockSmartHomeStateVariablesProvided
 
 
 class TestWordEsperantification(object):
@@ -43,22 +43,26 @@ class TestWordEsperantification(object):
         assert esperantify_word(word, UnalphabeticTerminal.DIVIDE) == "/"
 
 
-class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevelAstProvided):
-    def test_canAssignToVariable(self, ast):
-        sentence_tuples = [("assign", ReservedWord.PUT),
+def esperantify_tuples(sentence_tuples):
+    return " ".join([esperantify_word(word, pos) for word, pos in sentence_tuples])
+
+
+class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevelAstProvided,
+    MockSmartHomeStateVariablesProvided):
+    def test_canAssignToVariable(self, ast, state):
+        sentence_tuples = [
+            ("assign", ReservedWord.PUT),
             ("7", UnalphabeticTerminal.NUMBER),
             ("to", ReservedWord.TO),
             ("small", PartOfSpeech.ADJECTIVE),
             ("cat", PartOfSpeech.NOUN)]
         new_state = evaluate_and_return_state_variables(ast,
-            self.esperantify_tuples(sentence_tuples))
-        assert 7 == new_state[self.esperantify_tuples(sentence_tuples[-2:])]
+            esperantify_tuples(sentence_tuples), state)
+        assert 7 == new_state[esperantify_tuples(sentence_tuples[-2:])]
 
-    def esperantify_tuples(self, sentence_tuples):
-        return " ".join([esperantify_word(word, pos) for word, pos in sentence_tuples])
-
-    def test_canUseIfConditions(self, ast):
-        sentence_tuples = [("if", ReservedWord.IF),
+    def test_canUseIfConditions(self, ast, state):
+        sentence_tuples = [
+            ("if", ReservedWord.IF),
             ("false", ReservedWord.FALSE),
             ("then", ReservedWord.THEN),
             ("assign", ReservedWord.PUT),
@@ -68,10 +72,11 @@ class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevel
             ("end", ReservedWord.END),
         ]
         assert esperantify_word("cat", PartOfSpeech.NOUN) not in evaluate_and_return_state_variables(ast,
-            self.esperantify_tuples(sentence_tuples))
+            esperantify_tuples(sentence_tuples), state)
 
-    def test_canUseIfElseStatements(self, ast):
-        sentence_tuples = [("if", ReservedWord.IF),
+    def test_canUseIfElseStatements(self, ast, state):
+        sentence_tuples = [
+            ("if", ReservedWord.IF),
             ("false", ReservedWord.FALSE),
             ("then", ReservedWord.THEN),
             ("assign", ReservedWord.PUT),
@@ -86,11 +91,11 @@ class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevel
             ("end", ReservedWord.END),
         ]
         new_state = evaluate_and_return_state_variables(ast,
-            self.esperantify_tuples(sentence_tuples))
+            esperantify_tuples(sentence_tuples), state)
         assert 9 == new_state[esperantify_word("cat", PartOfSpeech.NOUN)]
 
     @pytest.mark.timeout(5)
-    def test_canDefineWhileLoopThatEvaluatesFiveTimes(self, ast):
+    def test_canDefineWhileLoopThatEvaluatesFiveTimes(self, ast, state):
         sentence_tuples = [
             ("while", ReservedWord.DURING),
             ("cat", PartOfSpeech.NOUN),
@@ -108,13 +113,12 @@ class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevel
             ("cat", PartOfSpeech.NOUN),
             ("end", ReservedWord.END),
         ]
-        manager = Domsagxo()
-        manager.variables[esperantify_word("cat", PartOfSpeech.NOUN)] = 5
+        state.variables[esperantify_word("cat", PartOfSpeech.NOUN)] = 5
         new_state = evaluate_and_return_state_variables(ast,
-            self.esperantify_tuples(sentence_tuples), manager)
+            esperantify_tuples(sentence_tuples), state)
         assert 0 == new_state[esperantify_word("cat", PartOfSpeech.NOUN)]
 
-    def test_canTurnVariablesIntoOrdinalsViaChangeFromNounToAdjective(self, ast):
+    def test_canTurnVariablesIntoOrdinalsViaChangeFromNounToAdjective(self, ast, state):
         sentence_tuples = [
             ("assign", ReservedWord.PUT),
             ("index", PartOfSpeech.ADJECTIVE),
@@ -124,16 +128,18 @@ class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevel
             ("to", ReservedWord.TO),
             ("cat", PartOfSpeech.NOUN),
         ]
-        manager = Domsagxo()
-        manager.variables[esperantify_word("index", PartOfSpeech.NOUN)] = 2
-        manager.variables[
-            self.esperantify_tuples([("light", PartOfSpeech.ADJECTIVE), ("bulb", PartOfSpeech.NOUN)])
+        state.variables[esperantify_word("index", PartOfSpeech.NOUN)] = 2
+        state.variables[
+            esperantify_tuples([
+                ("light", PartOfSpeech.ADJECTIVE),
+                ("bulb", PartOfSpeech.NOUN),
+            ])
         ] = [1, 2, 3]
         new_state = evaluate_and_return_state_variables(ast,
-            self.esperantify_tuples(sentence_tuples), manager)
+            esperantify_tuples(sentence_tuples), state)
         assert 2 == new_state[esperantify_word("cat", PartOfSpeech.NOUN)]
 
-    def test_canInvokeRoutineWithArguments(self, ast):
+    def test_canInvokeRoutineWithArguments(self, ast, state):
         # noinspection PyUnusedLocal
         def mock_routine(arg):
             pass
@@ -142,8 +148,7 @@ class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevel
             ("fubar", PartOfSpeech.V_IMP),
             ("42", UnalphabeticTerminal.NUMBER),
         ]
-        manager = Domsagxo()
-        manager.method_dict[esperantify_word("fubar", PartOfSpeech.V_IMP)] = mock_routine
+        state.method_dict[esperantify_word("fubar", PartOfSpeech.V_IMP)] = mock_routine
         # should execute without exception
         evaluate_and_return_state_variables(ast,
-            self.esperantify_tuples(sentence_tuples), manager)
+            esperantify_tuples(sentence_tuples), state)

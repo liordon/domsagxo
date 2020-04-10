@@ -3,7 +3,8 @@ import pytest
 import compilation.abstract_syntax_tree as ast_bld
 from compilation import node
 from test_utils import mocks
-from test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided
+from test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided, \
+    MockSmartHomeStateVariablesProvided
 
 
 def parsed_value_of(ast, expr, state=None):
@@ -135,10 +136,7 @@ class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType)
         self.assertThatExpressionIsOfNodeType(ast, "ĝin", node.VariableName)
 
 
-class TestReferenceSemantics(ExpressionLevelAstProvided):
-    @pytest.fixture
-    def state(self):
-        return mocks.Bunch(variables={})
+class TestReferenceSemantics(ExpressionLevelAstProvided, MockSmartHomeStateVariablesProvided):
 
     def test_nounVariableValueCanBeAssessedAsExpression(self, ast, state):
         variable_name = "sxambalulo"
