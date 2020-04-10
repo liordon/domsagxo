@@ -5,6 +5,7 @@ from nltk.corpus import wordnet
 
 from compilation.definitions import PartOfSpeech, ReservedWord, UnalphabeticTerminal
 from english_prototype.english_keyword_converter import identify_potential_keywords
+from print_utils.pretty_prints import leaf_form, branch_form
 
 
 def insensitive_starts_with(txt, insensitive_prefix):
@@ -101,6 +102,55 @@ class BeamToken(object):
             [formatted_token.splitlines()[line_number] for formatted_token in formatted_tokens_with_equal_lines]) for
             line_number in range(len(formatted_tokens_with_equal_lines[0].splitlines()))]
         return '\n'.join(output)
+
+    def break_into_types(self):
+        return [BeamToken((self.value, {tag: self.types[tag]})) for tag in self.types]
+
+
+class BeamTree(object):
+    def __init__(self, beam_tokens):
+        if len(beam_tokens[0].types) == 1:
+            self.value = beam_tokens[0].value
+            self.tag = [*beam_tokens[0].types][0]
+            self.probability = beam_tokens[0].types[self.tag]
+            beam_tokens = beam_tokens[1:]
+        else:
+            self.value = ""
+            self.tag = None
+            self.probability = 1
+        if len(beam_tokens) == 0:
+            self.children = []
+        else:
+            other_tokens = [] if len(beam_tokens) < 1 else beam_tokens[1:]
+            self.children = [
+                BeamTree([tag] + other_tokens) for tag in beam_tokens[0].break_into_types()
+            ]
+
+    def size(self):
+        return 1 + sum([child.size() for child in self.children])
+
+    def get_children(self):
+        return self.children
+
+    def pretty_print(self, indent="", last_child=True):
+        res = indent + leaf_form(last_child) + str(type(self).__name__) + "- " \
+              + self.value + " (" + str(self.tag) + ": " + str(self.probability) + ")"
+        for i in range(len(self.children)):
+            child = self.children[i]
+            newIndent = indent + branch_form(last_child)
+            res += "\n" + child.pretty_print(newIndent, i == len(self.children) - 1)
+
+        return res
+
+    def prune(self, tag_list):
+        if len(tag_list) == 1 and tag_list[0] == self.tag:
+            return None
+        else:
+            for i in self.children:
+                if i.tag == tag_list[1] and i.prune(tag_list[1:]) is None:
+                    self.children.remove(i)
+                    break
+            return self
 
 
 class WordnetProtoLexer(object):

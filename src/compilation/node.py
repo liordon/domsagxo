@@ -1,14 +1,7 @@
 import copy
 import datetime
 from enum import Enum
-
-
-def leaf_form(lastChild):
-    return "└- " if lastChild else "├- "
-
-
-def branch_form(last_child):
-    return "\t" if last_child else "│\t"
+from print_utils.pretty_prints import *
 
 
 def pretty_print(whatever, indent="", last_child=True):
@@ -378,7 +371,7 @@ class RoutineDefinition(AstNode):
                 raise TypeError(str(function_name) + "() expects " +
                                 str(len(argument_names)) + "arguments:\n\t" +
                                 str([name.getContainedName() for name in
-                                     argument_names]) + "\nbut " +
+                                    argument_names]) + "\nbut " +
                                 str(len(argument_list)) + "were given.")
             for i in range(len(argument_list)):
                 closure.variables[argument_names[i].getContainedName()] = argument_list[i]
@@ -401,12 +394,12 @@ class RoutineDefinition(AstNode):
         inner_args = self.args[1]
         for i in range(len(inner_args)):
             res += "\n" + pretty_print(inner_args[i], indent + "\t" + branch_form(False),
-                                                      i == len(inner_args) - 1)
+                i == len(inner_args) - 1)
         inner_args = self.args[2:]
         for i in range(len(inner_args)):
             child = inner_args[i]
             res += "\n" + child.pretty_print(indent + branch_form(last_child),
-                                             i == len(inner_args) - 1)
+                i == len(inner_args) - 1)
 
         return res
 

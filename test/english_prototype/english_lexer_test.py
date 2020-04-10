@@ -229,3 +229,36 @@ class TestBeamTokenPrettyPrint(BeamTokensProvided):
         token_list = [single_tag_token, multiple_tag_token]
         list_format = BeamToken.list_pretty_format(token_list)
         assert len(list_format.splitlines()) == len(multiple_tag_token.types) + 1
+
+
+class TestBeamTree(BeamTokensProvided):
+
+    def test_GivenSingleTagTheTreeRootValueAndTagAndProbabilityAreEqualToTag(self, single_tag_token):
+        assert BeamTree([single_tag_token]).value == single_tag_token.value
+        assert BeamTree([single_tag_token]).tag == "noun"
+        assert BeamTree([single_tag_token]).probability == 1
+
+    def test_GivenMultipleTagsTheTreeRootValueIsEmptyStringWithProbability1(self, multiple_tag_token):
+        assert BeamTree([multiple_tag_token]).value == ""
+        assert BeamTree([multiple_tag_token]).probability == 1
+
+    def test_beamTreeOfSingleTokenHasSizeEqualToTokenTagsPlusOneForRoot(self, single_tag_token, multiple_tag_token):
+        assert BeamTree([single_tag_token]).size() == 1
+        assert BeamTree([multiple_tag_token]).size() == 3
+
+    def test_beamTreeOf2PossibleTagsEachTimeHasAsManyNodesAsBinaryTree(self, multiple_tag_token):
+        # number of nodes is 2^(lvl+1)-1 => 2^3-1 => 7
+        assert BeamTree([multiple_tag_token] * 2).size() == 7
+
+    def test_beamTreeHasSubTreeForEachBeamTokenInterpretationWithItsProbability(self, multiple_tag_token):
+        subtrees = BeamTree([multiple_tag_token]).get_children()
+        noun_location = 0 if subtrees[0].tag == "noun" else 1
+        assert len(subtrees) == 2
+        assert subtrees[noun_location].probability == multiple_tag_token.types["noun"]
+        assert subtrees[1 - noun_location].probability == multiple_tag_token.types["verb"]
+
+    def test_pruningWholeTreeReturnsNone(self, single_tag_token):
+        assert BeamTree([single_tag_token] * 2).prune(["noun"]) is None
+
+    def test_canBePrunedGivenTagListSubtractingAsManyNodesAsNeeded(self, multiple_tag_token):
+        assert BeamTree([multiple_tag_token] * 2).prune([None, "noun"]).size() == 4
