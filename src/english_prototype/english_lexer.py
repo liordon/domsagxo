@@ -31,10 +31,21 @@ def convert_tag_to_part_of_speech(tag):
 
 
 class Token(object):
-    def __init__(self, token_tuple):
-        (word, part_of_speech) = token_tuple
+    def __init__(self, word, part_of_speech):
         self.value = word
-        self.type = part_of_speech
+        self.tag = part_of_speech
+
+    def __eq__(self, other):
+        if not isinstance(other, Token):
+            return False
+        else:
+            return self.value == other.value \
+                   and self.tag == other.tag
+
+    @staticmethod
+    def from_tuple(token_tuple):
+        (word, part_of_speech) = token_tuple
+        return Token(word, part_of_speech)
 
 
 class NltkProtoLexer(object):
@@ -70,8 +81,7 @@ def convert_word_to_stochastic_token_tuple(w):
 
 
 class BeamToken(object):
-    def __init__(self, token_tuple):
-        (str, possible_vals) = token_tuple
+    def __init__(self, str, possible_vals):
         self.value = str
         self.tags = possible_vals
 
@@ -82,6 +92,14 @@ class BeamToken(object):
 
     def create_tag_string_list(self):
         return [convert_item_to_dict_representation(t) for t in self.tags.items()]
+
+    def break_into_tags(self):
+        return [BeamToken(self.value, {tag: self.tags[tag]}) for tag in self.tags]
+
+    @staticmethod
+    def from_tuple(token_tuple):
+        (str, possible_vals) = token_tuple
+        return BeamToken(str, possible_vals)
 
     @staticmethod
     def list_pretty_format(token_list: list):
@@ -96,20 +114,15 @@ class BeamToken(object):
             line_number in range(len(formatted_tokens_with_equal_lines[0].splitlines()))]
         return '\n'.join(output)
 
-    def break_into_tags(self):
-        return [BeamToken((self.value, {tag: self.tags[tag]})) for tag in self.tags]
-
 
 class BeamTree(object):
     def __init__(self, beam_tokens):
         if len(beam_tokens[0].tags) == 1:
-            self.value = beam_tokens[0].value
-            self.tag = [*beam_tokens[0].tags][0]
-            self.probability = beam_tokens[0].tags[self.tag]
+            self.token = Token(beam_tokens[0].value, [*beam_tokens[0].tags][0])
+            self.probability = beam_tokens[0].tags[self.token.tag]
             beam_tokens = beam_tokens[1:]
         else:
-            self.value = ""
-            self.tag = None
+            self.token = Token('', None)
             self.probability = 1
         if len(beam_tokens) == 0:
             self.children = []
@@ -127,7 +140,7 @@ class BeamTree(object):
 
     def pretty_print(self, indent="", last_child=True):
         res = indent + leaf_form(last_child) + str(type(self).__name__) + "- " \
-              + self.value + " (" + str(self.tag) + ": " + str(self.probability) + ")"
+              + self.token.value + " (" + str(self.token.tag) + ": " + str(self.probability) + ")"
         for i in range(len(self.children)):
             child = self.children[i]
             newIndent = indent + branch_form(last_child)
@@ -136,49 +149,49 @@ class BeamTree(object):
         return res
 
     def prune(self, tag_list):
-        if len(tag_list) == 1 and tag_list[0] == self.tag:
+        if len(tag_list) == 1 and tag_list[0] == self.token.tag:
             return None
         else:
             for i in self.children:
-                if i.tag == tag_list[1] and i.prune(tag_list[1:]) is None:
+                if i.token.tag == tag_list[1] and i.prune(tag_list[1:]) is None:
                     self.children.remove(i)
                     break
             return self
 
     def get_next_interpretation(self, complete_interpretation=None):
-        current_tag = (self.value, self.tag)
+        current_token = self.token
 
         if complete_interpretation is None or complete_interpretation == []:
-            return [current_tag] + ([] if len(self.children) == 0 else self.children[0].get_next_interpretation())
+            return [current_token] + ([] if len(self.children) == 0 else self.children[0].get_next_interpretation())
 
-        if complete_interpretation[0][0] != self.value \
-                and complete_interpretation[0][1] != self.tag:
+        if complete_interpretation[0] != self.token:
             raise KeyError(str(complete_interpretation[0]) + " not a valid interpretation.")
 
         next_interpretations = None if len(complete_interpretation) < 2 \
             else complete_interpretation[1:]
 
         if len(self.children) == 0:  # no children
-            return [current_tag]
+            return [current_token]
         else:
-            matching_child_index = self.find_child_matching(next_interpretations[0]) # referred to by current implementation
+            matching_child_index = self.find_child_matching(
+                next_interpretations[0])  # referred to by current implementation
             child_interpretation = self.children[matching_child_index].get_next_interpretation(next_interpretations)
             if len(next_interpretations) == 1 \
-                    or child_interpretation is None: # if we exhausted this child
-                matching_child_index += 1 # roll over to next child
+                    or child_interpretation is None:  # if we exhausted this child
+                matching_child_index += 1  # roll over to next child
                 if (matching_child_index >= len(self.children)):
-                    return None # ran out of children
+                    return None  # ran out of children
                 child_interpretation = self.children[matching_child_index].get_next_interpretation()
 
             # at this point, we have either stayed with the original child or rolled over to
             # an existing child.
-            return [current_tag] + child_interpretation
+            return [current_token] + child_interpretation
 
-    def find_child_matching(self, search_tuple):
+    def find_child_matching(self, search_token):
         for i in range(len(self.children)):
-            if self.children[i].value == search_tuple[0] and self.children[i].tag == search_tuple[1]:
+            if self.children[i].token == search_token:
                 return i
-        raise KeyError("unable to find " + str(search_tuple))
+        raise KeyError("unable to find " + str(search_token))
 
 
 class WordnetProtoLexer(object):
@@ -193,7 +206,7 @@ class WordnetProtoLexer(object):
         return len(self._stack) > 0
 
     def token(self):
-        return BeamToken(self._stack.pop())
+        return BeamToken.from_tuple(self._stack.pop())
 
     def __iter__(self):
         while self.has_next():

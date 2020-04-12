@@ -149,11 +149,11 @@ class RealTimeSmartHomeManagerProvided_CarefulVolatile(object):
 class BeamTokensProvided(object):
     @pytest.fixture
     def kite_noun_token(self):
-        return BeamToken(("kite", {"noun": 1}))
+        return BeamToken("kite", {"noun": 1})
 
     @pytest.fixture
     def love_noun_or_verb_token(self):
-        return BeamToken(("love", {"noun": 0.5, "verb": 0.125}))
+        return BeamToken("love", {"noun": 0.5, "verb": 0.125})
 
 
 class ProvidedSmartHomeWithLightBulb(object):

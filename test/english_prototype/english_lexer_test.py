@@ -237,12 +237,12 @@ class TestBeamTree(BeamTokensProvided):
         return BeamTree([love_noun_or_verb_token] * 2)
 
     def test_GivenSingleTagTheTreeRootValueAndTagAndProbabilityAreEqualToTag(self, kite_noun_token):
-        assert BeamTree([kite_noun_token]).value == kite_noun_token.value
-        assert BeamTree([kite_noun_token]).tag == "noun"
+        assert BeamTree([kite_noun_token]).token.value == kite_noun_token.value
+        assert BeamTree([kite_noun_token]).token.tag == "noun"
         assert BeamTree([kite_noun_token]).probability == 1
 
     def test_GivenMultipleTagsTheTreeRootValueIsEmptyStringWithProbability1(self, love_noun_or_verb_token):
-        assert BeamTree([love_noun_or_verb_token]).value == ""
+        assert BeamTree([love_noun_or_verb_token]).token.value == ""
         assert BeamTree([love_noun_or_verb_token]).probability == 1
 
     def test_beamTreeOfSingleTokenHasSizeEqualToTokenTagsPlusOneForRoot(self, kite_noun_token, love_noun_or_verb_token):
@@ -255,7 +255,7 @@ class TestBeamTree(BeamTokensProvided):
 
     def test_beamTreeHasSubTreeForEachBeamTokenInterpretationWithItsProbability(self, love_noun_or_verb_token):
         subtrees = BeamTree([love_noun_or_verb_token]).get_children()
-        noun_location = 0 if subtrees[0].tag == "noun" else 1
+        noun_location = 0 if subtrees[0].token.tag == "noun" else 1
         assert len(subtrees) == 2
         assert subtrees[noun_location].probability == love_noun_or_verb_token.tags["noun"]
         assert subtrees[1 - noun_location].probability == love_noun_or_verb_token.tags["verb"]
@@ -269,32 +269,40 @@ class TestBeamTree(BeamTokensProvided):
     def test_gettingNextOfNoneReturnsAPossibleParsingForEachWord(self, double_love_tree):
         next_of_none = double_love_tree.get_next_interpretation(None)
         assert len(next_of_none) == 3
-        assert next_of_none[0] == ('', None)
-        assert next_of_none[1] == ("love", "noun")
-        assert next_of_none[2] == ("love", "noun")
+        assert next_of_none[0] == Token('', None)
+        assert next_of_none[1] == Token("love", "noun")
+        assert next_of_none[2] == Token("love", "noun")
 
     def test_gettingNextOfFirstInterpretationChangesOnlyTheLastWord(self, double_love_tree):
         next_of_none = double_love_tree.get_next_interpretation(None)
         next_of_first = double_love_tree.get_next_interpretation(next_of_none)
         assert len(next_of_first) == 3
-        assert next_of_first[0] == ('', None)
-        assert next_of_first[1] == ("love", "noun")
-        assert next_of_first[2] == ("love", "verb")
+        assert next_of_first[0] == Token('', None)
+        assert next_of_first[1] == Token("love", "noun")
+        assert next_of_first[2] == Token("love", "verb")
 
     def test_gettingNextOfLastInterpretationReturnsNone(self, double_love_tree):
-        last_interpretation = [('', None), ("love", "verb"), ("love", "verb")]
+        last_interpretation = [
+            Token('', None),
+            Token("love", "verb"),
+            Token("love", "verb"),
+        ]
         next_of_last = double_love_tree.get_next_interpretation(last_interpretation)
         assert next_of_last is None
 
     def test_providingUnrelatedInterpretationProducesKeyError(self, double_love_tree):
-        fake_interpretation = [("love", "nounjunctive")]
+        fake_interpretation = [Token("love", "nounjunctive")]
         with pytest.raises(KeyError):
             double_love_tree.get_next_interpretation(fake_interpretation)
 
     def test_whenLastWordOptionsAreExhaustedNextInterpretationChangesPreviousWord(self, double_love_tree):
-        last_interpretation = [('', None), ("love", "noun"), ("love", "verb")]
+        last_interpretation = [
+            Token('', None),
+            Token("love", "noun"),
+            Token("love", "verb"),
+        ]
         next_of_first = double_love_tree.get_next_interpretation(last_interpretation)
         assert len(next_of_first) == 3
-        assert next_of_first[0] == ('', None)
-        assert next_of_first[1] == ("love", "verb")
-        assert next_of_first[2] == ("love", "noun")
+        assert next_of_first[0] == Token('', None)
+        assert next_of_first[1] == Token("love", "verb")
+        assert next_of_first[2] == Token("love", "noun")
