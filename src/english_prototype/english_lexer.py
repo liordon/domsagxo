@@ -152,32 +152,40 @@ class BeamTree(object):
                     break
             return self
 
-    def getNext(self, complete_interpretation=None):
-        next_interpretations = None if complete_interpretation is None or len(complete_interpretation) < 2 \
+    def get_next_interpretation(self, complete_interpretation=None):
+        current_tag = (self.value, self.tag)
+
+        if complete_interpretation is None or complete_interpretation == []:
+            return [current_tag] + ([] if len(self.children) == 0 else self.children[0].get_next_interpretation())
+
+        if complete_interpretation[0][0] != self.value \
+                and complete_interpretation[0][1] != self.tag:
+            raise KeyError(str(complete_interpretation[0]) + " not a valid interpretation.")
+
+        next_interpretations = None if len(complete_interpretation) < 2 \
             else complete_interpretation[1:]
 
-        current_tag = (self.value, self.tag)
-        if len(self.children) == 0: # no children
-            children_tags = []
-        elif next_interpretations is None: # post pivot
-            children_tags = self.children[0].getNext(next_interpretations)
+        if len(self.children) == 0:  # no children
+            return [current_tag]
         else:
-            matching_child_index = self.find_child_matching(next_interpretations[0])
-            if len(next_interpretations) == 1: # pivot node
-                if matching_child_index == len(self.children) - 1: # next of last combination
+            matching_child_index = self.find_child_matching(next_interpretations[0]) # referred to by current implementation
+            child_interpretation = self.children[matching_child_index].get_next_interpretation(next_interpretations)
+            if len(next_interpretations) == 1 \
+                    or child_interpretation is None: # if we exhausted this child
+                matching_child_index += 1 # roll over to next child
+                if (matching_child_index >= len(self.children)):
                     return None
-                children_tags = self.children[matching_child_index + 1].getNext(
-                    next_interpretations)
-            else: # pre-pivot
-                children_tags = self.children[matching_child_index].getNext(
-                    next_interpretations)
-        return None if children_tags is None else [current_tag] + children_tags
+                child_interpretation = self.children[matching_child_index].get_next_interpretation()
+
+            # at this point, we have either stayed with the original child or rolled over to
+            # an existing child.
+            return [current_tag] + child_interpretation
 
     def find_child_matching(self, search_tuple):
         for i in range(len(self.children)):
             if self.children[i].value == search_tuple[0] and self.children[i].tag == search_tuple[1]:
                 return i
-        raise IndexError("unable to find " + str(search_tuple))
+        raise KeyError("unable to find " + str(search_tuple))
 
 
 class WordnetProtoLexer(object):
