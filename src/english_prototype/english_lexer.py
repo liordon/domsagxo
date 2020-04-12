@@ -51,12 +51,12 @@ class NltkProtoLexer(object):
 
 
 def collect_probabilities_from_list(possible_vals):
-    types = {}
+    tags = {}
     for val in possible_vals:
-        types[val] = types.get(val, 0) + 1
-    for val in types.keys():
-        types[val] /= len(possible_vals)
-    return types
+        tags[val] = tags.get(val, 0) + 1
+    for val in tags.keys():
+        tags[val] /= len(possible_vals)
+    return tags
 
 
 def convert_word_to_stochastic_token_tuple(w):
@@ -73,14 +73,7 @@ class BeamToken(object):
     def __init__(self, token_tuple):
         (str, possible_vals) = token_tuple
         self.value = str
-        self.types = possible_vals
-
-    def token(self):
-        return Token(self._stack.pop())
-
-    def __iter__(self):
-        while self.has_next():
-            yield self.token()
+        self.tags = possible_vals
 
     def pretty_format(self):
         token_representation_lines = self.create_tag_string_list() + [self.value]
@@ -88,7 +81,7 @@ class BeamToken(object):
         return '\n'.join(line.center(longest_line) for line in token_representation_lines)
 
     def create_tag_string_list(self):
-        return [convert_item_to_dict_representation(t) for t in self.types.items()]
+        return [convert_item_to_dict_representation(t) for t in self.tags.items()]
 
     @staticmethod
     def list_pretty_format(token_list: list):
@@ -103,16 +96,16 @@ class BeamToken(object):
             line_number in range(len(formatted_tokens_with_equal_lines[0].splitlines()))]
         return '\n'.join(output)
 
-    def break_into_types(self):
-        return [BeamToken((self.value, {tag: self.types[tag]})) for tag in self.types]
+    def break_into_tags(self):
+        return [BeamToken((self.value, {tag: self.tags[tag]})) for tag in self.tags]
 
 
 class BeamTree(object):
     def __init__(self, beam_tokens):
-        if len(beam_tokens[0].types) == 1:
+        if len(beam_tokens[0].tags) == 1:
             self.value = beam_tokens[0].value
-            self.tag = [*beam_tokens[0].types][0]
-            self.probability = beam_tokens[0].types[self.tag]
+            self.tag = [*beam_tokens[0].tags][0]
+            self.probability = beam_tokens[0].tags[self.tag]
             beam_tokens = beam_tokens[1:]
         else:
             self.value = ""
@@ -123,7 +116,7 @@ class BeamTree(object):
         else:
             other_tokens = [] if len(beam_tokens) < 1 else beam_tokens[1:]
             self.children = [
-                BeamTree([tag] + other_tokens) for tag in beam_tokens[0].break_into_types()
+                BeamTree([tag] + other_tokens) for tag in beam_tokens[0].break_into_tags()
             ]
 
     def size(self):

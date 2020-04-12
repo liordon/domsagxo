@@ -164,7 +164,7 @@ class TestEnglishLexerFindingPossibleTags(EnglishLexerProvided):
     def test_turningOnTheLights(self, lexer):
         lexer.input("activate the lights")
 
-        token_type_list = [t.types.keys() for t in (extract_all_tokens(lexer))]
+        token_type_list = [t.tags.keys() for t in (extract_all_tokens(lexer))]
         assert PartOfSpeech.V_IMP.value in token_type_list[0]
         assert ReservedWord.THE.value in token_type_list[1]
         assert PartOfSpeech.NOUN.value in token_type_list[2]
@@ -172,7 +172,7 @@ class TestEnglishLexerFindingPossibleTags(EnglishLexerProvided):
     def test_assigningValueToVariable(self, lexer):
         lexer.input("assign 3 to dog")
 
-        token_type_list = [t.types.keys() for t in (extract_all_tokens(lexer))]
+        token_type_list = [t.tags.keys() for t in (extract_all_tokens(lexer))]
         assert ReservedWord.PUT.value in token_type_list[0]
         assert UnalphabeticTerminal.NUMBER.value in token_type_list[1]
         assert ReservedWord.TO.value in token_type_list[2]
@@ -181,7 +181,7 @@ class TestEnglishLexerFindingPossibleTags(EnglishLexerProvided):
     def test_lockTheFrontDoor(self, lexer):
         lexer.input("lock the front door")
 
-        token_type_list = [t.types.keys() for t in (extract_all_tokens(lexer))]
+        token_type_list = [t.tags.keys() for t in (extract_all_tokens(lexer))]
         assert PartOfSpeech.V_IMP.value in token_type_list[0]
         assert ReservedWord.THE.value in token_type_list[1]
         assert PartOfSpeech.ADJECTIVE.value in token_type_list[2]
@@ -192,7 +192,7 @@ class TestBeamTokenPrettyPrint(BeamTokensProvided):
     def test_aSingleBeamTokenIsPrintedWithItsPossibleTagOnTheFirstLine(self, kite_noun_token):
         token_format = kite_noun_token.pretty_format()
         format_lines = token_format.splitlines()
-        assert format_lines[0] == kite_noun_token.types.__repr__()
+        assert format_lines[0] == kite_noun_token.tags.__repr__()
 
     def test_aSingleBeamTokenIsPrintedWithItsValuesInTheLastLine(self, kite_noun_token):
         token_format = kite_noun_token.pretty_format()
@@ -216,7 +216,7 @@ class TestBeamTokenPrettyPrint(BeamTokensProvided):
     def test_tokenWithMultipleTagsHasOneLineForEachTagAndOneForValue(self, love_noun_or_verb_token):
         token_format = love_noun_or_verb_token.pretty_format()
         format_lines = token_format.splitlines()
-        assert len(format_lines) == len(love_noun_or_verb_token.types) + 1
+        assert len(format_lines) == len(love_noun_or_verb_token.tags) + 1
 
     def test_tokenWithMultipleTagsHasAllLinesWithSameLength(self, love_noun_or_verb_token):
         token_format = love_noun_or_verb_token.pretty_format()
@@ -228,7 +228,7 @@ class TestBeamTokenPrettyPrint(BeamTokensProvided):
             love_noun_or_verb_token):
         token_list = [kite_noun_token, love_noun_or_verb_token]
         list_format = BeamToken.list_pretty_format(token_list)
-        assert len(list_format.splitlines()) == len(love_noun_or_verb_token.types) + 1
+        assert len(list_format.splitlines()) == len(love_noun_or_verb_token.tags) + 1
 
 
 class TestBeamTree(BeamTokensProvided):
@@ -257,8 +257,8 @@ class TestBeamTree(BeamTokensProvided):
         subtrees = BeamTree([love_noun_or_verb_token]).get_children()
         noun_location = 0 if subtrees[0].tag == "noun" else 1
         assert len(subtrees) == 2
-        assert subtrees[noun_location].probability == love_noun_or_verb_token.types["noun"]
-        assert subtrees[1 - noun_location].probability == love_noun_or_verb_token.types["verb"]
+        assert subtrees[noun_location].probability == love_noun_or_verb_token.tags["noun"]
+        assert subtrees[1 - noun_location].probability == love_noun_or_verb_token.tags["verb"]
 
     def test_pruningWholeTreeReturnsNone(self, kite_noun_token):
         assert BeamTree([kite_noun_token] * 2).prune(["noun"]) is None

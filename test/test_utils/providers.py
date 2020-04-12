@@ -22,7 +22,7 @@ class PartOfSpeechVerifier(object):
 
     @staticmethod
     def assertOnePossiblePartOfSpeechForNextTokenOfLexer(partOfSpeech, lexer):
-        assert partOfSpeech.value in lexer.token().types.keys()
+        assert partOfSpeech.value in lexer.token().tags.keys()
 
 
 def evaluate_and_return_state(ast, statement, initial_state=None):
