@@ -148,11 +148,11 @@ class RealTimeSmartHomeManagerProvided_CarefulVolatile(object):
 
 class BeamTokensProvided(object):
     @pytest.fixture
-    def single_tag_token(self):
+    def kite_noun_token(self):
         return BeamToken(("kite", {"noun": 1}))
 
     @pytest.fixture
-    def multiple_tag_token(self):
+    def love_noun_or_verb_token(self):
         return BeamToken(("love", {"noun": 0.5, "verb": 0.125}))
 
 

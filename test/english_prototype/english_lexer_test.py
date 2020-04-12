@@ -189,76 +189,100 @@ class TestEnglishLexerFindingPossibleTags(EnglishLexerProvided):
 
 
 class TestBeamTokenPrettyPrint(BeamTokensProvided):
-    def test_aSingleBeamTokenIsPrintedWithItsPossibleTagOnTheFirstLine(self, single_tag_token):
-        token_format = single_tag_token.pretty_format()
+    def test_aSingleBeamTokenIsPrintedWithItsPossibleTagOnTheFirstLine(self, kite_noun_token):
+        token_format = kite_noun_token.pretty_format()
         format_lines = token_format.splitlines()
-        assert format_lines[0] == single_tag_token.types.__repr__()
+        assert format_lines[0] == kite_noun_token.types.__repr__()
 
-    def test_aSingleBeamTokenIsPrintedWithItsValuesInTheLastLine(self, single_tag_token):
-        token_format = single_tag_token.pretty_format()
+    def test_aSingleBeamTokenIsPrintedWithItsValuesInTheLastLine(self, kite_noun_token):
+        token_format = kite_noun_token.pretty_format()
         format_lines = token_format.splitlines()
-        assert single_tag_token.value in format_lines[-1]
+        assert kite_noun_token.value in format_lines[-1]
 
-    def test_allLinesOfPrettyPrintedTokenAreOfSameLength(self, single_tag_token):
-        token_format = single_tag_token.pretty_format()
+    def test_allLinesOfPrettyPrintedTokenAreOfSameLength(self, kite_noun_token):
+        token_format = kite_noun_token.pretty_format()
         format_lines = token_format.splitlines()
         print(format_lines)
         assert len(format_lines[0]) == len(format_lines[1])
 
-    def test_tokenValueLineIsPaddedWithSpacesOnBothSides(self, single_tag_token):
-        token_format = single_tag_token.pretty_format()
+    def test_tokenValueLineIsPaddedWithSpacesOnBothSides(self, kite_noun_token):
+        token_format = kite_noun_token.pretty_format()
         format_lines = token_format.splitlines()
-        expected_number_of_pads = len(format_lines[0]) - len(single_tag_token.value)
+        expected_number_of_pads = len(format_lines[0]) - len(kite_noun_token.value)
 
         assert format_lines[1].startswith(' ' * int(expected_number_of_pads / 2))
         assert format_lines[1].endswith(' ' * int(expected_number_of_pads / 2))
 
-    def test_tokenWithMultipleTagsHasOneLineForEachTagAndOneForValue(self, multiple_tag_token):
-        token_format = multiple_tag_token.pretty_format()
+    def test_tokenWithMultipleTagsHasOneLineForEachTagAndOneForValue(self, love_noun_or_verb_token):
+        token_format = love_noun_or_verb_token.pretty_format()
         format_lines = token_format.splitlines()
-        assert len(format_lines) == len(multiple_tag_token.types) + 1
+        assert len(format_lines) == len(love_noun_or_verb_token.types) + 1
 
-    def test_tokenWithMultipleTagsHasAllLinesWithSameLength(self, multiple_tag_token):
-        token_format = multiple_tag_token.pretty_format()
+    def test_tokenWithMultipleTagsHasAllLinesWithSameLength(self, love_noun_or_verb_token):
+        token_format = love_noun_or_verb_token.pretty_format()
         format_lines = token_format.splitlines()
         for line in format_lines:
             assert len(line) == len(format_lines[0])
 
-    def test_listOfMultipleBeamTokensIsPrintedWithAsMuchLinesAsTheMostPossibleTagsPlusOne(self, single_tag_token,
-            multiple_tag_token):
-        token_list = [single_tag_token, multiple_tag_token]
+    def test_listOfMultipleBeamTokensIsPrintedWithAsMuchLinesAsTheMostPossibleTagsPlusOne(self, kite_noun_token,
+            love_noun_or_verb_token):
+        token_list = [kite_noun_token, love_noun_or_verb_token]
         list_format = BeamToken.list_pretty_format(token_list)
-        assert len(list_format.splitlines()) == len(multiple_tag_token.types) + 1
+        assert len(list_format.splitlines()) == len(love_noun_or_verb_token.types) + 1
 
 
 class TestBeamTree(BeamTokensProvided):
+    @pytest.fixture
+    def double_love_tree(self, love_noun_or_verb_token):
+        return BeamTree([love_noun_or_verb_token] * 2)
 
-    def test_GivenSingleTagTheTreeRootValueAndTagAndProbabilityAreEqualToTag(self, single_tag_token):
-        assert BeamTree([single_tag_token]).value == single_tag_token.value
-        assert BeamTree([single_tag_token]).tag == "noun"
-        assert BeamTree([single_tag_token]).probability == 1
+    def test_GivenSingleTagTheTreeRootValueAndTagAndProbabilityAreEqualToTag(self, kite_noun_token):
+        assert BeamTree([kite_noun_token]).value == kite_noun_token.value
+        assert BeamTree([kite_noun_token]).tag == "noun"
+        assert BeamTree([kite_noun_token]).probability == 1
 
-    def test_GivenMultipleTagsTheTreeRootValueIsEmptyStringWithProbability1(self, multiple_tag_token):
-        assert BeamTree([multiple_tag_token]).value == ""
-        assert BeamTree([multiple_tag_token]).probability == 1
+    def test_GivenMultipleTagsTheTreeRootValueIsEmptyStringWithProbability1(self, love_noun_or_verb_token):
+        assert BeamTree([love_noun_or_verb_token]).value == ""
+        assert BeamTree([love_noun_or_verb_token]).probability == 1
 
-    def test_beamTreeOfSingleTokenHasSizeEqualToTokenTagsPlusOneForRoot(self, single_tag_token, multiple_tag_token):
-        assert BeamTree([single_tag_token]).size() == 1
-        assert BeamTree([multiple_tag_token]).size() == 3
+    def test_beamTreeOfSingleTokenHasSizeEqualToTokenTagsPlusOneForRoot(self, kite_noun_token, love_noun_or_verb_token):
+        assert BeamTree([kite_noun_token]).size() == 1
+        assert BeamTree([love_noun_or_verb_token]).size() == 3
 
-    def test_beamTreeOf2PossibleTagsEachTimeHasAsManyNodesAsBinaryTree(self, multiple_tag_token):
+    def test_beamTreeOf2PossibleTagsEachTimeHasAsManyNodesAsBinaryTree(self, love_noun_or_verb_token):
         # number of nodes is 2^(lvl+1)-1 => 2^3-1 => 7
-        assert BeamTree([multiple_tag_token] * 2).size() == 7
+        assert BeamTree([love_noun_or_verb_token] * 2).size() == 7
 
-    def test_beamTreeHasSubTreeForEachBeamTokenInterpretationWithItsProbability(self, multiple_tag_token):
-        subtrees = BeamTree([multiple_tag_token]).get_children()
+    def test_beamTreeHasSubTreeForEachBeamTokenInterpretationWithItsProbability(self, love_noun_or_verb_token):
+        subtrees = BeamTree([love_noun_or_verb_token]).get_children()
         noun_location = 0 if subtrees[0].tag == "noun" else 1
         assert len(subtrees) == 2
-        assert subtrees[noun_location].probability == multiple_tag_token.types["noun"]
-        assert subtrees[1 - noun_location].probability == multiple_tag_token.types["verb"]
+        assert subtrees[noun_location].probability == love_noun_or_verb_token.types["noun"]
+        assert subtrees[1 - noun_location].probability == love_noun_or_verb_token.types["verb"]
 
-    def test_pruningWholeTreeReturnsNone(self, single_tag_token):
-        assert BeamTree([single_tag_token] * 2).prune(["noun"]) is None
+    def test_pruningWholeTreeReturnsNone(self, kite_noun_token):
+        assert BeamTree([kite_noun_token] * 2).prune(["noun"]) is None
 
-    def test_canBePrunedGivenTagListSubtractingAsManyNodesAsNeeded(self, multiple_tag_token):
-        assert BeamTree([multiple_tag_token] * 2).prune([None, "noun"]).size() == 4
+    def test_canBePrunedGivenTagListSubtractingAsManyNodesAsNeeded(self, double_love_tree):
+        assert double_love_tree.prune([None, "noun"]).size() == 4
+
+    def test_gettingNextOfNoneReturnsAPossibleParsingForEachWord(self, double_love_tree):
+        next_of_none = double_love_tree.getNext(None)
+        assert len(next_of_none) == 3
+        assert next_of_none[0] == ('', None)
+        assert next_of_none[1] == ("love", "noun")
+        assert next_of_none[2] == ("love", "noun")
+
+    def test_gettingNextOfFirstInterpretationChangesOnlyTheLastWord(self, double_love_tree):
+        next_of_none = double_love_tree.getNext(None)
+        next_of_first = double_love_tree.getNext(next_of_none)
+        assert len(next_of_first) == 3
+        assert next_of_first[0] == ('', None)
+        assert next_of_first[1] == ("love", "noun")
+        assert next_of_first[2] == ("love", "verb")
+
+    def test_gettingNextOfLastInterpretationReturnsNone(self, double_love_tree):
+        last_interpretation = [('', None), ("love", "verb"), ("love", "verb")]
+        next_of_last = double_love_tree.getNext(last_interpretation)
+        assert next_of_last is None
+

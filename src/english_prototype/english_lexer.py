@@ -152,6 +152,33 @@ class BeamTree(object):
                     break
             return self
 
+    def getNext(self, complete_interpretation=None):
+        next_interpretations = None if complete_interpretation is None or len(complete_interpretation) < 2 \
+            else complete_interpretation[1:]
+
+        current_tag = (self.value, self.tag)
+        if len(self.children) == 0: # no children
+            children_tags = []
+        elif next_interpretations is None: # post pivot
+            children_tags = self.children[0].getNext(next_interpretations)
+        else:
+            matching_child_index = self.find_child_matching(next_interpretations[0])
+            if len(next_interpretations) == 1: # pivot node
+                if matching_child_index == len(self.children) - 1: # next of last combination
+                    return None
+                children_tags = self.children[matching_child_index + 1].getNext(
+                    next_interpretations)
+            else: # pre-pivot
+                children_tags = self.children[matching_child_index].getNext(
+                    next_interpretations)
+        return None if children_tags is None else [current_tag] + children_tags
+
+    def find_child_matching(self, search_tuple):
+        for i in range(len(self.children)):
+            if self.children[i].value == search_tuple[0] and self.children[i].tag == search_tuple[1]:
+                return i
+        raise IndexError("unable to find " + str(search_tuple))
+
 
 class WordnetProtoLexer(object):
 
