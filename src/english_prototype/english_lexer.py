@@ -42,6 +42,9 @@ class Token(object):
             return self.value == other.value \
                    and self.tag == other.tag
 
+    def __repr__(self):
+        return self.__class__.__name__ + '(' + self.value + ',' + self.tag.__repr__() + ')'
+
     @staticmethod
     def from_tuple(token_tuple):
         (word, part_of_speech) = token_tuple
@@ -85,6 +88,9 @@ class BeamToken(object):
         self.value = str
         self.tags = possible_vals
 
+    def __repr__(self):
+        return self.__class__.__name__ + '(' + self.value + ',' + self.tags.__repr__() + ')'
+
     def pretty_format(self):
         token_representation_lines = self.create_tag_string_list() + [self.value]
         longest_line = max(len(line) for line in token_representation_lines)
@@ -116,24 +122,17 @@ class BeamToken(object):
 
 
 class BeamTree(object):
-    def __init__(self, beam_tokens):
-        if len(beam_tokens[0].tags) == 1:
-            self.token = Token(beam_tokens[0].value, [*beam_tokens[0].tags][0])
-            self.probability = beam_tokens[0].tags[self.token.tag]
-            beam_tokens = beam_tokens[1:]
-        else:
-            self.token = Token('', None)
-            self.probability = 1
-        if len(beam_tokens) == 0:
-            self.children = []
-        else:
-            other_tokens = [] if len(beam_tokens) < 1 else beam_tokens[1:]
-            self.children = [
-                BeamTree([tag] + other_tokens) for tag in beam_tokens[0].break_into_tags()
-            ]
+    def __init__(self, token: Token, probability: float, children: list):
+        self.token = token
+        self.probability = probability
+        self.children = children
 
-    def size(self):
-        return 1 + sum([child.size() for child in self.children])
+    def tree_size(self):
+        return 1 + sum([child.tree_size() for child in self.children])
+
+    def number_of_leaves(self):
+        return 1 if len(self.children) == 0 \
+            else sum([child.number_of_leaves() for child in self.children])
 
     def get_children(self):
         return self.children
@@ -161,7 +160,8 @@ class BeamTree(object):
     def get_next_interpretation(self, complete_interpretation=None):
         current_token = self.token
 
-        if complete_interpretation is None or complete_interpretation == []:
+        if complete_interpretation is None or complete_interpretation == [] \
+                or complete_interpretation == [self.token]:
             return [current_token] + ([] if len(self.children) == 0 else self.children[0].get_next_interpretation())
 
         if complete_interpretation[0] != self.token:
@@ -176,7 +176,7 @@ class BeamTree(object):
             matching_child_index = self.find_child_matching(
                 next_interpretations[0])  # referred to by current implementation
             child_interpretation = self.children[matching_child_index].get_next_interpretation(next_interpretations)
-            if len(next_interpretations) == 1 \
+            if (len(next_interpretations) == 1 and self._are_children_leaves()) \
                     or child_interpretation is None:  # if we exhausted this child
                 matching_child_index += 1  # roll over to next child
                 if (matching_child_index >= len(self.children)):
@@ -187,11 +187,32 @@ class BeamTree(object):
             # an existing child.
             return [current_token] + child_interpretation
 
+    def _are_children_leaves(self):
+        return len(self.children) + 1 == self.tree_size()
+
     def find_child_matching(self, search_token):
         for i in range(len(self.children)):
             if self.children[i].token == search_token:
                 return i
         raise KeyError("unable to find " + str(search_token))
+
+    @staticmethod
+    def from_tokens_list(beam_tokens):
+        subtrees = BeamTree.__forest_from_tokens_list(beam_tokens)
+        return BeamTree(Token("", None), 1, subtrees)
+
+    @staticmethod
+    def __forest_from_tokens_list(beam_tokens):
+        children = [] if len(beam_tokens) < 2 \
+            else BeamTree.__forest_from_tokens_list(beam_tokens[1:])
+        return [BeamTree.__branch_from_beam_token(beam_token, children)
+            for beam_token in beam_tokens[0].break_into_tags()]
+
+    @staticmethod
+    def __branch_from_beam_token(beam_token, children):
+        token = Token(beam_token.value, [*beam_token.tags][0])
+        probability = beam_token.tags[token.tag]
+        return BeamTree(token, probability, children)
 
 
 class WordnetProtoLexer(object):

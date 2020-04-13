@@ -4,6 +4,7 @@ import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esperanto_lexer as eo_lxr
+from compilation.definitions import PartOfSpeech
 from english_prototype.english_lexer import BeamToken
 from library import management_components as mgmt_cmp, atomic_types as atypes
 from library.management_components import Horaro, Domsagxo
@@ -149,11 +150,11 @@ class RealTimeSmartHomeManagerProvided_CarefulVolatile(object):
 class BeamTokensProvided(object):
     @pytest.fixture
     def kite_noun_token(self):
-        return BeamToken("kite", {"noun": 1})
+        return BeamToken("kite", {PartOfSpeech.NOUN: 1})
 
     @pytest.fixture
     def love_noun_or_verb_token(self):
-        return BeamToken("love", {"noun": 0.5, "verb": 0.125})
+        return BeamToken("love", {PartOfSpeech.NOUN: 0.5, PartOfSpeech.V_IMP: 0.125})
 
 
 class ProvidedSmartHomeWithLightBulb(object):

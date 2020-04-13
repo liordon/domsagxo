@@ -234,75 +234,87 @@ class TestBeamTokenPrettyPrint(BeamTokensProvided):
 class TestBeamTree(BeamTokensProvided):
     @pytest.fixture
     def double_love_tree(self, love_noun_or_verb_token):
-        return BeamTree([love_noun_or_verb_token] * 2)
-
-    def test_GivenSingleTagTheTreeRootValueAndTagAndProbabilityAreEqualToTag(self, kite_noun_token):
-        assert BeamTree([kite_noun_token]).token.value == kite_noun_token.value
-        assert BeamTree([kite_noun_token]).token.tag == "noun"
-        assert BeamTree([kite_noun_token]).probability == 1
+        return BeamTree.from_tokens_list([love_noun_or_verb_token] * 2)
 
     def test_GivenMultipleTagsTheTreeRootValueIsEmptyStringWithProbability1(self, love_noun_or_verb_token):
-        assert BeamTree([love_noun_or_verb_token]).token.value == ""
-        assert BeamTree([love_noun_or_verb_token]).probability == 1
+        single_love_tree = BeamTree.from_tokens_list([love_noun_or_verb_token])
+        assert single_love_tree.token.value == ""
+        assert single_love_tree.probability == 1
 
-    def test_beamTreeOfSingleTokenHasSizeEqualToTokenTagsPlusOneForRoot(self, kite_noun_token, love_noun_or_verb_token):
-        assert BeamTree([kite_noun_token]).size() == 1
-        assert BeamTree([love_noun_or_verb_token]).size() == 3
+    def test_beamTreeHasSizeEqualToTokenTagsPlusOneForRoot(self, kite_noun_token, love_noun_or_verb_token):
+        assert BeamTree.from_tokens_list([kite_noun_token]).tree_size() == 2
+        assert BeamTree.from_tokens_list([love_noun_or_verb_token]).tree_size() == 3
 
     def test_beamTreeOf2PossibleTagsEachTimeHasAsManyNodesAsBinaryTree(self, love_noun_or_verb_token):
         # number of nodes is 2^(lvl+1)-1 => 2^3-1 => 7
-        assert BeamTree([love_noun_or_verb_token] * 2).size() == 7
+        assert BeamTree.from_tokens_list([love_noun_or_verb_token] * 2).tree_size() == 7
 
     def test_beamTreeHasSubTreeForEachBeamTokenInterpretationWithItsProbability(self, love_noun_or_verb_token):
-        subtrees = BeamTree([love_noun_or_verb_token]).get_children()
-        noun_location = 0 if subtrees[0].token.tag == "noun" else 1
+        subtrees = BeamTree.from_tokens_list([love_noun_or_verb_token]).get_children()
+        noun_location = 0 if subtrees[0].token.tag == PartOfSpeech.NOUN else 1
         assert len(subtrees) == 2
-        assert subtrees[noun_location].probability == love_noun_or_verb_token.tags["noun"]
-        assert subtrees[1 - noun_location].probability == love_noun_or_verb_token.tags["verb"]
+        assert subtrees[noun_location].probability == love_noun_or_verb_token.tags[PartOfSpeech.NOUN]
+        assert subtrees[1 - noun_location].probability == love_noun_or_verb_token.tags[PartOfSpeech.V_IMP]
 
     def test_pruningWholeTreeReturnsNone(self, kite_noun_token):
-        assert BeamTree([kite_noun_token] * 2).prune(["noun"]) is None
+        assert BeamTree.from_tokens_list([kite_noun_token] * 2).prune([None]) is None
+
+    def test_canQueryNumberOfLeavesForAmountOfPossibleCombinations(self, double_love_tree):
+        assert double_love_tree.number_of_leaves() == 4
 
     def test_canBePrunedGivenTagListSubtractingAsManyNodesAsNeeded(self, double_love_tree):
-        assert double_love_tree.prune([None, "noun"]).size() == 4
+        pruned_tree = double_love_tree.prune([None, PartOfSpeech.NOUN])
+        assert pruned_tree.tree_size() == 4
+        assert pruned_tree.number_of_leaves() == 2
 
     def test_gettingNextOfNoneReturnsAPossibleParsingForEachWord(self, double_love_tree):
         next_of_none = double_love_tree.get_next_interpretation(None)
         assert len(next_of_none) == 3
         assert next_of_none[0] == Token('', None)
-        assert next_of_none[1] == Token("love", "noun")
-        assert next_of_none[2] == Token("love", "noun")
+        assert next_of_none[1] == Token("love", PartOfSpeech.NOUN)
+        assert next_of_none[2] == Token("love", PartOfSpeech.NOUN)
 
     def test_gettingNextOfFirstInterpretationChangesOnlyTheLastWord(self, double_love_tree):
         next_of_none = double_love_tree.get_next_interpretation(None)
         next_of_first = double_love_tree.get_next_interpretation(next_of_none)
         assert len(next_of_first) == 3
         assert next_of_first[0] == Token('', None)
-        assert next_of_first[1] == Token("love", "noun")
-        assert next_of_first[2] == Token("love", "verb")
+        assert next_of_first[1] == Token("love", PartOfSpeech.NOUN)
+        assert next_of_first[2] == Token("love", PartOfSpeech.V_IMP)
 
     def test_gettingNextOfLastInterpretationReturnsNone(self, double_love_tree):
         last_interpretation = [
             Token('', None),
-            Token("love", "verb"),
-            Token("love", "verb"),
+            Token("love", PartOfSpeech.V_IMP),
+            Token("love", PartOfSpeech.V_IMP),
         ]
         next_of_last = double_love_tree.get_next_interpretation(last_interpretation)
         assert next_of_last is None
 
     def test_providingUnrelatedInterpretationProducesKeyError(self, double_love_tree):
-        fake_interpretation = [Token("love", "nounjunctive")]
+        fake_interpretation = [Token("love", PartOfSpeech.OTHER)]
         with pytest.raises(KeyError):
             double_love_tree.get_next_interpretation(fake_interpretation)
 
     def test_whenLastWordOptionsAreExhaustedNextInterpretationChangesPreviousWord(self, double_love_tree):
         last_interpretation = [
             Token('', None),
-            Token("love", "noun"),
-            Token("love", "verb"),
+            Token("love", PartOfSpeech.NOUN),
+            Token("love", PartOfSpeech.V_IMP),
         ]
         next_of_first = double_love_tree.get_next_interpretation(last_interpretation)
         assert len(next_of_first) == 3
         assert next_of_first[0] == Token('', None)
-        assert next_of_first[1] == Token("love", "verb")
-        assert next_of_first[2] == Token("love", "noun")
+        assert next_of_first[1] == Token("love", PartOfSpeech.V_IMP)
+        assert next_of_first[2] == Token("love", PartOfSpeech.NOUN)
+
+    def test_whenProvidingIncompleteInterpretationNextInterpretationReturnedIsComplete(self, double_love_tree):
+        last_interpretation = [
+            Token('', None),
+            Token("love", PartOfSpeech.V_IMP),
+        ]
+        next_of_first = double_love_tree.get_next_interpretation(last_interpretation)
+        assert len(next_of_first) == 3
+        assert next_of_first[0] == Token('', None)
+        assert next_of_first[1] == Token("love", PartOfSpeech.V_IMP)
+        assert next_of_first[2] == Token("love", PartOfSpeech.NOUN)
