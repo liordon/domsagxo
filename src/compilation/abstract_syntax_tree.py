@@ -9,7 +9,14 @@ from library.atomic_types import *
 
 
 class EsperantoSyntaxError(Exception):
-    pass
+    def __init__(self, error_message):
+        self.message = error_message
+
+
+class EsperantoLocatedSyntaxError(EsperantoSyntaxError):
+    def __init__(self, index: int, description: str):
+        self.index = index
+        super(EsperantoSyntaxError, self).__init__(description)
 
 
 class GrammarVariable(Enum):
@@ -179,7 +186,8 @@ def build(start=None):
     def p_onceStatement_actionAndTrigger(p):
         p[0] = node.OnceStatement(p[1], p[3])
 
-    @RULE(GrammarVariable.WHENEVER_STATEMENT, [[GrammarVariable.STATEMENT, ResWord.WHENEVER, GrammarVariable.EXPRESSION], ])
+    @RULE(GrammarVariable.WHENEVER_STATEMENT,
+        [[GrammarVariable.STATEMENT, ResWord.WHENEVER, GrammarVariable.EXPRESSION], ])
     def p_wheneverStatement_actionAndTrigger(p):
         p[0] = node.WheneverStatement(p[1], p[3])
 
@@ -509,7 +517,7 @@ def build(start=None):
             else:
                 symbol_stack_trace += str(symbol)
             symbol_stack_trace += "\n"
-        raise EsperantoSyntaxError("Syntax error in input: " + str(p) +
+        raise EsperantoLocatedSyntaxError(len(ast_builder.symstack), "Syntax error in input: " + str(p) +
                                    "\nOn parse tree:\n" + symbol_stack_trace)
 
     ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, errorlog=yacc.NullLogger())

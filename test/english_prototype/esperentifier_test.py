@@ -1,8 +1,11 @@
 import pytest
+
+from english_prototype.english_lexer import BeamToken
 from english_prototype.esperantifier import *
 from compilation.definitions import PartOfSpeech, ReservedWord, UnalphabeticTerminal
+from english_prototype.esperantifier import esperantify_tuples
 from test_utils.providers import StatementLevelAstProvided, evaluate_and_return_state_variables, \
-    MockSmartHomeStateVariablesProvided
+    MockSmartHomeStateVariablesProvided, BeamTokensProvided
 
 
 class TestWordEsperantification(object):
@@ -43,10 +46,6 @@ class TestWordEsperantification(object):
         assert esperantify_word(word, UnalphabeticTerminal.DIVIDE) == "/"
 
 
-def esperantify_tuples(sentence_tuples):
-    return " ".join([esperantify_word(word, pos) for word, pos in sentence_tuples])
-
-
 class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevelAstProvided,
     MockSmartHomeStateVariablesProvided):
     def test_canAssignToVariable(self, ast, state):
@@ -55,7 +54,8 @@ class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevel
             ("7", UnalphabeticTerminal.NUMBER),
             ("to", ReservedWord.TO),
             ("small", PartOfSpeech.ADJECTIVE),
-            ("cat", PartOfSpeech.NOUN)]
+            ("cat", PartOfSpeech.NOUN),
+        ]
         new_state = evaluate_and_return_state_variables(ast,
             esperantify_tuples(sentence_tuples), state)
         assert 7 == new_state[esperantify_tuples(sentence_tuples[-2:])]
@@ -152,3 +152,53 @@ class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevel
         # should execute without exception
         evaluate_and_return_state_variables(ast,
             esperantify_tuples(sentence_tuples), state)
+
+
+class TestEndToEndEsperantifier(BeamTokensProvided, StatementLevelAstProvided, MockSmartHomeStateVariablesProvided):
+
+    @pytest.fixture
+    def esperantifier(self, state, ast):
+        return Esperantifier(state, ast)
+
+    def test_returnsNoneForInvalidSentence(self, esperantifier, kite_noun_token):
+        interpretations = esperantifier.try_interpreting([kite_noun_token])
+        assert interpretations is None
+
+    def test_returnsBeamTreeOfSize1For1ValidInterpretation(self, esperantifier):
+        sentence_tokens = [
+            BeamToken("assign", {ReservedWord.PUT: 1}),
+            BeamToken("7", {UnalphabeticTerminal.NUMBER: 1}),
+            BeamToken("to", {ReservedWord.TO: 1}),
+            BeamToken("small", {PartOfSpeech.ADJECTIVE: 1}),
+            BeamToken("cat", {PartOfSpeech.NOUN: 1}),
+        ]
+
+        interpretations = esperantifier.try_interpreting(sentence_tokens)
+        assert isinstance(interpretations, BeamTree)
+        assert interpretations.number_of_leaves() == 1
+
+    def test_whenLastTokenHasInvalidInterpretationItIsRemoved(self, esperantifier):
+        sentence_tokens = [
+            BeamToken("assign", {ReservedWord.PUT: 1}),
+            BeamToken("7", {UnalphabeticTerminal.NUMBER: 1}),
+            BeamToken("to", {ReservedWord.TO: 1}),
+            BeamToken("small", {PartOfSpeech.ADJECTIVE: 1}),
+            BeamToken("cat", {PartOfSpeech.V_IMP: 0.5, PartOfSpeech.NOUN: 0.5}),
+        ]
+
+        interpretations = esperantifier.try_interpreting(sentence_tokens)
+        assert isinstance(interpretations, BeamTree)
+        assert interpretations.number_of_leaves() == 1
+
+    def test_whenMidwayNodeHasInvalidInterpretationsItIsPruned(self, esperantifier):
+        sentence_tokens = [
+            BeamToken("assign", {ReservedWord.PUT: 1}),
+            BeamToken("7", {UnalphabeticTerminal.NUMBER: 1, PartOfSpeech.V_IMP: 0.5}),
+            BeamToken("to", {ReservedWord.TO: 1}),
+            BeamToken("small", {PartOfSpeech.ADJECTIVE: 1}),
+            BeamToken("cat", {PartOfSpeech.NOUN: 0.5}),
+        ]
+
+        interpretations = esperantifier.try_interpreting(sentence_tokens)
+        assert isinstance(interpretations, BeamTree)
+        assert interpretations.number_of_leaves() == 1
