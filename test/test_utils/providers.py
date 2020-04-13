@@ -5,7 +5,7 @@ import pytest
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esperanto_lexer as eo_lxr
 from compilation.definitions import PartOfSpeech
-from english_prototype.english_lexer import BeamToken
+from english_prototype.data_structures import BeamToken
 from library import management_components as mgmt_cmp, atomic_types as atypes
 from library.management_components import Horaro, Domsagxo
 from test_utils import mocks

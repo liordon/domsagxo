@@ -1,6 +1,6 @@
 import pytest
 
-from english_prototype.english_lexer import BeamToken
+from english_prototype.data_structures import BeamToken
 from english_prototype.esperantifier import *
 from compilation.definitions import PartOfSpeech, ReservedWord, UnalphabeticTerminal
 from english_prototype.esperantifier import esperantify_tuples
@@ -154,7 +154,8 @@ class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevel
             esperantify_tuples(sentence_tuples), state)
 
 
-class TestEndToEndEsperantifier(BeamTokensProvided, StatementLevelAstProvided, MockSmartHomeStateVariablesProvided):
+class TestIntegrationOfEsperantifierAndBeamTree(BeamTokensProvided, StatementLevelAstProvided,
+    MockSmartHomeStateVariablesProvided):
 
     @pytest.fixture
     def esperantifier(self, state, ast):

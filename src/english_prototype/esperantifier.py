@@ -1,7 +1,6 @@
 from compilation.abstract_syntax_tree import EsperantoSyntaxError, EsperantoLocatedSyntaxError
 from compilation.definitions import PartOfSpeech, ReservedWord, UnalphabeticTerminal
-from english_prototype.english_lexer import BeamTree
-from library.management_components import Domsagxo
+from english_prototype.data_structures import BeamTree
 
 _part_of_speech_suffix = {
     PartOfSpeech.NOUN: "oso",
