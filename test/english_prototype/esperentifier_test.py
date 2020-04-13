@@ -193,8 +193,8 @@ class TestEndToEndEsperantifier(BeamTokensProvided, StatementLevelAstProvided, M
     def test_whenMidwayNodeHasInvalidInterpretationsItIsPruned(self, esperantifier):
         sentence_tokens = [
             BeamToken("assign", {ReservedWord.PUT: 1}),
-            BeamToken("7", {UnalphabeticTerminal.NUMBER: 1, PartOfSpeech.V_IMP: 0.5}),
-            BeamToken("to", {ReservedWord.TO: 1}),
+            BeamToken("7", {UnalphabeticTerminal.NUMBER: 1}),
+            BeamToken("to", {ReservedWord.TO: 1, PartOfSpeech.V_IMP: 0.5}),
             BeamToken("small", {PartOfSpeech.ADJECTIVE: 1}),
             BeamToken("cat", {PartOfSpeech.NOUN: 0.5}),
         ]

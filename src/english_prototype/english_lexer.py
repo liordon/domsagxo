@@ -121,7 +121,7 @@ class BeamToken(object):
         return '\n'.join(output)
 
 
-class BeamTree(object):
+class BeamTreeNode(object):
     def __init__(self, token: Token, probability: float, children: list):
         self.token = token
         self.probability = probability
@@ -196,10 +196,24 @@ class BeamTree(object):
                 return i
         raise KeyError("unable to find " + str(search_token))
 
+
+class BeamTree(BeamTreeNode):
+    def __init__(self, subtrees: list):
+        super(BeamTree, self).__init__(Token("root", None), 1, subtrees)
+
+    def prune(self, tag_list):
+        return super(BeamTree, self).prune([None] + tag_list)
+
+    def get_next_interpretation(self, complete_interpretation=None):
+        padded_interpretation = None if complete_interpretation is None \
+            else ([self.token] + complete_interpretation)
+        next_interpretation = super(BeamTree, self).get_next_interpretation(padded_interpretation)
+        return None if next_interpretation is None else next_interpretation[1:]
+
     @staticmethod
     def from_tokens_list(beam_tokens):
         subtrees = BeamTree.__forest_from_tokens_list(beam_tokens)
-        return BeamTree(Token("", None), 1, subtrees)
+        return BeamTree(subtrees)
 
     @staticmethod
     def __forest_from_tokens_list(beam_tokens):
@@ -212,7 +226,7 @@ class BeamTree(object):
     def __branch_from_beam_token(beam_token, children):
         token = Token(beam_token.value, [*beam_token.tags][0])
         probability = beam_token.tags[token.tag]
-        return BeamTree(token, probability, children)
+        return BeamTreeNode(token, probability, children)
 
 
 class WordnetProtoLexer(object):

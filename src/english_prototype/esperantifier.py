@@ -49,10 +49,10 @@ class Esperantifier(object):
         interpretation = interpretations_tree.get_next_interpretation()
         while interpretation is not None:
             try:
-                self._ast.parse(esperantify_tokens(interpretation[1:]))
+                self._ast.parse(esperantify_tokens(interpretation))
             except EsperantoLocatedSyntaxError as e:
-                interpretations_tree = interpretations_tree.prune([t.tag for t in interpretation[:e.index]])
-                interpretation = interpretation[:e.index - 1]
+                interpretations_tree = interpretations_tree.prune([t.tag for t in interpretation[:e.index-1]])
+                interpretation = interpretation[:e.index - 2]
                 if interpretations_tree.tree_size() == 1:
                     return None
             except EsperantoSyntaxError as e:
