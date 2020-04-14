@@ -6,24 +6,21 @@ import compilation.abstract_syntax_tree as ast_bld
 import compilation.esperanto_lexer as eo_lxr
 from compilation.definitions import PartOfSpeech
 from english_prototype.data_structures import BeamToken
+from english_prototype.english_lexer import WordnetProtoLexer
 from library import management_components as mgmt_cmp, atomic_types as atypes
 from library.management_components import Horaro, Domsagxo
 from test_utils import mocks
 from test_utils.mocks import MockClock
 
 
-class PartOfSpeechVerifier(object):
+class PartOfSpeechValueVerifier(object):
     @staticmethod
-    def assertPartOfSpeechForGivenToken(partOfSpeech, token):
+    def assert_part_of_speech_for_token(partOfSpeech, token):
         assert partOfSpeech.value == token.type
 
     @staticmethod
-    def assertPartOfSpeechForNextTokenOfLexer(partOfSpeech, lexer):
+    def assert_part_of_speech_for_next_token_of_lexer(partOfSpeech, lexer):
         assert partOfSpeech.value == lexer.token().type
-
-    @staticmethod
-    def assertOnePossiblePartOfSpeechForNextTokenOfLexer(partOfSpeech, lexer):
-        assert partOfSpeech.value in lexer.token().tags.keys()
 
 
 def evaluate_and_return_state(ast, statement, initial_state=None):
@@ -37,7 +34,7 @@ def evaluate_and_return_state_variables(ast, statement, initial_state=None):
     return evaluate_and_return_state(ast, statement, initial_state).variables
 
 
-class EsperantoLexerProvided(PartOfSpeechVerifier):
+class EsperantoLexerProvided(PartOfSpeechValueVerifier):
     @pytest.fixture
     def lexer(self):
         return eo_lxr.build()
@@ -164,3 +161,13 @@ class ProvidedSmartHomeWithLightBulb(object):
         light_bulb = atypes.Appliance(atypes.ApplianceTypes.LIGHT, "sxambalulo")
         smart_home.addAppliance(light_bulb)
         return smart_home
+
+
+class EnglishLexerProvided(object):
+    @pytest.fixture
+    def lexer(self):
+        return WordnetProtoLexer()
+
+    @staticmethod
+    def assert_possible_next_token(partOfSpeech, lexer):
+        assert partOfSpeech in lexer.token().tags.keys()

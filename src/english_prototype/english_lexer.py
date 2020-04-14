@@ -15,17 +15,17 @@ def insensitive_starts_with(txt, insensitive_prefix):
 def convert_tag_to_part_of_speech(tag):
     if insensitive_starts_with(tag, 'a') or insensitive_starts_with(tag, 'j') or insensitive_starts_with(tag,
             's'):  # adjective or satellite
-        return PartOfSpeech.ADJECTIVE.value
+        return PartOfSpeech.ADJECTIVE
     elif insensitive_starts_with(tag, 'd'):
-        return ReservedWord.THE.value
+        return ReservedWord.THE
     elif insensitive_starts_with(tag, 'i'):
-        return PartOfSpeech.PREPOSITION.value
+        return PartOfSpeech.PREPOSITION
     elif insensitive_starts_with(tag, 'n'):
-        return PartOfSpeech.NOUN.value
+        return PartOfSpeech.NOUN
     elif insensitive_starts_with(tag, 'r'):
-        return PartOfSpeech.ADVERB.value
+        return PartOfSpeech.ADVERB
     elif insensitive_starts_with(tag, 'v'):
-        return PartOfSpeech.V_IMP.value
+        return PartOfSpeech.V_IMP
     else:
         return ''
 
@@ -54,7 +54,7 @@ def collect_probabilities_from_list(possible_vals):
 
 def convert_word_to_stochastic_token_tuple(w):
     if re.match(r"\d+", w):
-        return w, {UnalphabeticTerminal.NUMBER.value: 1.}
+        return w, {UnalphabeticTerminal.NUMBER: 1.}
     # if re.match(r"[a-zĉĝĥĵŝŭA-ZĈĜĤĴŜŬ]+", w):
     else:
         return (w, collect_probabilities_from_list(
@@ -67,8 +67,22 @@ class WordnetProtoLexer(object):
     def __init__(self):
         self._stack = []
 
+    def input2(self, text):
+        self._stack += [convert_word_to_stochastic_token_tuple(w) for w in self.split_input(text)][::-1]
+
     def input(self, text):
-        self._stack += [convert_word_to_stochastic_token_tuple(w) for w in text.split(" ")][::-1]
+        split_words = self.split_input(text)
+        i = 0
+        while i < len(split_words):
+            if i == 0 and len(split_words) >= 2 and split_words[i].lower() == "to":
+                self._stack.insert(0, (" ".join(split_words[i:i + 2]), {PartOfSpeech.V_INF: 1}))
+                i += 1
+            else:
+                self._stack.insert(0, convert_word_to_stochastic_token_tuple(split_words[i]))
+            i += 1
+
+    def split_input(self, text):
+        return [w for w in re.split(r"\s+", text) if w != '']
 
     def has_next(self):
         return len(self._stack) > 0
@@ -79,5 +93,3 @@ class WordnetProtoLexer(object):
     def __iter__(self):
         while self.has_next():
             yield self.token()
-
-

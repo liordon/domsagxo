@@ -9,30 +9,30 @@ class TestPartsOfSpeech(EsperantoLexerProvided):
     def test_aTerminatedWordsAreAdjectives(self, lexer):
         lexer.input("blanka")
         token = lexer.token()
-        self.assertPartOfSpeechForGivenToken(PartOfSpeech.ADJECTIVE, token)
+        self.assert_part_of_speech_for_token(PartOfSpeech.ADJECTIVE, token)
         assert token.value == "blanka"
 
     def test_numberWithAdjectiveEndingIsOrdinal(self, lexer):
         lexer.input("unua")
         token = lexer.token()
-        self.assertPartOfSpeechForGivenToken(PartOfSpeech.ORDINAL, token)
+        self.assert_part_of_speech_for_token(PartOfSpeech.ORDINAL, token)
 
     def test_uTerminatedWordsAreImperativeVerbs(self, lexer):
         lexer.input("presu")
         token = lexer.token()
-        self.assertPartOfSpeechForGivenToken(PartOfSpeech.V_IMP, token)
+        self.assert_part_of_speech_for_token(PartOfSpeech.V_IMP, token)
         assert token.value == "presu"
 
     def test_asTerminatedWordsArePresentVerbs(self, lexer):
         lexer.input("presas")
         token = lexer.token()
-        self.assertPartOfSpeechForGivenToken(PartOfSpeech.V_PRES, token)
+        self.assert_part_of_speech_for_token(PartOfSpeech.V_PRES, token)
         assert token.value == "presas"
 
     def test_iTerminatedWordsAreInfinitiveVerbs(self, lexer):
         lexer.input("presi")
         token = lexer.token()
-        self.assertPartOfSpeechForGivenToken(PartOfSpeech.V_INF, token)
+        self.assert_part_of_speech_for_token(PartOfSpeech.V_INF, token)
         assert token.value == "presi"
 
     def test_accusativeNounsAreEvaluatedWithoutTheAccusativeCase(self, lexer):
@@ -61,23 +61,23 @@ class TestReservedWords(EsperantoLexerProvided):
 
     def test_theWordAsignuIsRecognizedForAssignment(self, lexer):
         lexer.input("asignu")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.PUT, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.PUT, lexer)
 
     def test_theWordEstasIsEquivalentToEqualsSign(self, lexer):
         lexer.input("=")
-        self.assertPartOfSpeechForNextTokenOfLexer(UnalphabeticTerminal.ASSIGN, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.ASSIGN, lexer)
 
     def test_kajIsAReservedWordAndNotAnAdjective(self, lexer):
         lexer.input("kaj")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.AND, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.AND, lexer)
 
     def test_kunIsAPrepositionAndNotAnAccusativeImperativeVerb(self, lexer):
         lexer.input("kun")
-        self.assertPartOfSpeechForNextTokenOfLexer(PartOfSpeech.PREPOSITION, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(PartOfSpeech.PREPOSITION, lexer)
 
     def test_reservedWordLa(self, lexer):
         lexer.input("la")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.THE, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.THE, lexer)
 
     def test_numericalTokensHaveIntValuesInsteadOfStrings(self, lexer):
         lexer.input("42")
@@ -89,114 +89,114 @@ class TestReservedWords(EsperantoLexerProvided):
 
     def test_booleanReservedWords_TrueFalse(self, lexer):
         lexer.input("vero")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.TRUE, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TRUE, lexer)
         lexer.input("malvero")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.FALSE, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.FALSE, lexer)
 
     def test_words_moreLessTimesParts_areReservedForMath(self, lexer):
         lexer.input("pli")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.MORE, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.MORE, lexer)
         lexer.input("malpli")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.LESS, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.LESS, lexer)
         lexer.input("fojoj")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.TIMES, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TIMES, lexer)
         lexer.input("partoj")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.PARTS, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.PARTS, lexer)
 
     def test_words_rightLeftParenthesis_areReservedForMath(self, lexer):
         lexer.input("(")
-        self.assertPartOfSpeechForNextTokenOfLexer(UnalphabeticTerminal.L_PAREN, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.L_PAREN, lexer)
         lexer.input(")")
-        self.assertPartOfSpeechForNextTokenOfLexer(UnalphabeticTerminal.R_PAREN, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.R_PAREN, lexer)
         lexer.input("krampo")
-        self.assertPartOfSpeechForNextTokenOfLexer(UnalphabeticTerminal.L_PAREN, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.L_PAREN, lexer)
         lexer.input("malkrampo")
-        self.assertPartOfSpeechForNextTokenOfLexer(UnalphabeticTerminal.R_PAREN, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.R_PAREN, lexer)
 
     def test_timeUnitsAreRecognizedTimeIndicationsAndNotNouns(self, lexer):
         lexer.input("jaro")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.TIME_INDICATION, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TIME_INDICATION, lexer)
         lexer.input("monato")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.TIME_INDICATION, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TIME_INDICATION, lexer)
         lexer.input("semajno")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.TIME_INDICATION, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TIME_INDICATION, lexer)
         lexer.input("tago")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.TIME_INDICATION, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TIME_INDICATION, lexer)
         lexer.input("horo")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.TIME_INDICATION, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TIME_INDICATION, lexer)
         lexer.input("minutoj")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.TIME_INDICATION, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TIME_INDICATION, lexer)
         lexer.input("sekundoj")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.TIME_INDICATION, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TIME_INDICATION, lexer)
 
     def test_theWords_IfThenAndElse_areReservedForConditionalStatements(self, lexer):
         lexer.input("se")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.IF, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.IF, lexer)
         lexer.input("tiam")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.THEN, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.THEN, lexer)
         lexer.input("alie")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.ELSE, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.ELSE, lexer)
 
     def test_theWord_While_isReservedForLoopStatements(self, lexer):
         lexer.input("dum")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.DURING, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.DURING, lexer)
 
     def test_theWords_ThenToMoreGreatSmallOrNot_areReservedForComparisons(self, lexer):
         lexer.input("ne")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.NOT, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.NOT, lexer)
         lexer.input("al")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.TO, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TO, lexer)
         lexer.input("ol")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.THAN, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.THAN, lexer)
         lexer.input("pli")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.MORE, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.MORE, lexer)
         lexer.input("aux")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.OR, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.OR, lexer)
         lexer.input("egala")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.EQUAL, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.EQUAL, lexer)
         lexer.input("granda")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.GREATER, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.GREATER, lexer)
         lexer.input("malgranda")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.SMALLER, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.SMALLER, lexer)
 
     def test_theWord_Both_isReservedForLogicOperations(self, lexer):
         lexer.input("ambaux")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.BOTH, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.BOTH, lexer)
 
     def test_theWords_AtAfterEvery_areReservedForScheduling(self, lexer):
         lexer.input("je")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.AT, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.AT, lexer)
         lexer.input("post")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.AFTER, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.AFTER, lexer)
         lexer.input("cxiu")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.EVERY, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.EVERY, lexer)
 
     def test_theWords_AndThenAtTheSameTime_areReservedForChainingCommands(self, lexer):
         lexer.input("poste")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.AND_THEN, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.AND_THEN, lexer)
         lexer.input("samtempe")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.SIMULTANEOUSLY, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.SIMULTANEOUSLY, lexer)
 
     def test_theWord_it_hasItsOwnType(self, lexer):
         lexer.input("gxi")
-        self.assertPartOfSpeechForNextTokenOfLexer(ReservedWord.IT, lexer)
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.IT, lexer)
 
     def test_theWord_it_resultsInNominativeTokenEvenWhenAccusative(self, lexer):
         lexer.input("gxin")
         token = lexer.token()
-        self.assertPartOfSpeechForGivenToken(ReservedWord.IT, token)
+        self.assert_part_of_speech_for_token(ReservedWord.IT, token)
         assert token.value == "gxi"
 
     def test_theWord_it_losesEsperantoLetterWhenLexed(self, lexer):
         lexer.input("ĝi")
         token = lexer.token()
-        self.assertPartOfSpeechForGivenToken(ReservedWord.IT, token)
+        self.assert_part_of_speech_for_token(ReservedWord.IT, token)
         assert token.value == "gxi"
 
     def test_theWord_it_losesEsperantoLetterAndAccusativeCaseWhenLexed(self, lexer):
         lexer.input("ĝin")
         token = lexer.token()
-        self.assertPartOfSpeechForGivenToken(ReservedWord.IT, token)
+        self.assert_part_of_speech_for_token(ReservedWord.IT, token)
         assert token.value == "gxi"
 
 
