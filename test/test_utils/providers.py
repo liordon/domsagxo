@@ -64,6 +64,12 @@ class StatementLevelAstProvided(object):
         return ast_bld.build(start=ast_bld.GrammarVariable.STATEMENT.value)
 
 
+class TopLevelAstProvided(object):
+    @pytest.fixture
+    def ast(self):
+        return ast_bld.build()
+
+
 class MockSmartHomeStateVariablesProvided(object):
     @pytest.fixture
     def state(self):

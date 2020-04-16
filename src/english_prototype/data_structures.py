@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from print_utils.pretty_prints import leaf_form, branch_form
 
 
@@ -93,6 +95,8 @@ class BeamTreeNode(object):
             for i in self.children:
                 if i.token.tag == tag_list[1] and i.prune(tag_list[1:]) is None:
                     self.children.remove(i)
+                    if len(self.children) == 0:
+                        return None
                     break
             return self
 
@@ -112,7 +116,7 @@ class BeamTreeNode(object):
         if len(self.children) == 0:  # no children
             return [current_token]
         else:
-            matching_child_index = self.find_child_matching(
+            matching_child_index = self._find_child_matching(
                 next_interpretations[0])  # referred to by current implementation
             child_interpretation = self.children[matching_child_index].get_next_interpretation(next_interpretations)
             if (len(next_interpretations) == 1 and self._are_children_leaves()) \
@@ -129,25 +133,47 @@ class BeamTreeNode(object):
     def _are_children_leaves(self):
         return len(self.children) + 1 == self.tree_size()
 
-    def find_child_matching(self, search_token):
+    def _find_child_matching(self, search_token):
         for i in range(len(self.children)):
             if self.children[i].token == search_token:
                 return i
-        raise KeyError("unable to find " + str(search_token))
+        return None
+
+    def longest_legal_sub_interpretation(self, interpretation):
+        if interpretation[0] != self.token:
+            raise KeyError()
+        if len(interpretation) > 1:
+            matching_child = self._find_child_matching(interpretation[1])
+            if matching_child is None:
+                return interpretation[:1]
+            else:
+                return interpretation[:1] + \
+                    self.children[matching_child].\
+                        longest_legal_sub_interpretation(interpretation[1:])
+        elif len(interpretation) == 1:
+            return interpretation
+
 
 
 class BeamTree(BeamTreeNode):
+    ROOT_TOKEN = Token("root", None)
+
     def __init__(self, subtrees: list):
-        super(BeamTree, self).__init__(Token("root", None), 1, subtrees)
+        super(BeamTree, self).__init__(BeamTree.ROOT_TOKEN, 1, subtrees)
 
     def prune(self, tag_list):
-        return super(BeamTree, self).prune([None] + tag_list)
+        super(BeamTree, self).prune([None] + tag_list)
+        return self
 
     def get_next_interpretation(self, complete_interpretation=None):
         padded_interpretation = None if complete_interpretation is None \
             else ([self.token] + complete_interpretation)
         next_interpretation = super(BeamTree, self).get_next_interpretation(padded_interpretation)
         return None if next_interpretation is None else next_interpretation[1:]
+
+
+    def longest_legal_sub_interpretation(self, interpretation):
+        return super(BeamTree, self).longest_legal_sub_interpretation([BeamTree.ROOT_TOKEN] + interpretation)[1:]
 
     @staticmethod
     def from_tokens_list(beam_tokens):
@@ -165,7 +191,7 @@ class BeamTree(BeamTreeNode):
     def __branch_from_beam_token(beam_token, children):
         token = Token(beam_token.value, [*beam_token.tags][0])
         probability = beam_token.tags[token.tag]
-        return BeamTreeNode(token, probability, children)
+        return BeamTreeNode(token, probability, deepcopy(children))
 
 
 def convert_item_to_dict_representation(dict_item: tuple):

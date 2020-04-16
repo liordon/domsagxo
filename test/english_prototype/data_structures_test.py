@@ -53,6 +53,10 @@ class TestBeamTree(BeamTokensProvided):
     def double_love_tree(self, love_noun_or_verb_token):
         return BeamTree.from_tokens_list([love_noun_or_verb_token] * 2)
 
+    @pytest.fixture
+    def empty_tree(self):
+        return BeamTree([])
+
     def test_GivenMultipleTagsTheTreeRootTagIsNoneWithProbability1(self, love_noun_or_verb_token):
         single_love_tree = BeamTree.from_tokens_list([love_noun_or_verb_token])
         assert single_love_tree.token.tag is None
@@ -74,7 +78,7 @@ class TestBeamTree(BeamTokensProvided):
         assert subtrees[1 - noun_location].probability == love_noun_or_verb_token.tags[PartOfSpeech.V_IMP]
 
     def test_pruningWholeTreeReturnsRoot(self, kite_noun_token):
-        assert BeamTree.from_tokens_list([kite_noun_token] * 2)\
+        assert BeamTree.from_tokens_list([kite_noun_token] * 2) \
                    .prune([PartOfSpeech.NOUN]).tree_size() == 1
 
     def test_canQueryNumberOfLeavesForAmountOfPossibleCombinations(self, double_love_tree):
@@ -82,6 +86,17 @@ class TestBeamTree(BeamTokensProvided):
 
     def test_canBePrunedGivenTagListSubtractingAsManyNodesAsNeeded(self, double_love_tree):
         pruned_tree = double_love_tree.prune([PartOfSpeech.NOUN])
+        assert pruned_tree.tree_size() == 4
+        assert pruned_tree.number_of_leaves() == 2
+
+    def test_pruningOneSubtreeDoesNotAffectTheOtherSubtree(self, double_love_tree):
+        pruned_tree = double_love_tree.prune([PartOfSpeech.NOUN, PartOfSpeech.NOUN])
+        assert pruned_tree.tree_size() == 6
+        assert pruned_tree.number_of_leaves() == 3
+
+    def test_whenAllChildrenArePrunedSubtreeItselfIsPruned(self, double_love_tree):
+        pruned_tree = double_love_tree.prune([PartOfSpeech.NOUN, PartOfSpeech.NOUN])
+        pruned_tree = pruned_tree.prune([PartOfSpeech.NOUN, PartOfSpeech.V_IMP])
         assert pruned_tree.tree_size() == 4
         assert pruned_tree.number_of_leaves() == 2
 
@@ -111,11 +126,6 @@ class TestBeamTree(BeamTokensProvided):
         next_of_last = double_love_tree.get_next_interpretation(last_interpretation)
         assert next_of_last is None
 
-    def test_providingUnrelatedInterpretationProducesKeyError(self, double_love_tree):
-        fake_interpretation = [Token("love", PartOfSpeech.OTHER)]
-        with pytest.raises(KeyError):
-            double_love_tree.get_next_interpretation(fake_interpretation)
-
     def test_whenLastWordOptionsAreExhaustedNextInterpretationChangesPreviousWord(self, double_love_tree):
         last_interpretation = [
             Token("love", PartOfSpeech.NOUN),
@@ -134,3 +144,24 @@ class TestBeamTree(BeamTokensProvided):
         assert len(next_of_first) == 2
         assert next_of_first[0] == Token("love", PartOfSpeech.V_IMP)
         assert next_of_first[1] == Token("love", PartOfSpeech.NOUN)
+
+    def test_canQueryInterpretationAndReceiveLongestMatchingSubsequence(self, double_love_tree):
+        sub_interpretation = double_love_tree.longest_legal_sub_interpretation([
+            Token("love", PartOfSpeech.NOUN),
+            Token("love", PartOfSpeech.PREPOSITION),
+            Token("love", PartOfSpeech.OTHER),
+        ])
+        assert len(sub_interpretation) == 1
+        assert sub_interpretation[0] == Token("love", PartOfSpeech.NOUN)
+
+    def test_emptyInterpretationIsValidEvenForEmptyTree(self, empty_tree):
+        sub_interpretation = empty_tree.longest_legal_sub_interpretation([])
+        assert sub_interpretation == []
+
+    def test_completelyValidInterpretationIsReturnedFully(self, double_love_tree):
+        interpretation = [
+            Token("love", PartOfSpeech.NOUN),
+            Token("love", PartOfSpeech.NOUN),
+        ]
+        sub_interpretation = double_love_tree.longest_legal_sub_interpretation(interpretation)
+        assert sub_interpretation == interpretation

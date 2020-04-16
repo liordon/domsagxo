@@ -517,7 +517,7 @@ def build(start=None):
             else:
                 symbol_stack_trace += str(symbol)
             symbol_stack_trace += "\n"
-        raise EsperantoLocatedSyntaxError(len(ast_builder.symstack), "Syntax error in input: " + str(p) +
+        raise EsperantoLocatedSyntaxError(symbol_stack_trace.count('\n')+1, "Syntax error in input: " + str(p) +
                                    "\nOn parse tree:\n" + symbol_stack_trace)
 
     ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, errorlog=yacc.NullLogger())

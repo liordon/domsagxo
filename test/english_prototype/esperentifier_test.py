@@ -45,6 +45,10 @@ class TestWordEsperantification(object):
         assert esperantify_word(word, UnalphabeticTerminal.TIMES) == "*"
         assert esperantify_word(word, UnalphabeticTerminal.DIVIDE) == "/"
 
+    def test_esperantifying2WordInfinitiveVerb(self):
+        esperantified = esperantify_word("to constantify", PartOfSpeech.V_INF)
+        assert "to" not in esperantified
+
 
 class TestEsperantificationOnDomsagxoParserGivenPerfectPreparsing(StatementLevelAstProvided,
     MockSmartHomeStateVariablesProvided):
@@ -188,8 +192,11 @@ class TestIntegrationOfEsperantifierAndBeamTree(BeamTokensProvided, StatementLev
         ]
 
         interpretations = esperantifier.try_interpreting(sentence_tokens)
+        remaining_interpretation = interpretations.get_next_interpretation()
         assert isinstance(interpretations, BeamTree)
         assert interpretations.number_of_leaves() == 1
+        assert len(remaining_interpretation) == len(sentence_tokens)
+        assert remaining_interpretation[4].tag == PartOfSpeech.NOUN
 
     def test_whenMidwayNodeHasInvalidInterpretationsItIsPruned(self, esperantifier):
         sentence_tokens = [
@@ -201,5 +208,62 @@ class TestIntegrationOfEsperantifierAndBeamTree(BeamTokensProvided, StatementLev
         ]
 
         interpretations = esperantifier.try_interpreting(sentence_tokens)
+        remaining_interpretation = interpretations.get_next_interpretation()
         assert isinstance(interpretations, BeamTree)
         assert interpretations.number_of_leaves() == 1
+        assert len(remaining_interpretation) == len(sentence_tokens)
+        assert remaining_interpretation[2].tag == ReservedWord.TO
+
+    def test_whenWrongInterpretationIsAfter1RuleHasBeenFoldedPruningActionDoesNotMiss(self, esperantifier):
+        sentence_tokens = [
+            BeamToken("assign", {ReservedWord.PUT: 1}),
+            BeamToken("40", {UnalphabeticTerminal.NUMBER: 1}),
+            BeamToken("+", {UnalphabeticTerminal.PLUS: 1}),
+            BeamToken("1", {UnalphabeticTerminal.NUMBER: 1}),
+            BeamToken("+", {UnalphabeticTerminal.PLUS: 1}),
+            BeamToken("1", {UnalphabeticTerminal.NUMBER: 1}),
+            BeamToken("to", {ReservedWord.TO: 1, PartOfSpeech.V_IMP: 0.5}),
+            BeamToken("small", {PartOfSpeech.ADJECTIVE: 1}),
+            BeamToken("cat", {PartOfSpeech.NOUN: 0.5}),
+        ]
+
+        interpretations = esperantifier.try_interpreting(sentence_tokens)
+        remaining_interpretation = interpretations.get_next_interpretation()
+        assert isinstance(interpretations, BeamTree)
+        assert interpretations.number_of_leaves() == 1
+        assert len(remaining_interpretation) == len(sentence_tokens)
+        assert remaining_interpretation[6].tag == ReservedWord.TO
+
+    def test_pruningOneBranchDoesNotAffectOtherSubtrees(self, esperantifier):
+        """The bug that this checks: pruning [PUT, ADJECTIVE, TO] has pruned TO
+        from the [PUT,NOUN] branch as well, resulting in:
+        └- BeamTree- root (None: 1)
+          └- BeamTreeNode- assign (ReservedWord.PUT: 1)
+          ├- BeamTreeNode- love (PartOfSpeech.ADJECTIVE: 1) -- real mistake
+          │ ├- BeamTreeNode- to (ReservedWord.TO: 1)
+          │ │  └- BeamTreeNode- small (PartOfSpeech.ADJECTIVE: 1)
+          │	│     └- BeamTreeNode- cat (PartOfSpeech.NOUN: 0.5)
+          │	└- BeamTreeNode- to (PartOfSpeech.V_IMP: 0.5)
+          │    └- BeamTreeNode- small (PartOfSpeech.ADJECTIVE: 1)
+          │       └- BeamTreeNode- cat (PartOfSpeech.NOUN: 0.5)
+          └- BeamTreeNode- love (PartOfSpeech.NOUN: 1)
+            ├- BeamTreeNode- to (ReservedWord.TO: 1) -- pruned unnecessarily
+            │  └- BeamTreeNode- small (PartOfSpeech.ADJECTIVE: 1)
+            │    └- BeamTreeNode- cat (PartOfSpeech.NOUN: 0.5)
+            └- BeamTreeNode- to (PartOfSpeech.V_IMP: 0.5)
+              └- BeamTreeNode- small (PartOfSpeech.ADJECTIVE: 1)
+                └- BeamTreeNode- cat (PartOfSpeech.NOUN: 0.5)"""
+        sentence_tokens = [
+            BeamToken("assign", {ReservedWord.PUT: 1}),
+            BeamToken("love", {PartOfSpeech.ADJECTIVE: 1, PartOfSpeech.NOUN: 1}),
+            BeamToken("to", {ReservedWord.TO: 1, PartOfSpeech.V_IMP: 0.5}),
+            BeamToken("small", {PartOfSpeech.ADJECTIVE: 1}),
+            BeamToken("cat", {PartOfSpeech.NOUN: 0.5}),
+        ]
+
+        interpretations = esperantifier.try_interpreting(sentence_tokens)
+        remaining_interpretation = interpretations.get_next_interpretation()
+        assert isinstance(interpretations, BeamTree)
+        assert interpretations.number_of_leaves() == 1
+        assert len(remaining_interpretation) == len(sentence_tokens)
+        assert remaining_interpretation[2].tag == ReservedWord.TO

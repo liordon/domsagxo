@@ -2,9 +2,10 @@ import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
 from compilation import node
+from compilation.abstract_syntax_tree import EsperantoLocatedSyntaxError
 from test_utils import mocks
 from test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided, \
-    MockSmartHomeStateVariablesProvided
+    MockSmartHomeStateVariablesProvided, TopLevelAstProvided
 
 
 def parsed_value_of(ast, expr, state=None):
@@ -383,3 +384,15 @@ class TestAstRelationalExpressions(ExpressionLevelAstProvided):
         assert not parsed_value_of(ast, "unu ne estas pli malgranda aux egala al unu")
         assert not parsed_value_of(ast, "unu ne estas pli malgranda aux egala al du")
         assert parsed_value_of(ast, "du ne estas pli malgranda aux egala al unu")
+
+
+class TestPinPointingOffendingTokenOnSyntaxErrors(TopLevelAstProvided):
+    def test_canIndicateProblemInVeryFirstToken(self, ast):
+        with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
+            ast.parse("finu")
+        assert exception_info.value.index == 1
+
+    def test_canIdentifyProblemAfterArithmeticNode(self, ast):
+        with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
+            ast.parse("asignu 1 + 1 + finu")
+        assert exception_info.value.index == 6

@@ -59,7 +59,7 @@ def convert_word_to_stochastic_token_tuple(w):
     else:
         return (w, collect_probabilities_from_list(
             [convert_tag_to_part_of_speech(syn.pos()) for syn in wordnet.synsets(w)]
-            + identify_potential_keywords(w)))
+            + identify_potential_keywords(w.lower())))
 
 
 class WordnetProtoLexer(object):
@@ -74,15 +74,21 @@ class WordnetProtoLexer(object):
         split_words = self.split_input(text)
         i = 0
         while i < len(split_words):
-            if i == 0 and len(split_words) >= 2 and split_words[i].lower() == "to":
+            current_word = split_words[i]
+            if i == 0 and len(split_words) >= 2 and current_word.lower() == "to":
                 self._stack.insert(0, (" ".join(split_words[i:i + 2]), {PartOfSpeech.V_INF: 1}))
                 i += 1
             else:
-                self._stack.insert(0, convert_word_to_stochastic_token_tuple(split_words[i]))
+                token_tuple = convert_word_to_stochastic_token_tuple(current_word)
+                if UnalphabeticTerminal.COMMENT not in token_tuple[1] \
+                        or token_tuple[1][UnalphabeticTerminal.COMMENT] < 1:
+                    self._stack.insert(0, token_tuple)
             i += 1
 
     def split_input(self, text):
-        return [w for w in re.split(r"\s+", text) if w != '']
+        # return [w for w in re.split(r"\s+", text) if w != '']
+
+        return [w for w in re.split(r"\b|\s+", text) if not re.fullmatch(r"\s*", w)]
 
     def has_next(self):
         return len(self._stack) > 0

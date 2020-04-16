@@ -35,6 +35,18 @@ class TestEnglishKeywordsRecognition(EnglishLexerProvided):
         lexer.input("the")
         self.assert_possible_next_token(ReservedWord.THE, lexer)
 
+    def test_canIdentifyKeywordMeans(self, lexer):
+        lexer.input("means")
+        self.assert_possible_next_token(ReservedWord.THIS_WAY, lexer)
+
+    def test_canIdentifyKeywordReturn(self, lexer):
+        lexer.input("return")
+        self.assert_possible_next_token(ReservedWord.RETURN, lexer)
+
+    def test_canIdentifyKeywordEnd(self, lexer):
+        lexer.input("End")
+        self.assert_possible_next_token(ReservedWord.END, lexer)
+
 
 class TestUnalphabeticTerminalRecognition(EnglishLexerProvided):
     def test_canIdentifyPlusSignAndWord(self, lexer):
@@ -104,6 +116,16 @@ class TestUnalphabeticTerminalRecognition(EnglishLexerProvided):
         lexer.input("seconds")
         self.assert_possible_next_token(ReservedWord.TIME_INDICATION, lexer)
 
+    def test_canRecognizePunctuationMarks(self, lexer):
+        lexer.input(',')
+        self.assert_possible_next_token(UnalphabeticTerminal.COLON, lexer)
+
+    def test_irrelevantTokensAreNotKeptInLexer(self, lexer):
+        lexer.input('.')
+        assert not lexer.has_next()
+        lexer.input(':')
+        assert not lexer.has_next()
+
 
 class TestEnglishParserPrototype(EnglishLexerProvided):
 
@@ -155,6 +177,7 @@ class TestMultipleWordTokens(EnglishLexerProvided):
         assert PartOfSpeech.V_INF in token.tags.keys()
         assert token.value == infinitive_verb
 
+
 def extract_all_tokens(lexer):
     return [t for t in lexer]
 
@@ -186,5 +209,3 @@ class TestEnglishLexerFindingCorrectTags(EnglishLexerProvided):
         assert ReservedWord.THE in token_type_list[1]
         assert PartOfSpeech.ADJECTIVE in token_type_list[2]
         assert PartOfSpeech.NOUN in token_type_list[3]
-
-

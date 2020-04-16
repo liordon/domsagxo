@@ -17,16 +17,29 @@ _unalphabetic_terminals = {
     UnalphabeticTerminal.MINUS: "-",
     UnalphabeticTerminal.TIMES: "*",
     UnalphabeticTerminal.DIVIDE: "/",
+    UnalphabeticTerminal.PERIOD: ".",
+    UnalphabeticTerminal.COLON: ",",
+    UnalphabeticTerminal.COMMENT: "",
 }
 
 
+def clean_infinitive_verb(word):
+    if word.lower().startswith("to"):
+        word = word[3:]
+    if "-" in word:
+        word = word.replace('-', '')
+    return word
+
+
 def esperantify_word(word: str, part_of_speech):
-    if part_of_speech == UnalphabeticTerminal.NUMBER:
+    if part_of_speech is UnalphabeticTerminal.NUMBER:
         return word
     if part_of_speech in ReservedWord:
         return part_of_speech.value[1:]
     if part_of_speech in UnalphabeticTerminal:
         return _unalphabetic_terminals[part_of_speech]
+    if part_of_speech is PartOfSpeech.V_INF:
+        word = clean_infinitive_verb(word)
     return word + _part_of_speech_suffix[part_of_speech]
 
 
@@ -50,13 +63,13 @@ class Esperantifier(object):
             try:
                 self._ast.parse(esperantify_tokens(interpretation))
             except EsperantoLocatedSyntaxError as e:
-                interpretations_tree = interpretations_tree.prune([t.tag for t in interpretation[:e.index-1]])
-                interpretation = interpretation[:e.index - 2]
+                interpretations_tree = interpretations_tree.prune([t.tag for t in interpretation[:e.index]])
+                interpretation = interpretations_tree.longest_legal_sub_interpretation(interpretation)
                 if interpretations_tree.tree_size() == 1:
+                    print(e)
                     return None
             except EsperantoSyntaxError as e:
-                print(e.message)
+                print(e)
                 return None
-            print(interpretation)
             interpretation = interpretations_tree.get_next_interpretation(interpretation)
         return interpretations_tree
