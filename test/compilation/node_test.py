@@ -48,7 +48,6 @@ def test_canUsePrettyPrintOnVariablesAndArrays():
         Description('mba', Description('sxa', NoneNode()))
     ).pretty_print() == \
            "└- <sxa mba lulo>"
-    # assert ArrayAccess(3, 'sxamba').pretty_print() == "└- <sxamba lulo>"
 
 
 def test_canPrettyPrintVariableAssignments():
