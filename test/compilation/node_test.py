@@ -1,4 +1,5 @@
 from compilation.node import *
+from test_utils.providers import SyntaxNodesProvided
 
 
 class TestNodeRepresentation(object):
@@ -120,4 +121,49 @@ class TestNodePrettyPrinting(object):
                "\n\t└- Divide" + \
                "\n\t\t├- 0" + \
                "\n\t\t└- 5"
+
+
+class TestNumberOfTokensPerNode(SyntaxNodesProvided):
+
+    def test_noneNodeHasNoTokensInIt(self):
+        assert NoneNode().number_of_tokens() == 0
+
+    def test_numberLiteralsAreAlwaysSingleTokens(self):
+        assert Number(2).number_of_tokens() == 1
+        assert Number(42).number_of_tokens() == 1
+
+    def test_BooleanNodeIsAlwaysSingeToken(self):
+        assert Boolean(True).number_of_tokens() == 1
+        assert Boolean(False).number_of_tokens() == 1
+
+    def test_BooleanOperationNodesAreWorth1TokenPlusArguments(self, tokenless_node, double_token_node):
+        assert LogicAnd(Boolean(True), Boolean(False)).number_of_tokens() == 3
+        assert LogicAnd(tokenless_node,
+            LogicAnd(tokenless_node, tokenless_node)
+        ).number_of_tokens() == 2
+        assert LogicAnd(tokenless_node, double_token_node).number_of_tokens() == 3
+
+    def test_arithmeticOperatorNodesAreConsideredTokens(self):
+        assert Add(Number(40), Number(2)).number_of_tokens() == 3
+        assert Add(Divide(Number(4), Number(0)), Number(2)).number_of_tokens() == 5
+        assert Parentheses(Number(42)).number_of_tokens() == 3
+
+    def test_descriptionNodeHasAsManyTokensAsAdjectives(self):
+        assert Description("dika").number_of_tokens() == 1
+        assert Description("dika", Description("nigra")).number_of_tokens() == 2
+
+    def test_variableNameNodeHasNumberOfTokensEqualToNumberOfWords(self):
+        assert VariableName("hundo", NoneNode()).number_of_tokens() == 1
+        assert VariableName("kato", Description("dika")).number_of_tokens() == 2
+        assert VariableName("kato", Description("dika", Description("nigra"))).number_of_tokens() == 3
+
+    def test_assignmentStatementHas2TokensMoreThanItsComponents(self, tokenless_node, double_token_node):
+        assert VariableAssignment(tokenless_node, tokenless_node).number_of_tokens() == 2
+        assert VariableAssignment(double_token_node, double_token_node).number_of_tokens() == 6
+
+    def test_ifStatementHas3TokensIfThereIsNoElseClauseAnd4IfThereIsPlusInternals(self, tokenless_node, single_token_node, double_token_node):
+        assert ConditionalStatement(tokenless_node, tokenless_node).number_of_tokens() == 3
+        assert ConditionalStatement(tokenless_node, tokenless_node, tokenless_node).number_of_tokens() == 4
+        assert ConditionalStatement(single_token_node, double_token_node).number_of_tokens() == 6
+        assert ConditionalStatement(tokenless_node, single_token_node, double_token_node).number_of_tokens() == 7
 

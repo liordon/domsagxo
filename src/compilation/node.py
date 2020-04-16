@@ -41,6 +41,9 @@ class AstNode(object):
 
         return res
 
+    def number_of_tokens(self):
+        return sum([arg.number_of_tokens() for arg in self.args if arg is not None])
+
 
 class BasicNode(AstNode):
     def __init__(self, *args, **kwargs):
@@ -51,6 +54,9 @@ class BasicNode(AstNode):
 
     def __str__(self):
         return str(self.args[0])
+
+    def number_of_tokens(self):
+        return 1
 
 
 class Number(BasicNode):
@@ -79,6 +85,9 @@ class NoneNode(AstNode):
     def _method(self, state):
         return state, None
 
+    def number_of_tokens(self):
+        return 0
+
     @staticmethod
     def getContainedAdjectives():
         return []
@@ -88,6 +97,9 @@ class BinaryOp(AstNode):
 
     def __init__(self, arg1, arg2):
         super(BinaryOp, self).__init__(arg1, arg2)
+
+    def number_of_tokens(self):
+        return 1 + super(BinaryOp, self).number_of_tokens()
 
 
 class Add(BinaryOp):
@@ -175,6 +187,9 @@ class VariableName(BasicNode):
     def __str__(self):
         return '<' + self.variable_name + '>'
 
+    def number_of_tokens(self):
+        return self.variable_name.count(" ") + 1
+
 
 class Description(AstNode):
     def __init__(self, descriptor, additional_descriptor=NoneNode()):
@@ -189,6 +204,9 @@ class Description(AstNode):
 
     def getContainedAdjectives(self):
         return self.adjectives
+
+    def number_of_tokens(self):
+        return len(self.adjectives)
 
 
 class Dereference(AstNode):
@@ -251,6 +269,9 @@ class VariableAssignment(AstNode):
         state, value = variable_value.evaluate(state)
         variable_name.setter(state, value)
         return state, nextAction.GO_ON
+
+    def number_of_tokens(self):
+        return 2 + super(VariableAssignment, self).number_of_tokens()
 
 
 class nextAction(Enum):
@@ -405,7 +426,7 @@ class RoutineDefinition(AstNode):
 
 
 class ConditionalStatement(AstNode):
-    def __init__(self, condition, trueStatement, falseStatement):
+    def __init__(self, condition, trueStatement, falseStatement=None):
         super(ConditionalStatement, self).__init__(condition, trueStatement, falseStatement)
 
     def _method(self, state, condition, trueStatement, falseStatement):
@@ -416,6 +437,10 @@ class ConditionalStatement(AstNode):
             return falseStatement.evaluate(state)
         else:
             return state, None
+
+    def number_of_tokens(self):
+        return (3 if self.args[2] is None else 4) \
+               + super(ConditionalStatement, self).number_of_tokens()
 
 
 class ExecutionWrapper(object):
@@ -544,3 +569,21 @@ class QueryState(AstNode):
     def _method(self, state, appliance, stateName):
         state, evaluated_appliance = appliance.evaluate(state)
         return state, evaluated_appliance.stateQueries[stateName]
+
+
+class Parentheses(AstNode):
+    def __init__(self, inner_expression):
+        super(Parentheses, self).__init__(inner_expression)
+
+    def _method(self, state, inner_expression):
+        return inner_expression.evaluate(state)
+
+    def number_of_tokens(self):
+        return 2 + self.args[0].number_of_tokens()
+
+#
+# class Parameters(AstNode):
+#     def __init__(self, parameter):
+#         super(Parameters, self)
+#
+#     def add_parameter(self, new_parameter):

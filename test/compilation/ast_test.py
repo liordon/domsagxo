@@ -112,6 +112,10 @@ class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType)
         self.assertThatExpressionIsOfNodeType(ast, "1-1", node.Subtract)
         self.assertThatExpressionIsOfNodeType(ast, "unu malpli unu", node.Subtract)
 
+    def test_calculationInParenthesesReturnParenthesesNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "(1-1)", node.Parentheses)
+        self.assertThatExpressionIsOfNodeType(ast, "krampo unu malpli unu malkrampo", node.Parentheses)
+
     def test_nounReturnsVariableNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "sxambalulo", node.VariableName)
 
@@ -135,6 +139,14 @@ class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType)
         self.assertThatExpressionIsOfNodeType(ast, "gxin", node.VariableName)
         self.assertThatExpressionIsOfNodeType(ast, "ĝi", node.VariableName)
         self.assertThatExpressionIsOfNodeType(ast, "ĝin", node.VariableName)
+
+
+# class TestListTypeNodes(CanAssertNodeType):
+#
+#     def test_routineParametersHaveANodeTypeOfTheirOwn(self):
+#         parameter_ast = ast_bld.build(start=ast_bld.GrammarVariable.PARAMETERS.value)
+#         self.assertThatExpressionIsOfNodeType(parameter_ast, "hundo", node.Parameters)
+#         self.assertThatExpressionIsOfNodeType(parameter_ast, "hundo kaj kato", node.Parameters)
 
 
 class TestReferenceSemantics(ExpressionLevelAstProvided, MockSmartHomeStateVariablesProvided):
@@ -396,3 +408,9 @@ class TestPinPointingOffendingTokenOnSyntaxErrors(TopLevelAstProvided):
         with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
             ast.parse("asignu 1 + 1 + finu")
         assert exception_info.value.index == 6
+
+    def test_canIdentifyProblemAfterMethodParameters(self, ast):
+        with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
+            ast.parse("sxambaluli unuo kaj duo kaj trio signifas finu")
+        assert exception_info.value.index == 8
+

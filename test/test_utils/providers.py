@@ -5,12 +5,38 @@ import pytest
 import compilation.abstract_syntax_tree as ast_bld
 import compilation.esperanto_lexer as eo_lxr
 from compilation.definitions import PartOfSpeech
+from compilation.node import AstNode
 from english_prototype.data_structures import BeamToken
 from english_prototype.english_lexer import WordnetProtoLexer
 from library import management_components as mgmt_cmp, atomic_types as atypes
 from library.management_components import Horaro, Domsagxo
 from test_utils import mocks
 from test_utils.mocks import MockClock
+
+
+class SyntaxNodesProvided(object):
+    class FakeNode(AstNode):
+        def __init__(self, number_of_tokens=0):
+            self.num_tokens = number_of_tokens
+
+        def number_of_tokens(self):
+            return self.num_tokens
+
+    @staticmethod
+    def node_with_x_tokens(x):
+        return SyntaxNodesProvided.FakeNode(number_of_tokens=x)
+
+    @pytest.fixture
+    def tokenless_node(self):
+        return self.node_with_x_tokens(0)
+
+    @pytest.fixture
+    def single_token_node(self):
+        return self.node_with_x_tokens(1)
+
+    @pytest.fixture
+    def double_token_node(self):
+        return self.node_with_x_tokens(2)
 
 
 class PartOfSpeechValueVerifier(object):

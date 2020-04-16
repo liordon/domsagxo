@@ -160,7 +160,7 @@ def build(start=None):
                 ResWord.ELSE, GrammarVariable.BLOCK, ResWord.END], ])
     def p_ifStatement_ifCondition(p):
         if len(p) == 6:
-            p[0] = node.ConditionalStatement(p[2], p[4], None)
+            p[0] = node.ConditionalStatement(p[2], p[4])
         else:
             p[0] = node.ConditionalStatement(p[2], p[4], p[6])
 
@@ -323,7 +323,7 @@ def build(start=None):
 
     @RULE(GrammarVariable.FACTOR, [[UaTer.L_PAREN, GrammarVariable.EXPRESSION, UaTer.R_PAREN], ])
     def p_factor_expr(p):
-        p[0] = p[2]
+        p[0] = node.Parentheses(p[2])
 
     # ----------------------------   boolean calculations    ------------------------- #
     @RULE(GrammarVariable.RELATION, [[ResWord.IS, ResWord.EQUAL, ResWord.TO], ])
@@ -509,16 +509,19 @@ def build(start=None):
     # noinspection PyUnusedLocal
     def p_error(p):
         symbol_stack_trace = ""
+        shifted_tokens = 0
         for symbol in ast_builder.symstack[1:]:
             # noinspection PyUnresolvedReferences
             if isinstance(symbol, yacc.YaccSymbol) and isinstance(symbol.value, node.AstNode):
                 # noinspection PyUnresolvedReferences
                 symbol_stack_trace += symbol.value.pretty_print()
             else:
+                if isinstance(symbol.value, list):
+                    shifted_tokens += len(symbol.value) * 2 - 2
                 symbol_stack_trace += str(symbol)
             symbol_stack_trace += "\n"
-        raise EsperantoLocatedSyntaxError(symbol_stack_trace.count('\n')+1, "Syntax error in input: " + str(p) +
-                                   "\nOn parse tree:\n" + symbol_stack_trace)
+        raise EsperantoLocatedSyntaxError(symbol_stack_trace.count('\n') + 1 + shifted_tokens,
+            "Syntax error in input: " + str(p) + "\nOn parse tree:\n" + symbol_stack_trace)
 
     ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, errorlog=yacc.NullLogger())
     return ast_builder
