@@ -37,7 +37,10 @@ def esperantify_word(word: str, part_of_speech):
     if part_of_speech in ReservedWord:
         return part_of_speech.value[1:]
     if part_of_speech in UnalphabeticTerminal:
-        return _unalphabetic_terminals[part_of_speech]
+        if part_of_speech is UnalphabeticTerminal.STRING:
+            return word
+        else:
+            return _unalphabetic_terminals[part_of_speech]
     if part_of_speech is PartOfSpeech.V_INF:
         word = clean_infinitive_verb(word)
     return word + _part_of_speech_suffix[part_of_speech]

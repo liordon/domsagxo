@@ -47,6 +47,10 @@ class TestEnglishKeywordsRecognition(EnglishLexerProvided):
         lexer.input("End")
         self.assert_possible_next_token(ReservedWord.END, lexer)
 
+    def test_canIdentifyKeywordAfterwards(self, lexer):
+        lexer.input("Afterwards")
+        self.assert_possible_next_token(ReservedWord.AND_THEN, lexer)
+
 
 class TestUnalphabeticTerminalRecognition(EnglishLexerProvided):
     def test_canIdentifyPlusSignAndWord(self, lexer):

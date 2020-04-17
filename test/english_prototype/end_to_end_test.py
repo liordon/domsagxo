@@ -1,6 +1,7 @@
 import pytest
 
 from english_prototype import example_programs
+from english_prototype.data_structures import calculate_total_combinations
 from english_prototype.esperantifier import Esperantifier
 from library.management_components import Domsagxo
 from test_utils.providers import EnglishLexerProvided

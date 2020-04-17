@@ -148,11 +148,10 @@ class BeamTreeNode(object):
                 return interpretation[:1]
             else:
                 return interpretation[:1] + \
-                    self.children[matching_child].\
-                        longest_legal_sub_interpretation(interpretation[1:])
+                       self.children[matching_child]. \
+                           longest_legal_sub_interpretation(interpretation[1:])
         elif len(interpretation) == 1:
             return interpretation
-
 
 
 class BeamTree(BeamTreeNode):
@@ -170,7 +169,6 @@ class BeamTree(BeamTreeNode):
             else ([self.token] + complete_interpretation)
         next_interpretation = super(BeamTree, self).get_next_interpretation(padded_interpretation)
         return None if next_interpretation is None else next_interpretation[1:]
-
 
     def longest_legal_sub_interpretation(self, interpretation):
         return super(BeamTree, self).longest_legal_sub_interpretation([BeamTree.ROOT_TOKEN] + interpretation)[1:]
@@ -196,3 +194,11 @@ class BeamTree(BeamTreeNode):
 
 def convert_item_to_dict_representation(dict_item: tuple):
     return '{' + dict_item.__repr__().replace(',', ':')[1:-1] + '}'
+
+
+def calculate_total_combinations(beam_tokens: list):
+    combinations = 1
+    for t in beam_tokens:
+        length = len(t.tags.keys())
+        combinations *= 1 if length <= 0 else length
+    return combinations

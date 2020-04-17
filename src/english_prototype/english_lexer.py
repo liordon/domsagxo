@@ -67,9 +67,6 @@ class WordnetProtoLexer(object):
     def __init__(self):
         self._stack = []
 
-    def input2(self, text):
-        self._stack += [convert_word_to_stochastic_token_tuple(w) for w in self.split_input(text)][::-1]
-
     def input(self, text):
         split_words = self.split_input(text)
         i = 0
@@ -78,6 +75,13 @@ class WordnetProtoLexer(object):
             if i == 0 and len(split_words) >= 2 and current_word.lower() == "to":
                 self._stack.insert(0, (" ".join(split_words[i:i + 2]), {PartOfSpeech.V_INF: 1}))
                 i += 1
+            elif current_word == '"':
+                i += 1
+                while '"' not in split_words[i]:
+                    current_word += ' ' + split_words[i]
+                    i += 1
+                current_word += ' "'
+                self._stack.insert(0, (current_word, {UnalphabeticTerminal.STRING: 1}))
             else:
                 token_tuple = convert_word_to_stochastic_token_tuple(current_word)
                 if UnalphabeticTerminal.COMMENT not in token_tuple[1] \

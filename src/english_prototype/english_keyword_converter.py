@@ -2,6 +2,7 @@ from compilation.definitions import ReservedWord, UnalphabeticTerminal
 
 english_keywords_dictionary = {
     "assign": [ReservedWord.PUT],
+    "afterwards": [ReservedWord.AND_THEN],
     "day": [ReservedWord.TIME_INDICATION],
     "days": [ReservedWord.TIME_INDICATION],
     "end": [ReservedWord.END],

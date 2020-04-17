@@ -28,7 +28,7 @@ verbs = [
 ]
 
 keywords = [
-    "after", "and then", "assign", "at the same time", "at", "do", "else", "end", "equal", "every", "false", "for", "greater",
+    "after", "afterwards", "assign", "at the same time", "at", "do", "else", "end", "equal", "every", "false", "for", "greater",
     "if", "into", "is", "it", "like", "means", "new", "not", "of", "on", "once",
     "return", "so", "than", "them", "then", "true",
     "whenever", "which", "while",
