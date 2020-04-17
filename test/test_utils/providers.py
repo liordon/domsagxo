@@ -19,7 +19,7 @@ class SyntaxNodesProvided(object):
         def __init__(self, number_of_tokens=0):
             self.num_tokens = number_of_tokens
 
-        def number_of_tokens(self):
+        def total_number_of_tokens(self):
             return self.num_tokens
 
     @staticmethod

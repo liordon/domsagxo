@@ -36,13 +36,18 @@ class AstNode(object):
         res = indent + leaf_form(last_child) + str(type(self).__name__)
         for i in range(len(self.args)):
             child = self.args[i]
-            newIndent = indent + branch_form(last_child)
-            res += "\n" + pretty_print(child, newIndent, i == len(self.args) - 1)
+            new_indent = indent + branch_form(last_child)
+            res += "\n" + pretty_print(child, new_indent, i == len(self.args) - 1)
 
         return res
 
-    def number_of_tokens(self):
-        return sum([arg.number_of_tokens() for arg in self.args if arg is not None])
+    def total_number_of_tokens(self):
+        return self._local_number_of_tokens() + sum(
+            [arg.total_number_of_tokens() for arg in self.args if arg is not None])
+
+    @staticmethod
+    def _local_number_of_tokens():
+        return 1
 
 
 class BasicNode(AstNode):
@@ -55,7 +60,7 @@ class BasicNode(AstNode):
     def __str__(self):
         return str(self.args[0])
 
-    def number_of_tokens(self):
+    def total_number_of_tokens(self):
         return 1
 
 
@@ -85,7 +90,7 @@ class NoneNode(AstNode):
     def _method(self, state):
         return state, None
 
-    def number_of_tokens(self):
+    def total_number_of_tokens(self):
         return 0
 
     @staticmethod
@@ -97,9 +102,6 @@ class BinaryOp(AstNode):
 
     def __init__(self, arg1, arg2):
         super(BinaryOp, self).__init__(arg1, arg2)
-
-    def number_of_tokens(self):
-        return 1 + super(BinaryOp, self).number_of_tokens()
 
 
 class Add(BinaryOp):
@@ -187,7 +189,7 @@ class VariableName(BasicNode):
     def __str__(self):
         return '<' + self.variable_name + '>'
 
-    def number_of_tokens(self):
+    def total_number_of_tokens(self):
         return self.variable_name.count(" ") + 1
 
 
@@ -205,7 +207,7 @@ class Description(AstNode):
     def getContainedAdjectives(self):
         return self.adjectives
 
-    def number_of_tokens(self):
+    def total_number_of_tokens(self):
         return len(self.adjectives)
 
 
@@ -268,13 +270,14 @@ class VariableAssignment(AstNode):
     def _method(self, state, variable_name, variable_value):
         state, value = variable_value.evaluate(state)
         variable_name.setter(state, value)
-        return state, nextAction.GO_ON
+        return state, NextAction.GO_ON
 
-    def number_of_tokens(self):
-        return 2 + super(VariableAssignment, self).number_of_tokens()
+    @staticmethod
+    def _local_number_of_tokens():
+        return 2
 
 
-class nextAction(Enum):
+class NextAction(Enum):
     GO_ON = "go on"
     RETURN = "return"
 
@@ -286,9 +289,12 @@ class Program(AstNode):
     def _method(self, state, previous_commands, next_command):
         if previous_commands is not None:
             state, return_value = previous_commands.evaluate(state)
-            if return_value == nextAction.RETURN:
+            if return_value == NextAction.RETURN:
                 return state, return_value
         return next_command.evaluate(state)
+
+    def _local_number_of_tokens(self):
+        return 0 if self.args[0] is None else 1
 
 
 class TimeSpan(AstNode):
@@ -362,10 +368,14 @@ class RoutineInvocation(AstNode):
         inner_args = self.args[1]
         for i in range(len(inner_args)):
             child = inner_args[i]
-            newIndent = indent + branch_form(last_child)
-            res += "\n" + pretty_print(child, newIndent, i == len(inner_args) - 1)
+            new_indent = indent + branch_form(last_child)
+            res += "\n" + pretty_print(child, new_indent, i == len(inner_args) - 1)
 
         return res
+
+    def _local_number_of_tokens(self):
+        argument_tokens = self.args[1].total_number_of_tokens()
+        return 0 if argument_tokens == 0 else argument_tokens - 1
 
 
 class ReturnValue(AstNode):
@@ -376,7 +386,7 @@ class ReturnValue(AstNode):
         if return_value is not None:
             state, evaluated_return_value = return_value.evaluate(state)
             state.variables['gxi'] = evaluated_return_value
-        return state, nextAction.RETURN
+        return state, NextAction.RETURN
 
 
 class RoutineDefinition(AstNode):
@@ -396,17 +406,17 @@ class RoutineDefinition(AstNode):
                                 str(len(argument_list)) + "were given.")
             for i in range(len(argument_list)):
                 closure.variables[argument_names[i].getContainedName()] = argument_list[i]
-            colsure, action = abstract_syntax_tree.evaluate(closure)
-            if action == nextAction.RETURN and 'gxi' in closure.variables.keys():
+            closure, action = abstract_syntax_tree.evaluate(closure)
+            if action == NextAction.RETURN and 'gxi' in closure.variables.keys():
                 state.variables['gxi'] = closure.variables['gxi']
-            return nextAction.GO_ON
+            return NextAction.GO_ON
 
         return subtree_function
 
     def _method(self, state, function_name, argument_names, command_subtree):
         state.method_dict[function_name] = self.turn_ast_into_function(
             state, function_name, argument_names, command_subtree)
-        return state, nextAction.GO_ON
+        return state, NextAction.GO_ON
 
     def pretty_print(self, indent="", last_child=True):
         res = indent + leaf_form(last_child) + str(type(self).__name__) + ": " \
@@ -426,21 +436,20 @@ class RoutineDefinition(AstNode):
 
 
 class ConditionalStatement(AstNode):
-    def __init__(self, condition, trueStatement, falseStatement=None):
-        super(ConditionalStatement, self).__init__(condition, trueStatement, falseStatement)
+    def __init__(self, condition, true_statement, false_statement=None):
+        super(ConditionalStatement, self).__init__(condition, true_statement, false_statement)
 
-    def _method(self, state, condition, trueStatement, falseStatement):
+    def _method(self, state, condition, true_statement, false_statement):
         state, evaluated_condition = condition.evaluate(state)
         if evaluated_condition:
-            return trueStatement.evaluate(state)
-        elif falseStatement is not None:
-            return falseStatement.evaluate(state)
+            return true_statement.evaluate(state)
+        elif false_statement is not None:
+            return false_statement.evaluate(state)
         else:
             return state, None
 
-    def number_of_tokens(self):
-        return (3 if self.args[2] is None else 4) \
-               + super(ConditionalStatement, self).number_of_tokens()
+    def _local_number_of_tokens(self):
+        return 3 if self.args[2] is None else 4
 
 
 class ExecutionWrapper(object):
@@ -515,11 +524,18 @@ class RepeatedStatement(AstNode, ExecutionWrapper):
 class Comparison(AstNode):
     class Relation(Enum):
         EQUAL = "EQ"
-        NOT_EQUAL = "NEQ"
         GREATER = "GT"
         GREATER_OR_EQUAL = "GTE"
         LESSER = "LT"
         LESSER_OR_EQUAL = "LTE"
+
+        def total_number_of_tokens(self):
+            short_relations = [
+                Comparison.Relation.EQUAL,
+                Comparison.Relation.GREATER,
+                Comparison.Relation.LESSER,
+            ]
+            return 3 if self in short_relations else 6
 
     def __init__(self, arg1, comparison, arg2):
         super(Comparison, self).__init__(arg1, comparison, arg2)
@@ -546,6 +562,9 @@ class Comparison(AstNode):
         self.reverser_flag = not self.reverser_flag
         return self
 
+    def _local_number_of_tokens(self):
+        return 1 if self.reverser_flag else 0
+
 
 class LoopStatement(AstNode):
     def __init__(self, condition, body):
@@ -555,20 +574,24 @@ class LoopStatement(AstNode):
         state, flag = condition.evaluate(state)
         while flag:
             state, return_value = body.evaluate(state)
-            if return_value == nextAction.RETURN:
+            if return_value == NextAction.RETURN:
                 return state, return_value
             state, flag = condition.evaluate(state)
 
         return state, None
 
+    @staticmethod
+    def _local_number_of_tokens():
+        return 3
+
 
 class QueryState(AstNode):
-    def __init__(self, appliance, stateName):
-        super(QueryState, self).__init__(appliance, stateName)
+    def __init__(self, appliance, state_name):
+        super(QueryState, self).__init__(appliance, state_name)
 
-    def _method(self, state, appliance, stateName):
+    def _method(self, state, appliance, state_name):
         state, evaluated_appliance = appliance.evaluate(state)
-        return state, evaluated_appliance.stateQueries[stateName]
+        return state, evaluated_appliance.stateQueries[state_name]
 
 
 class Parentheses(AstNode):
@@ -578,12 +601,6 @@ class Parentheses(AstNode):
     def _method(self, state, inner_expression):
         return inner_expression.evaluate(state)
 
-    def number_of_tokens(self):
-        return 2 + self.args[0].number_of_tokens()
-
-#
-# class Parameters(AstNode):
-#     def __init__(self, parameter):
-#         super(Parameters, self)
-#
-#     def add_parameter(self, new_parameter):
+    @staticmethod
+    def _local_number_of_tokens():
+        return 2

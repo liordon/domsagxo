@@ -126,44 +126,92 @@ class TestNodePrettyPrinting(object):
 class TestNumberOfTokensPerNode(SyntaxNodesProvided):
 
     def test_noneNodeHasNoTokensInIt(self):
-        assert NoneNode().number_of_tokens() == 0
+        assert NoneNode().total_number_of_tokens() == 0
 
     def test_numberLiteralsAreAlwaysSingleTokens(self):
-        assert Number(2).number_of_tokens() == 1
-        assert Number(42).number_of_tokens() == 1
+        assert Number(2).total_number_of_tokens() == 1
+        assert Number(42).total_number_of_tokens() == 1
 
     def test_BooleanNodeIsAlwaysSingeToken(self):
-        assert Boolean(True).number_of_tokens() == 1
-        assert Boolean(False).number_of_tokens() == 1
+        assert Boolean(True).total_number_of_tokens() == 1
+        assert Boolean(False).total_number_of_tokens() == 1
 
     def test_BooleanOperationNodesAreWorth1TokenPlusArguments(self, tokenless_node, double_token_node):
-        assert LogicAnd(Boolean(True), Boolean(False)).number_of_tokens() == 3
+        assert LogicAnd(Boolean(True), Boolean(False)).total_number_of_tokens() == 3
         assert LogicAnd(tokenless_node,
             LogicAnd(tokenless_node, tokenless_node)
-        ).number_of_tokens() == 2
-        assert LogicAnd(tokenless_node, double_token_node).number_of_tokens() == 3
+        ).total_number_of_tokens() == 2
+        assert LogicAnd(tokenless_node, double_token_node).total_number_of_tokens() == 3
 
     def test_arithmeticOperatorNodesAreConsideredTokens(self):
-        assert Add(Number(40), Number(2)).number_of_tokens() == 3
-        assert Add(Divide(Number(4), Number(0)), Number(2)).number_of_tokens() == 5
-        assert Parentheses(Number(42)).number_of_tokens() == 3
+        assert Add(Number(40), Number(2)).total_number_of_tokens() == 3
+        assert Add(Divide(Number(4), Number(0)), Number(2)).total_number_of_tokens() == 5
+        assert Parentheses(Number(42)).total_number_of_tokens() == 3
 
     def test_descriptionNodeHasAsManyTokensAsAdjectives(self):
-        assert Description("dika").number_of_tokens() == 1
-        assert Description("dika", Description("nigra")).number_of_tokens() == 2
+        assert Description("dika").total_number_of_tokens() == 1
+        assert Description("dika", Description("nigra")).total_number_of_tokens() == 2
 
     def test_variableNameNodeHasNumberOfTokensEqualToNumberOfWords(self):
-        assert VariableName("hundo", NoneNode()).number_of_tokens() == 1
-        assert VariableName("kato", Description("dika")).number_of_tokens() == 2
-        assert VariableName("kato", Description("dika", Description("nigra"))).number_of_tokens() == 3
+        assert VariableName("hundo", NoneNode()).total_number_of_tokens() == 1
+        assert VariableName("kato", Description("dika")).total_number_of_tokens() == 2
+        assert VariableName("kato", Description("dika", Description("nigra"))).total_number_of_tokens() == 3
 
     def test_assignmentStatementHas2TokensMoreThanItsComponents(self, tokenless_node, double_token_node):
-        assert VariableAssignment(tokenless_node, tokenless_node).number_of_tokens() == 2
-        assert VariableAssignment(double_token_node, double_token_node).number_of_tokens() == 6
+        assert VariableAssignment(tokenless_node, tokenless_node).total_number_of_tokens() == 2
+        assert VariableAssignment(double_token_node, double_token_node).total_number_of_tokens() == 6
 
-    def test_ifStatementHas3TokensIfThereIsNoElseClauseAnd4IfThereIsPlusInternals(self, tokenless_node, single_token_node, double_token_node):
-        assert ConditionalStatement(tokenless_node, tokenless_node).number_of_tokens() == 3
-        assert ConditionalStatement(tokenless_node, tokenless_node, tokenless_node).number_of_tokens() == 4
-        assert ConditionalStatement(single_token_node, double_token_node).number_of_tokens() == 6
-        assert ConditionalStatement(tokenless_node, single_token_node, double_token_node).number_of_tokens() == 7
+    def test_ifStatementHas3TokensIfThereIsNoElseClauseAnd4IfThereIsPlusInternals(self, tokenless_node,
+            single_token_node, double_token_node):
+        assert ConditionalStatement(tokenless_node, tokenless_node).total_number_of_tokens() == 3
+        assert ConditionalStatement(tokenless_node, tokenless_node, tokenless_node).total_number_of_tokens() == 4
+        assert ConditionalStatement(single_token_node, double_token_node).total_number_of_tokens() == 6
+        assert ConditionalStatement(tokenless_node, single_token_node, double_token_node).total_number_of_tokens() == 7
 
+    def test_whileStatementHas3TokensBesidesItsConditionsAndLoopBody(self, tokenless_node,
+            single_token_node, double_token_node):
+        assert LoopStatement(tokenless_node, tokenless_node).total_number_of_tokens() == 3
+        assert LoopStatement(single_token_node, double_token_node).total_number_of_tokens() == 6
+
+    def test_comparisonOperatorsContain3To6TokensPlusArguments(self, tokenless_node,
+            single_token_node, double_token_node):
+        assert Comparison(tokenless_node, Comparison.Relation.EQUAL, tokenless_node).total_number_of_tokens() == 3
+        assert Comparison(tokenless_node, Comparison.Relation.GREATER_OR_EQUAL,
+            tokenless_node).total_number_of_tokens() == 6
+        assert Comparison(single_token_node, Comparison.Relation.EQUAL, double_token_node).total_number_of_tokens() == 6
+        assert Comparison(double_token_node, Comparison.Relation.GREATER_OR_EQUAL,
+            double_token_node).total_number_of_tokens() == 10
+
+    def test_negatedComparisonOperatorsContain4Or7TokensPlusArguments(self, tokenless_node,
+            single_token_node, double_token_node):
+        assert Comparison(tokenless_node, Comparison.Relation.EQUAL,
+            tokenless_node).reverse().total_number_of_tokens() == 4
+        assert Comparison(tokenless_node, Comparison.Relation.GREATER_OR_EQUAL,
+            tokenless_node).reverse().total_number_of_tokens() == 7
+        assert Comparison(single_token_node, Comparison.Relation.EQUAL,
+            double_token_node).reverse().total_number_of_tokens() == 7
+        assert Comparison(double_token_node, Comparison.Relation.GREATER_OR_EQUAL,
+            double_token_node).reverse().total_number_of_tokens() == 11
+
+    def test_dereferenceNodesContain1TokenPlusInternals(self, tokenless_node, single_token_node):
+        assert Dereference(tokenless_node, tokenless_node).total_number_of_tokens() == 1
+        assert Dereference(single_token_node, single_token_node).total_number_of_tokens() == 3
+
+    def test_arrayAccessNodesContain1TokenPlusInternals(self, tokenless_node, single_token_node):
+        assert ArrayAccess(tokenless_node, tokenless_node).total_number_of_tokens() == 1
+        assert ArrayAccess(single_token_node, single_token_node).total_number_of_tokens() == 3
+
+    def test_programNodeContainsAdditionalTokenIfBothInternalsArePresent(self, tokenless_node, single_token_node):
+        assert Program(None, tokenless_node).total_number_of_tokens() == 0
+        assert Program(tokenless_node, tokenless_node).total_number_of_tokens() == 1
+        assert Program(single_token_node, single_token_node).total_number_of_tokens() == 3
+
+    def test_routineInvocationContainsTokensForRoutineNameArgumentsAndSeparators(self, tokenless_node,
+            single_token_node, double_token_node):
+        assert RoutineInvocation(tokenless_node, tokenless_node).total_number_of_tokens() == 0
+        assert RoutineInvocation(single_token_node, single_token_node).total_number_of_tokens() == 2
+        assert RoutineInvocation(single_token_node, double_token_node).total_number_of_tokens() == 4
+
+    def test_returnStatementContains1TokenBesidesReturnValue(self, tokenless_node, double_token_node):
+        assert ReturnValue(tokenless_node).total_number_of_tokens() == 1
+        assert ReturnValue(double_token_node).total_number_of_tokens() == 3
