@@ -12,7 +12,7 @@ class TestEndToEndExamplePrograms(EnglishLexerProvided):
     def esperantifier(self):
         return Esperantifier(Domsagxo(), ast.build())
 
-    def test_muFuncion_constant(self, lexer, esperantifier):
+    def test_muFunction_constant(self, lexer, esperantifier):
         lexer.input(example_programs.mu_constant)
         tokenized_program = [t for t in lexer]
         legal_interpretations_tree = esperantifier.try_interpreting(tokenized_program)

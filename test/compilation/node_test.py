@@ -206,11 +206,20 @@ class TestNumberOfTokensPerNode(SyntaxNodesProvided):
         assert Program(tokenless_node, tokenless_node).total_number_of_tokens() == 1
         assert Program(single_token_node, single_token_node).total_number_of_tokens() == 3
 
+    def test_routineDefinitionContainsTokensForRoutineNameArgumentsSeparatorsKeywordAndContent(self, tokenless_node,
+            single_token_node, double_token_node):
+        assert RoutineDefinition("", [tokenless_node], tokenless_node).total_number_of_tokens() == 3
+        assert RoutineDefinition("", [single_token_node], tokenless_node).total_number_of_tokens() == 4
+        assert RoutineDefinition("", [double_token_node, single_token_node],
+            tokenless_node).total_number_of_tokens() == 7
+        assert RoutineDefinition("", [tokenless_node], double_token_node).total_number_of_tokens() == 5
+
     def test_routineInvocationContainsTokensForRoutineNameArgumentsAndSeparators(self, tokenless_node,
             single_token_node, double_token_node):
-        assert RoutineInvocation(tokenless_node, tokenless_node).total_number_of_tokens() == 0
-        assert RoutineInvocation(single_token_node, single_token_node).total_number_of_tokens() == 2
-        assert RoutineInvocation(single_token_node, double_token_node).total_number_of_tokens() == 4
+        assert RoutineInvocation("", [tokenless_node]).total_number_of_tokens() == 1
+        assert RoutineInvocation("", [single_token_node]).total_number_of_tokens() == 2
+        assert RoutineInvocation("", [double_token_node]).total_number_of_tokens() == 3
+        assert RoutineInvocation("", [double_token_node, single_token_node]).total_number_of_tokens() == 5
 
     def test_returnStatementContains1TokenBesidesReturnValue(self, tokenless_node, double_token_node):
         assert ReturnValue(tokenless_node).total_number_of_tokens() == 1

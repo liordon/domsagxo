@@ -402,15 +402,20 @@ class TestPinPointingOffendingTokenOnSyntaxErrors(TopLevelAstProvided):
     def test_canIndicateProblemInVeryFirstToken(self, ast):
         with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
             ast.parse("finu")
-        assert exception_info.value.index == 1
+        assert exception_info.value.index == 0
 
     def test_canIdentifyProblemAfterArithmeticNode(self, ast):
         with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
             ast.parse("asignu 1 + 1 + finu")
-        assert exception_info.value.index == 6
+        assert exception_info.value.index == 5
 
     def test_canIdentifyProblemAfterMethodParameters(self, ast):
         with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
             ast.parse("sxambaluli unuo kaj duo kaj trio signifas finu")
-        assert exception_info.value.index == 8
+        assert exception_info.value.index == 7
+
+    def test_canIdentifyProblemAfterEntireMethodDefinition(self, ast):
+        with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
+            ast.parse("sxambaluli unuo kaj duo kaj trio signifas revenu finu finu")
+        assert exception_info.value.index == 9
 

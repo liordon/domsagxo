@@ -515,12 +515,16 @@ def build(start=None):
             if isinstance(symbol, yacc.YaccSymbol) and isinstance(symbol.value, node.AstNode):
                 # noinspection PyUnresolvedReferences
                 symbol_stack_trace += symbol.value.pretty_print()
+                shifted_tokens += symbol.value.total_number_of_tokens()
+            elif isinstance(symbol, yacc.YaccSymbol) and isinstance(symbol.value, list):
+                    shifted_tokens += sum([node.total_number_of_tokens() for node in symbol.value])
+                    shifted_tokens += len(symbol.value)-1
+                    symbol_stack_trace += str(symbol) + str(symbol.value)
             else:
-                if isinstance(symbol.value, list):
-                    shifted_tokens += len(symbol.value) * 2 - 2
                 symbol_stack_trace += str(symbol)
+                shifted_tokens += 1
             symbol_stack_trace += "\n"
-        raise EsperantoLocatedSyntaxError(symbol_stack_trace.count('\n') + 1 + shifted_tokens,
+        raise EsperantoLocatedSyntaxError(shifted_tokens,
             "Syntax error in input: " + str(p) + "\nOn parse tree:\n" + symbol_stack_trace)
 
     ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, errorlog=yacc.NullLogger())

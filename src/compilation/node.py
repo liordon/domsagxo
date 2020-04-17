@@ -352,7 +352,7 @@ class TimePoint(AstNode):
 
 
 class RoutineInvocation(AstNode):
-    def __init__(self, function_name, args):
+    def __init__(self, function_name: str, args: list):
         super(RoutineInvocation, self).__init__(function_name, args)
 
     def _method(self, state, function_name, args):
@@ -373,9 +373,10 @@ class RoutineInvocation(AstNode):
 
         return res
 
-    def _local_number_of_tokens(self):
-        argument_tokens = self.args[1].total_number_of_tokens()
-        return 0 if argument_tokens == 0 else argument_tokens - 1
+    def total_number_of_tokens(self):
+        argument_tokens = sum([arg.total_number_of_tokens() for arg in self.args[1]])
+        separator_tokens = 0 if len(self.args[1]) == 0 else len(self.args[1]) - 1
+        return 1 + argument_tokens + separator_tokens
 
 
 class ReturnValue(AstNode):
@@ -390,7 +391,7 @@ class ReturnValue(AstNode):
 
 
 class RoutineDefinition(AstNode):
-    def __init__(self, function_name, argument_names, command_subtree):
+    def __init__(self, function_name: str, argument_names: list, command_subtree: AstNode):
         super(RoutineDefinition, self).__init__(function_name, argument_names, command_subtree)
 
     @staticmethod
@@ -433,6 +434,16 @@ class RoutineDefinition(AstNode):
                 i == len(inner_args) - 1)
 
         return res
+
+    def total_number_of_tokens(self):
+        argument_tokens = sum([arg.total_number_of_tokens() for arg in self.args[1]])
+        separator_tokens = 0 if len(self.args[1]) == 0 else len(self.args[1]) - 1
+        subtree_tokens = self.args[2].total_number_of_tokens()
+        return self._local_number_of_tokens() + argument_tokens + separator_tokens + subtree_tokens
+
+    @staticmethod
+    def _local_number_of_tokens():
+        return 3
 
 
 class ConditionalStatement(AstNode):
