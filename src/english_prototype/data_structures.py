@@ -67,6 +67,7 @@ class BeamTreeNode(object):
         self.token = token
         self.probability = probability
         self.children = children
+        self.children_copied = False
 
     def tree_size(self):
         return 1 + sum([child.tree_size() for child in self.children])
@@ -94,11 +95,19 @@ class BeamTreeNode(object):
         else:
             for i in self.children:
                 if i.token.tag == tag_list[1] and i.prune(tag_list[1:]) is None:
-                    self.children.remove(i)
+                    if not self.children_copied:
+                        self.children = deepcopy(self.children)
+                    self.__remove_child(i)
                     if len(self.children) == 0:
                         return None
                     break
             return self
+
+    def __remove_child(self, i):
+        """Used to be self.children.remove(i) but that doesn't work anymore
+        due to using Copy On Write"""
+        child_index = self._find_index_of_child_matching_token(i.token)
+        self.children.pop(child_index)
 
     def get_next_interpretation(self, complete_interpretation=None):
         current_token = self.token
@@ -116,7 +125,7 @@ class BeamTreeNode(object):
         if len(self.children) == 0:  # no children
             return [current_token]
         else:
-            matching_child_index = self._find_child_matching(
+            matching_child_index = self._find_index_of_child_matching_token(
                 next_interpretations[0])  # referred to by current implementation
             child_interpretation = self.children[matching_child_index].get_next_interpretation(next_interpretations)
             if (len(next_interpretations) == 1 and self._are_children_leaves()) \
@@ -133,7 +142,7 @@ class BeamTreeNode(object):
     def _are_children_leaves(self):
         return len(self.children) + 1 == self.tree_size()
 
-    def _find_child_matching(self, search_token):
+    def _find_index_of_child_matching_token(self, search_token):
         for i in range(len(self.children)):
             if self.children[i].token == search_token:
                 return i
@@ -143,7 +152,7 @@ class BeamTreeNode(object):
         if interpretation[0] != self.token:
             raise KeyError()
         if len(interpretation) > 1:
-            matching_child = self._find_child_matching(interpretation[1])
+            matching_child = self._find_index_of_child_matching_token(interpretation[1])
             if matching_child is None:
                 return interpretation[:1]
             else:
@@ -189,7 +198,7 @@ class BeamTree(BeamTreeNode):
     def __branch_from_beam_token(beam_token, children):
         token = Token(beam_token.value, [*beam_token.tags][0])
         probability = beam_token.tags[token.tag]
-        return BeamTreeNode(token, probability, deepcopy(children))
+        return BeamTreeNode(token, probability, children)
 
 
 def convert_item_to_dict_representation(dict_item: tuple):

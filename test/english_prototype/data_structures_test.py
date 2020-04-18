@@ -1,3 +1,6 @@
+from concurrent.futures import thread
+from time import sleep
+
 import pytest
 
 from compilation.definitions import PartOfSpeech
@@ -165,3 +168,7 @@ class TestBeamTree(BeamTokensProvided):
         ]
         sub_interpretation = double_love_tree.longest_legal_sub_interpretation(interpretation)
         assert sub_interpretation == interpretation
+
+    @pytest.mark.timeout(timeout=1)
+    def test_canRapidlyConstructHugeBeamTrees(self, love_noun_or_verb_token):
+        BeamTree.from_tokens_list([love_noun_or_verb_token] * 20)

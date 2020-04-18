@@ -22,12 +22,12 @@ def convert_tag_to_part_of_speech(tag):
         return PartOfSpeech.PREPOSITION
     elif insensitive_starts_with(tag, 'n'):
         return PartOfSpeech.NOUN
-    elif insensitive_starts_with(tag, 'r'):
-        return PartOfSpeech.ADVERB
+    # elif insensitive_starts_with(tag, 'r'):
+    #     return PartOfSpeech.ADVERB # not using adverbs
     elif insensitive_starts_with(tag, 'v'):
         return PartOfSpeech.V_IMP
     else:
-        return ''
+        return None
 
 
 class NltkProtoLexer(object):
@@ -44,11 +44,12 @@ class NltkProtoLexer(object):
 
 
 def collect_probabilities_from_list(possible_vals):
+    filtered_values = [v for v in possible_vals if v is not None]
     tags = {}
-    for val in possible_vals:
+    for val in filtered_values:
         tags[val] = tags.get(val, 0) + 1
     for val in tags.keys():
-        tags[val] /= len(possible_vals)
+        tags[val] /= len(filtered_values)
     return tags
 
 
