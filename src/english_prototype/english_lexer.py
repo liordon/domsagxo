@@ -85,6 +85,8 @@ class WordnetProtoLexer(object):
                 self._stack.insert(0, (current_word, {UnalphabeticTerminal.STRING: 1}))
             else:
                 token_tuple = convert_word_to_stochastic_token_tuple(current_word)
+                if current_word.endswith("th") and len(token_tuple[1].keys()) == 0:
+                    token_tuple[1][PartOfSpeech.ADJECTIVE] = 1
                 if UnalphabeticTerminal.COMMENT not in token_tuple[1] \
                         or token_tuple[1][UnalphabeticTerminal.COMMENT] < 1:
                     self._stack.insert(0, token_tuple)

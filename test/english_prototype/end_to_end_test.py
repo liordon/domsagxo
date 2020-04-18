@@ -1,7 +1,6 @@
 import pytest
 
 from english_prototype import example_programs
-from english_prototype.data_structures import calculate_total_combinations
 from english_prototype.esperantifier import Esperantifier
 from library.management_components import Domsagxo
 from test_utils.providers import EnglishLexerProvided
@@ -13,16 +12,27 @@ class TestEndToEndExamplePrograms(EnglishLexerProvided):
     def esperantifier(self):
         return Esperantifier(Domsagxo(), ast.build())
 
+    def test_noEmptyTokensInAnyExampleProgram(self, lexer):
+        problematic_tokens = []
+        for program in example_programs.EngluentoPrograms:
+            lexer.input(program.value)
+            for token in lexer:
+                if len(token.tags.keys()) == 0 and token.value not in problematic_tokens:
+                    problematic_tokens += [token.value]
+        print(problematic_tokens)
+
     def test_muFunction_constant(self, lexer, esperantifier):
-        lexer.input(example_programs.mu_constant)
+        lexer.input(example_programs.EngluentoPrograms.mu_constant.value)
         tokenized_program = [t for t in lexer]
         legal_interpretations_tree = esperantifier.try_interpreting(tokenized_program)
         assert legal_interpretations_tree.number_of_leaves() > 0
 
-
     # def test_program_sillyNameExample(self, lexer, esperantifier):
-    #     lexer.input(example_programs.silly_name_generator)
-    #
+    #     lexer.input(example_programs.EngluentoPrograms.silly_name_generator.value)
+    #     tokenized_program = [t for t in lexer]
+    #     legal_interpretations_tree = esperantifier.try_interpreting(tokenized_program)
+    #     assert legal_interpretations_tree.number_of_leaves() > 0
+
     # def test_program_sequencedAnnouncements(self, lexer):
     #     lexer.input(example_programs.sequenced_announcements)
     #

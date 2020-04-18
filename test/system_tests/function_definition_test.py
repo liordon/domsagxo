@@ -98,7 +98,6 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         for i in range(len(new_state.variables["sxambaluloj"])):
             assert 10 * (i + 1) == new_state.variables["sxambaluloj"][i].properties["brilo"]
 
-
     def test_canDefineMuConstantFunction(self, ast, smart_home):
         """the Mu-recursive constant function has a predefined constant n which it always returns.
         The function is simply: f(x) = n."""
