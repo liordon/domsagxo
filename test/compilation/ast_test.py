@@ -1,8 +1,9 @@
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
+import compilation.definitions
 from compilation import node
-from compilation.abstract_syntax_tree import EsperantoLocatedSyntaxError
+from compilation.definitions import EsperantoLocatedSyntaxError
 from test_utils import mocks
 from test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided, \
     MockSmartHomeStateVariablesProvided, TopLevelAstProvided
@@ -139,14 +140,6 @@ class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType)
         self.assertThatExpressionIsOfNodeType(ast, "gxin", node.VariableName)
         self.assertThatExpressionIsOfNodeType(ast, "ĝi", node.VariableName)
         self.assertThatExpressionIsOfNodeType(ast, "ĝin", node.VariableName)
-
-
-# class TestListTypeNodes(CanAssertNodeType):
-#
-#     def test_routineParametersHaveANodeTypeOfTheirOwn(self):
-#         parameter_ast = ast_bld.build(start=ast_bld.GrammarVariable.PARAMETERS.value)
-#         self.assertThatExpressionIsOfNodeType(parameter_ast, "hundo", node.Parameters)
-#         self.assertThatExpressionIsOfNodeType(parameter_ast, "hundo kaj kato", node.Parameters)
 
 
 class TestReferenceSemantics(ExpressionLevelAstProvided, MockSmartHomeStateVariablesProvided):
@@ -293,7 +286,7 @@ class TestAstMathExpressions(ExpressionLevelAstProvided):
         assert 9 == parsed_value_of(ast, "krampo unu pli du malkrampo fojoj tri")
 
     def test_sameDigitCannotBeSpecifiedTwice(self, ast):
-        with pytest.raises(ast_bld.EsperantoSyntaxError):
+        with pytest.raises(compilation.definitions.EsperantoSyntaxError):
             ast.parse("naux ses")
 
 
@@ -325,7 +318,7 @@ class TestAstBooleanExpressions(ExpressionLevelAstProvided):
 class TestAstRelationalExpressions(ExpressionLevelAstProvided):
     @pytest.fixture
     def relation_ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.RELATION.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.RELATION.value)
 
     def test_existsAnEqualityRelation(self, relation_ast):
         ast_node = relation_ast.parse("estas egala al")
@@ -346,6 +339,14 @@ class TestAstRelationalExpressions(ExpressionLevelAstProvided):
     def test_existsAnEqualOrSmallnessRelation(self, relation_ast):
         ast_node = relation_ast.parse("estas pli malgranda aux egala al")
         assert ast_node is not None
+
+    def test_unalphabeticComparisonOperatorsAreEquivalentToSpokenOperators(self, relation_ast):
+        assert relation_ast.parse("estas pli granda ol") == relation_ast.parse(">")
+        assert relation_ast.parse("estas pli malgranda ol") == relation_ast.parse("<")
+        assert relation_ast.parse("estas pli granda aux egala al") == relation_ast.parse(">=")
+        assert relation_ast.parse("estas pli malgranda aux egala al") == relation_ast.parse("<=")
+        assert relation_ast.parse("estas pli granda aux egala al") == relation_ast.parse("≥")
+        assert relation_ast.parse("estas pli malgranda aux egala al") == relation_ast.parse("≤")
 
     def test_canEvaluateEqualityBetweenNumberAndItself(self, ast):
         assert parsed_value_of(ast, "unu estas egala al unu")
@@ -418,4 +419,3 @@ class TestPinPointingOffendingTokenOnSyntaxErrors(TopLevelAstProvided):
         with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
             ast.parse("sxambaluli unuo kaj duo kaj trio signifas revenu finu finu")
         assert exception_info.value.index == 9
-

@@ -3,6 +3,7 @@ import datetime
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
+import compilation.definitions
 from library.atomic_types import Appliance
 from library.management_components import Domsagxo
 from library.predefined_values import ApplianceTypes, ApplianceQueries, Color
@@ -19,7 +20,7 @@ def parsed_value_of(ast, expr, state=None):
 class TestAstTimeSpans(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.TIME_SPAN.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.TIME_SPAN.value)
 
     @staticmethod
     def assertTimeSpan(parse_result, days=0, hours=0, minutes=0, seconds=0):
@@ -62,7 +63,7 @@ class TestAstTimeSpans(object):
         self.assertTimeSpan(parse_result, hours=1, minutes=30)
 
     def test_cannotFormatAnHourAndAnHour(self, ast):
-        with pytest.raises(ast_bld.EsperantoSyntaxError):
+        with pytest.raises(compilation.definitions.EsperantoSyntaxError):
             ast.parse("horo kaj unu")
 
     def test_canFormatHalfAMinute(self, ast):
@@ -77,7 +78,7 @@ class TestAstTimeSpans(object):
 class TestAstTimePoints(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.TIME_POINT.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.TIME_POINT.value)
 
     @staticmethod
     def assertTimePointValues(parse_result, hour, minutes=0):
@@ -106,34 +107,34 @@ class TestAstTimePoints(object):
         self.assertTimePointValues(parse_result, 23)
 
     def test_cannotFormatFormalFracturedHour_ITriedThatAndGotParsingConflicts(self, ast):
-        with pytest.raises(ast_bld.EsperantoSyntaxError):
+        with pytest.raises(compilation.definitions.EsperantoSyntaxError):
             ast.parse("la deka horo kaj kvardek ses minutoj")
 
     def test_cannotFormatMoreThan24thHour(self, ast):
-        with pytest.raises(ast_bld.EsperantoSyntaxError):
+        with pytest.raises(compilation.definitions.EsperantoSyntaxError):
             parsed_value_of(ast, "la kvardek sesa horo kaj nul")
 
     def test_cannotFormatMoreThan24thHourInOneDigit(self, ast):
-        with pytest.raises(ast_bld.EsperantoSyntaxError):
+        with pytest.raises(compilation.definitions.EsperantoSyntaxError):
             parsed_value_of(ast, "la nauxdeka horo kaj nul")
 
     def test_cannotFormatMoreThan60Minutes(self, ast):
-        with pytest.raises(ast_bld.EsperantoSyntaxError):
+        with pytest.raises(compilation.definitions.EsperantoSyntaxError):
             parsed_value_of(ast, "la kvina kaj cent")
 
     def test_cannotFormatTimeWithoutHour(self, ast):
-        with pytest.raises(ast_bld.EsperantoSyntaxError):
+        with pytest.raises(compilation.definitions.EsperantoSyntaxError):
             parsed_value_of(ast, "la kvina minuto")
 
     def test_cannotFormatReverseOrderTime(self, ast):
-        with pytest.raises(ast_bld.EsperantoSyntaxError):
+        with pytest.raises(compilation.definitions.EsperantoSyntaxError):
             parsed_value_of(ast, "la kvina minuto kaj dek horoj")
 
 
 class TestAstRandomGeneration(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.ROUTINE_INVOCATION.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.ROUTINE_INVOCATION.value)
 
     def test_canGenerateRandomNumber(self, ast):
         parsed_value_of(ast, "hazardu nombro")
@@ -171,7 +172,7 @@ class TestAstRandomGeneration(object):
 class TestAstApplianceManagement(object):
     @pytest.fixture
     def ast(self):
-        abstract_syntax_tree = ast_bld.build(start=ast_bld.GrammarVariable.ROUTINE_INVOCATION.value)
+        abstract_syntax_tree = ast_bld.build(start=compilation.definitions.GrammarVariable.ROUTINE_INVOCATION.value)
         return abstract_syntax_tree
 
     @pytest.fixture
@@ -231,7 +232,7 @@ class TestAstApplianceManagement(object):
 class TestObjectOrientedActions(object):
     @pytest.fixture
     def parser(self):
-        abstract_syntax_tree = ast_bld.build(start=ast_bld.GrammarVariable.STATEMENT.value)
+        abstract_syntax_tree = ast_bld.build(start=compilation.definitions.GrammarVariable.STATEMENT.value)
         return abstract_syntax_tree
 
     @pytest.fixture

@@ -15,6 +15,12 @@ class UnalphabeticTerminal(Enum):
     L_PAREN = 'TLPAREN'
     R_PAREN = 'TRPAREN'
     COMMENT = 'TCOMMENT'
+    GREATER_THAN = 'TGT'
+    GREATER_EQUAL = 'TGE'
+    LESSER_THAN = 'TLT'
+    LESSER_EQUAL = 'TLE'
+    EXACTLY_EQUAL = 'TEQ'
+    NOT_EQUAL = 'TNEQ'
 
 
 class ReservedWord(Enum):
@@ -173,3 +179,49 @@ prepositions = {
     'tra',
     'trans'
 }
+
+
+class EsperantoSyntaxError(Exception):
+    def __init__(self, error_message):
+        self.message = error_message
+
+
+class EsperantoLocatedSyntaxError(EsperantoSyntaxError):
+    def __init__(self, index: int, description: str):
+        self.index = index
+        super(EsperantoSyntaxError, self).__init__(description)
+
+
+class GrammarVariable(Enum):
+    PROGRAM = 'V_program'
+    BLOCK = 'V_block'
+    STATEMENT = 'V_statement'
+    IF_STATEMENT = 'V_if'
+    WHILE_LOOP = 'V_while_loop'
+    DELAYED_STATEMENT = 'V_delayed_statement'
+    DELIMITER = 'V_separator'
+    SCHEDULED_STATEMENT = 'V_scheduled_statement'
+    REPEATING_STATEMENT = 'V_repeating_statement'
+    RETURN_STATEMENT = 'V_return'
+    ASSIGN_STATEMENT = 'V_assign'
+    EXPRESSION = 'V_expression'
+    TIME_SPAN = 'V_time_span'
+    TIME_POINT = 'V_time_point'
+    NAME = 'V_name'
+    VARIABLE = 'V_variable'
+    PARTIAL_NAME = 'V_partial_name'
+    ADJECTIVE = 'V_adjective'
+    TERM = 'V_term'
+    FACTOR = 'V_factor'
+    ROUTINE_INVOCATION = 'V_routine_invocation'
+    NUMBER_LITERAL = 'V_number_literal'
+    HOUR_ORDINAL = 'V_hour_ordinal'
+    PARTIAL_TIME_SPAN = 'V_partial_time_span'
+    ROUTINE_ARGUMENTS = 'V_arguments'
+    ROUTINE_ARGUMENT = 'V_single_argument'
+    PARAMETERS = 'V_parameters'
+    ROUTINE_DEFINITION = 'V_routine_definition'
+    RELATION = 'V_relation'
+    LARGE_ORDINAL = 'V_large_ordinal'
+    ONCE_STATEMENT = 'V_once_statement'
+    WHENEVER_STATEMENT = 'V_whenever_statement'

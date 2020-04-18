@@ -291,3 +291,24 @@ class TestMultipleTokenSequences(EsperantoLexerProvided):
     def test_canParseSimpleAdditionExpression(self, lexer):
         lexer.input("1+1")
         assert 3 == len(self.getTokenList(lexer))
+
+
+class TestUnalphabeticSyntacticSugar(EsperantoLexerProvided):
+    def test_relationOperatorsAreRecognizedByLexer(self, lexer):
+        lexer.input(">")
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.GREATER_THAN, lexer)
+
+        lexer.input("<")
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.LESSER_THAN, lexer)
+
+        lexer.input(">=")
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.GREATER_EQUAL, lexer)
+
+        lexer.input("<=")
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.LESSER_EQUAL, lexer)
+
+        lexer.input("≥")
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.GREATER_EQUAL, lexer)
+
+        lexer.input("≤")
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.LESSER_EQUAL, lexer)

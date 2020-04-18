@@ -28,6 +28,10 @@ t_TLPAREN = r'\('
 t_TRPAREN = r'\)'
 t_TPERIOD = r'\.'
 t_TDELIM = r','
+t_TGT = r'\>'
+t_TGE = r'(\>=)|≥'
+t_TLT = r'\<'
+t_TLE = r'(\<=)|≤'
 t_ignore_TCOMMENT = r'\#.*'
 
 

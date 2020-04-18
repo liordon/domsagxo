@@ -3,6 +3,7 @@ import datetime
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
+import compilation.definitions
 import compilation.esperanto_lexer as eo_lxr
 from compilation.definitions import PartOfSpeech
 from compilation.node import AstNode
@@ -69,25 +70,25 @@ class EsperantoLexerProvided(PartOfSpeechValueVerifier):
 class PartialNameLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.PARTIAL_NAME.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.PARTIAL_NAME.value)
 
 
 class ExpressionLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.EXPRESSION.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.EXPRESSION.value)
 
 
 class FunctionDefinitionLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.ROUTINE_DEFINITION.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.ROUTINE_DEFINITION.value)
 
 
 class StatementLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.STATEMENT.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.STATEMENT.value)
 
 
 class TopLevelAstProvided(object):

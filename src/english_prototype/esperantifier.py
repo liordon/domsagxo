@@ -1,5 +1,4 @@
-from compilation.abstract_syntax_tree import EsperantoSyntaxError, EsperantoLocatedSyntaxError
-from compilation.definitions import PartOfSpeech, ReservedWord, UnalphabeticTerminal
+from compilation.definitions import *
 from english_prototype.data_structures import BeamTree
 
 _part_of_speech_suffix = {
