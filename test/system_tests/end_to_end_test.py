@@ -4,6 +4,7 @@ import time
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
+import compilation.definitions
 import library.management_components as mng_co
 from library.atomic_types import Appliance
 from library.predefined_values import ApplianceTypes, ApplianceProperties, Color
@@ -221,14 +222,14 @@ class TestAstPrograms(object):
 
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.PROGRAM.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.PROGRAM.value)
 
     @pytest.fixture
     def initial_state(self):
         return mng_co.Domsagxo()
 
     def test_unterminatedCommandIsNotAProgram(self, ast):
-        with pytest.raises(ast_bld.EsperantoSyntaxError):
+        with pytest.raises(compilation.definitions.EsperantoSyntaxError):
             ast.parse("12")
 
     def test_canParseASingleCommandAsProgram(self, ast):
