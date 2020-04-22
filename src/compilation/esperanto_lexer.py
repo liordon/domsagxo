@@ -49,7 +49,7 @@ timeUnitRe = re.compile(r"(jaro|monato|semajno|tago|horo|minuto|sekundo)j?\b")
 
 def t_string(t):
     r"""('.*?')|(".*?")|(\bmaldekstra\scitilo\b.*?\bdekstra\scitilo\b)|(
-    \bcitilo\b.*?\bmalcitilo\b)"""
+    \bcitilo\b(.|\n)*?\bmalcitilo\b)"""
     if t.value.startswith("maldekstra citilo"):
         t.value = t.value[18:-15]
     if t.value.startswith("citilo"):
@@ -62,7 +62,7 @@ def t_string(t):
 
 def t_TWORD(t):
     r"""[a-zĉĝĥĵŝŭA-ZĈĜĤĴŜŬ]+"""
-    if reserved_words.keys().__contains__(t.value):
+    if reserved_words.keys().__contains__(t.value.lower()):
         determine_type_and_value_of_reserved_words(t)
     elif digitRe.fullmatch(t.value):
         t.type = ReservedWord.VERBAL_DIGIT.value
@@ -90,7 +90,7 @@ def t_TWORD(t):
 
 
 def determine_type_and_value_of_reserved_words(t):
-    t.type = reserved_words[t.value]
+    t.type = reserved_words[t.value.lower()]
     if t.type == ReservedWord.IT.value:
         t.value = ReservedWord.IT.value[1:]
 

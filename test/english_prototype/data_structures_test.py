@@ -80,6 +80,22 @@ class TestBeamTree(BeamTokensProvided):
         assert subtrees[noun_location].probability == love_noun_or_verb_token.tags[PartOfSpeech.NOUN]
         assert subtrees[1 - noun_location].probability == love_noun_or_verb_token.tags[PartOfSpeech.V_IMP]
 
+    def test_canReturnTreeDepthIfQueried(self, double_love_tree):
+        assert double_love_tree.tree_depth() == 3
+
+    def test_pruningDoesNotAffectTreeDepthIfQueried(self, double_love_tree):
+        assert double_love_tree.prune([PartOfSpeech.NOUN]).tree_depth() == 3
+
+    def test_loneRootHasDepthOf1(self, double_love_tree):
+        assert BeamTree([]).tree_depth() == 1
+
+    def test_canVerifyTreeIntegrity(self, double_love_tree):
+        assert double_love_tree.verify_integrity()
+
+    def test_integrityVerificationFailsWhenTreeHasDanglingBranch(self, double_love_tree):
+        double_love_tree.children[0].children = []
+        assert not double_love_tree.verify_integrity()
+
     def test_pruningWholeTreeReturnsRoot(self, kite_noun_token):
         assert BeamTree.from_tokens_list([kite_noun_token] * 2) \
                    .prune([PartOfSpeech.NOUN]).tree_size() == 1
@@ -102,6 +118,12 @@ class TestBeamTree(BeamTokensProvided):
         pruned_tree = pruned_tree.prune([PartOfSpeech.NOUN, PartOfSpeech.V_IMP])
         assert pruned_tree.tree_size() == 4
         assert pruned_tree.number_of_leaves() == 2
+
+    def test_whenDeepBranchIsPrunedParallelBranchesAreUnaffected(self, kite_noun_token, love_noun_or_verb_token):
+        love_tree = BeamTree.from_tokens_list([love_noun_or_verb_token] + [kite_noun_token] * 2)
+        pruned_tree = love_tree.prune([PartOfSpeech.NOUN] * 3)
+        assert pruned_tree.tree_size() == 4
+        assert pruned_tree.number_of_leaves() == 1
 
     def test_gettingInterpretationOfEmptyTreeYieldsEmptyList(self):
         empty_tree = BeamTree([])

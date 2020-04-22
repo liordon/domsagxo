@@ -66,6 +66,12 @@ class Esperantifier(object):
                 self._ast.parse(esperantify_tokens(interpretation))
             except EsperantoLocatedSyntaxError as e:
                 interpretations_tree = interpretations_tree.prune([t.tag for t in interpretation[:e.index+1]])
+                if not interpretations_tree.verify_integrity():
+                    print("tree integrity ruined!")
+                    print("last interpretation was: " + str(interpretation))
+                    print("resulting tree:")
+                    print(interpretations_tree.pretty_print())
+                    return None
                 interpretation = interpretations_tree.longest_legal_sub_interpretation(interpretation)
                 if interpretations_tree.tree_size() == 1:
                     print(e)

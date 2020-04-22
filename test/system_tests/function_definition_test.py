@@ -195,3 +195,21 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         for i in range(2, 100):
             assert is_prime(i) == new_state.variables['sxambaluloj'][i - 1].isTurnedOn()
             assert is_prime(i) == (i in self.prime_list)
+
+    def test_canDefineSillyNameFunction(self, ast, smart_home):
+        new_state = evaluate_and_return_state(
+            ast, '''
+                sensencnomi signifas
+                    Anoncu citilo kio estas via 
+                        bonsxanca nombro malcitilo
+                    poste atentu bonsxanca nombro
+                    poste anoncu citilo kio estas via
+                        sxatata koloro malcitilo
+                    poste atentu sxatata koloro
+                    poste asignu sxatata koloro pli 
+                        bonsxanca nombro al sensenca nomo
+                    poste anoncu citilo via sensenca nomo 
+                        estas malcitilo
+                    poste anoncu sensenca nomo
+                finu ''')
+        assert new_state.method_dict['sensencnomu'] is not None

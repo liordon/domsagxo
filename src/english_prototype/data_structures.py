@@ -72,6 +72,9 @@ class BeamTreeNode(object):
     def tree_size(self):
         return 1 + sum([child.tree_size() for child in self.children])
 
+    def tree_depth(self):
+        return 1 + (0 if len(self.children) == 0 else self.children[0].tree_depth())
+
     def number_of_leaves(self):
         return 1 if len(self.children) == 0 \
             else sum([child.number_of_leaves() for child in self.children])
@@ -90,24 +93,16 @@ class BeamTreeNode(object):
         return res
 
     def prune(self, tag_list):
+        if tag_list[0] != self.token.tag:
+            return self
         if len(tag_list) == 1 and tag_list[0] == self.token.tag:
             return None
         else:
-            for i in self.children:
-                if i.token.tag == tag_list[1] and i.prune(tag_list[1:]) is None:
-                    if not self.children_copied:
-                        self.children = deepcopy(self.children)
-                    self.__remove_child(i)
-                    if len(self.children) == 0:
-                        return None
-                    break
-            return self
-
-    def __remove_child(self, i):
-        """Used to be self.children.remove(i) but that doesn't work anymore
-        due to using Copy On Write"""
-        child_index = self._find_index_of_child_matching_token(i.token)
-        self.children.pop(child_index)
+            new_children = [child.prune(tag_list[1:]) for child in self.children]
+            new_children = [child for child in new_children if child is not None]
+            if len(new_children) == 0:
+                return None
+            return BeamTreeNode(self.token, self.probability, new_children)
 
     def get_next_interpretation(self, complete_interpretation=None):
         current_token = self.token
@@ -139,15 +134,6 @@ class BeamTreeNode(object):
             # an existing child.
             return [current_token] + child_interpretation
 
-    def _are_children_leaves(self):
-        return len(self.children) + 1 == self.tree_size()
-
-    def _find_index_of_child_matching_token(self, search_token):
-        for i in range(len(self.children)):
-            if self.children[i].token == search_token:
-                return i
-        return None
-
     def longest_legal_sub_interpretation(self, interpretation):
         if interpretation[0] != self.token:
             raise KeyError()
@@ -162,6 +148,29 @@ class BeamTreeNode(object):
         elif len(interpretation) == 1:
             return interpretation
 
+    def __remove_child(self, i):
+        """Used to be self.children.remove(i) but that doesn't work anymore
+        due to using Copy On Write"""
+        child_index = self._find_index_of_child_matching_token(i.token)
+        self.children.pop(child_index)
+
+    def _are_children_leaves(self):
+        return len(self.children) + 1 == self.tree_size()
+
+    def _find_index_of_child_matching_token(self, search_token):
+        for i in range(len(self.children)):
+            if self.children[i].token == search_token:
+                return i
+        return None
+
+    def verify_integrity(self):
+        if len(self.children) == 0:
+            return True
+        children_depths = [child.tree_depth() for child in self.children]
+        if len(set(children_depths)) > 1:
+            return False
+        return False not in [child.verify_integrity() for child in self.children]
+
 
 class BeamTree(BeamTreeNode):
     ROOT_TOKEN = Token("root", None)
@@ -170,7 +179,11 @@ class BeamTree(BeamTreeNode):
         super(BeamTree, self).__init__(BeamTree.ROOT_TOKEN, 1, subtrees)
 
     def prune(self, tag_list):
-        super(BeamTree, self).prune([None] + tag_list)
+        prune_result = super(BeamTree, self).prune([None] + tag_list)
+        if prune_result is None:
+            self.children = []
+        else:
+            self.children = prune_result.children
         return self
 
     def get_next_interpretation(self, complete_interpretation=None):

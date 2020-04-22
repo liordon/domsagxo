@@ -62,6 +62,8 @@ class TestReservedWords(EsperantoLexerProvided):
     def test_theWordAsignuIsRecognizedForAssignment(self, lexer):
         lexer.input("asignu")
         self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.PUT, lexer)
+        lexer.input("Asignu")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.PUT, lexer)
 
     def test_theWordEstasIsEquivalentToEqualsSign(self, lexer):
         lexer.input("=")
@@ -70,6 +72,8 @@ class TestReservedWords(EsperantoLexerProvided):
     def test_kajIsAReservedWordAndNotAnAdjective(self, lexer):
         lexer.input("kaj")
         self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.AND, lexer)
+        lexer.input("Kaj")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.AND, lexer)
 
     def test_kunIsAPrepositionAndNotAnAccusativeImperativeVerb(self, lexer):
         lexer.input("kun")
@@ -77,6 +81,8 @@ class TestReservedWords(EsperantoLexerProvided):
 
     def test_reservedWordLa(self, lexer):
         lexer.input("la")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.THE, lexer)
+        lexer.input("La")
         self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.THE, lexer)
 
     def test_numericalTokensHaveIntValuesInsteadOfStrings(self, lexer):
@@ -92,6 +98,10 @@ class TestReservedWords(EsperantoLexerProvided):
         self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TRUE, lexer)
         lexer.input("malvero")
         self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.FALSE, lexer)
+        lexer.input("Vero")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TRUE, lexer)
+        lexer.input("Malvero")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.FALSE, lexer)
 
     def test_words_moreLessTimesParts_areReservedForMath(self, lexer):
         lexer.input("pli")
@@ -102,6 +112,14 @@ class TestReservedWords(EsperantoLexerProvided):
         self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TIMES, lexer)
         lexer.input("partoj")
         self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.PARTS, lexer)
+        lexer.input("Pli")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.MORE, lexer)
+        lexer.input("Malpli")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.LESS, lexer)
+        lexer.input("Fojoj")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.TIMES, lexer)
+        lexer.input("Partoj")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.PARTS, lexer)
 
     def test_words_rightLeftParenthesis_areReservedForMath(self, lexer):
         lexer.input("(")
@@ -111,6 +129,10 @@ class TestReservedWords(EsperantoLexerProvided):
         lexer.input("krampo")
         self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.L_PAREN, lexer)
         lexer.input("malkrampo")
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.R_PAREN, lexer)
+        lexer.input("Krampo")
+        self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.L_PAREN, lexer)
+        lexer.input("Malkrampo")
         self.assert_part_of_speech_for_next_token_of_lexer(UnalphabeticTerminal.R_PAREN, lexer)
 
     def test_timeUnitsAreRecognizedTimeIndicationsAndNotNouns(self, lexer):
@@ -136,9 +158,17 @@ class TestReservedWords(EsperantoLexerProvided):
         self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.THEN, lexer)
         lexer.input("alie")
         self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.ELSE, lexer)
+        lexer.input("Se")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.IF, lexer)
+        lexer.input("Tiam")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.THEN, lexer)
+        lexer.input("Alie")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.ELSE, lexer)
 
     def test_theWord_While_isReservedForLoopStatements(self, lexer):
         lexer.input("dum")
+        self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.DURING, lexer)
+        lexer.input("Dum")
         self.assert_part_of_speech_for_next_token_of_lexer(ReservedWord.DURING, lexer)
 
     def test_theWords_ThenToMoreGreatSmallOrNot_areReservedForComparisons(self, lexer):
@@ -271,6 +301,16 @@ class TestStrings(EsperantoLexerProvided):
         assert UnalphabeticTerminal.STRING.value != lexer.token().type
         lexer.input("malmaldekstra citilo dekstra citilo")
         assert UnalphabeticTerminal.STRING.value != lexer.token().type
+
+    def test_canIdentifyStringAfterImperativeVerb(self, lexer):
+        lexer.input("anoncu citilo sxambalulo malcitilo")
+        _ = lexer.token()
+        assert lexer.token().type == UnalphabeticTerminal.STRING.value
+
+    def test_canIdentifyStringSpanningMultipleLines(self, lexer):
+        lexer.input("""citilo sxambalulo
+         kahxolo malcitilo""")
+        assert lexer.token().type == UnalphabeticTerminal.STRING.value
 
 
 class TestMultipleTokenSequences(EsperantoLexerProvided):
