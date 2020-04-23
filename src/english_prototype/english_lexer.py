@@ -54,13 +54,14 @@ def collect_probabilities_from_list(possible_vals):
 
 
 def convert_word_to_stochastic_token_tuple(w):
+    w = w.lower()
     if re.match(r"\d+", w):
         return w, {UnalphabeticTerminal.NUMBER: 1.}
     # if re.match(r"[a-zĉĝĥĵŝŭA-ZĈĜĤĴŜŬ]+", w):
     else:
         return (w, collect_probabilities_from_list(
             [convert_tag_to_part_of_speech(syn.pos()) for syn in wordnet.synsets(w)]
-            + identify_potential_keywords(w.lower())))
+            + identify_potential_keywords(w)))
 
 
 class WordnetProtoLexer(object):

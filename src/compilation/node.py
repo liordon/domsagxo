@@ -169,7 +169,7 @@ class VariableName(BasicNode):
     def __init__(self, variable_name, variable_descriptor):
         super(VariableName, self).__init__(variable_name)
         self.variable_name = " ".join(
-            variable_descriptor.getContainedAdjectives() + [variable_name]).lower()
+            variable_descriptor.getContainedAdjectives() + [variable_name])
 
     def _method(self, state, variable_name):
         if self.variable_name in state.variables:
@@ -392,7 +392,7 @@ class ReturnValue(AstNode):
 
 class RoutineDefinition(AstNode):
     def __init__(self, function_name: str, argument_names: list, command_subtree: AstNode):
-        super(RoutineDefinition, self).__init__(function_name.lower(), argument_names, command_subtree)
+        super(RoutineDefinition, self).__init__(function_name, argument_names, command_subtree)
 
     @staticmethod
     def turn_ast_into_function(state, function_name, argument_names, abstract_syntax_tree):

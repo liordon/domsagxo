@@ -1,6 +1,5 @@
 import pytest
 
-from compilation import esperanto_lexer
 from demo.example_programs import *
 from english_prototype.esperantifier import Esperantifier
 from library.management_components import Domsagxo

@@ -62,7 +62,8 @@ def t_string(t):
 
 def t_TWORD(t):
     r"""[a-zĉĝĥĵŝŭA-ZĈĜĤĴŜŬ]+"""
-    if reserved_words.keys().__contains__(t.value.lower()):
+    t.value = t.value.lower()
+    if reserved_words.keys().__contains__(t.value):
         determine_type_and_value_of_reserved_words(t)
     elif digitRe.fullmatch(t.value):
         t.type = ReservedWord.VERBAL_DIGIT.value
@@ -90,7 +91,7 @@ def t_TWORD(t):
 
 
 def determine_type_and_value_of_reserved_words(t):
-    t.type = reserved_words[t.value.lower()]
+    t.type = reserved_words[t.value]
     if t.type == ReservedWord.IT.value:
         t.value = ReservedWord.IT.value[1:]
 

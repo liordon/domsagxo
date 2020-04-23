@@ -169,7 +169,9 @@ class TestTimedAstStatements(StatementLevelAstProvided, SmartHomeManagerProvided
         light_bulb2 = Appliance(ApplianceTypes.LIGHT, "cxarmandero")
         smart_home.addAppliance(light_bulb)
         smart_home.addAppliance(light_bulb2)
-        smart_home, value = ast.parse("asignu kvardek du al brilo de bulbazoro unufoje la koloro de cxarmandero estas egala al rugxo").evaluate(smart_home)
+        smart_home, value = ast.parse(
+            "asignu kvardek du al brilo de bulbazoro unufoje la koloro de cxarmandero estas egala al rugxo").evaluate(
+            smart_home)
 
         self.fastForwardBy(smart_home, seconds=2)
         assert smart_home.variables["bulbazoro"].properties[ApplianceProperties.BRIGHTNESS.value] != 42
@@ -309,6 +311,16 @@ class TestAstPrograms(object):
 
         with pytest.raises(KeyError):
             assert variables["hundo"] is None
+
+    def test_languageShouldBeCompleteCaseInsensitive(self, ast, initial_state):
+        from random import randint
+        script = '''sxambaluli signifas revenu nul finu
+            poste sxambalulu
+            poste asignu gxi al kato'''
+        script = ''.join(c.lower() if randint(0, 1) else c.upper() for c in script)
+        variables = evaluate_and_return_state_variables(ast,
+            script)
+        assert variables['kato'] == 0
 
 
 @pytest.mark.timeout(10)
