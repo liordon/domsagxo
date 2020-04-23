@@ -4,6 +4,8 @@ import pytest
 
 import library.atomic_types as atypes
 import library.management_components as mgmt_cmp
+from demo import example_programs
+from demo.example_programs import DomsagxoPrograms
 from test_utils.providers import FunctionDefinitionLevelAstProvided, evaluate_and_return_state, \
     ProvidedSmartHomeWithLightBulb
 
@@ -27,6 +29,12 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
     def test_canDefiningSimpleReturningRoutineAddsItToMethodDict(self, ast):
         new_state = evaluate_and_return_state(ast,
             '''sxambaluli signifas revenu finu''')
+        assert 1 == len(new_state.method_dict)
+        assert 'sxambalulu' in new_state.method_dict.keys()
+
+    def test_functionNamesAreCaseInsensitiveAndAreAlwaysSavedAsLowercase(self, ast):
+        new_state = evaluate_and_return_state(ast,
+            '''SxamBaluLi signifas revenu finu''')
         assert 1 == len(new_state.method_dict)
         assert 'sxambalulu' in new_state.method_dict.keys()
 
@@ -98,7 +106,7 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         for i in range(len(new_state.variables["sxambaluloj"])):
             assert 10 * (i + 1) == new_state.variables["sxambaluloj"][i].properties["brilo"]
 
-    def test_canDefineMuConstantFunction(self, ast, smart_home):
+    def test_canDefineOldMuConstantFunction(self, ast, smart_home):
         """the Mu-recursive constant function has a predefined constant n which it always returns.
         The function is simply: f(x) = n."""
         new_state = evaluate_and_return_state(
@@ -106,6 +114,14 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
                 asignu sep al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['konstantu'](10, 809, 341)
         assert 7 == new_state.variables['sxambalulo'].properties["brilo"]
+
+    def test_canDefineUpdatedMuConstantFunction(self, ast, smart_home):
+        """the Mu-recursive constant function has a predefined constant n which it always returns.
+        The function is simply: f(x) = n."""
+        new_state = evaluate_and_return_state(
+            ast, DomsagxoPrograms.mu_constant.value, smart_home)
+        new_state.method_dict['konstantu'](10)
+        assert 0 == new_state.variables['gxi']
 
     def test_canDefineMuSuccessorFunction(self, ast, smart_home):
         """the Mu-recursive successor function recieves an argument and returns it's successor.
@@ -197,19 +213,5 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
             assert is_prime(i) == (i in self.prime_list)
 
     def test_canDefineSillyNameFunction(self, ast, smart_home):
-        new_state = evaluate_and_return_state(
-            ast, '''
-                sensencnomi signifas
-                    Anoncu citilo kio estas via 
-                        bonsxanca nombro malcitilo
-                    poste atentu bonsxanca nombro
-                    poste anoncu citilo kio estas via
-                        sxatata koloro malcitilo
-                    poste atentu sxatata koloro
-                    poste asignu sxatata koloro pli 
-                        bonsxanca nombro al sensenca nomo
-                    poste anoncu citilo via sensenca nomo 
-                        estas malcitilo
-                    poste anoncu sensenca nomo
-                finu ''')
+        new_state = evaluate_and_return_state(ast, DomsagxoPrograms.silly_name_generator.value)
         assert new_state.method_dict['sensencnomu'] is not None

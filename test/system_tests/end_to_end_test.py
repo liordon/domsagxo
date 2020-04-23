@@ -14,11 +14,11 @@ from test_utils.providers import StatementLevelAstProvided, SmartHomeManagerProv
 
 class TestUntimedAstStatements(StatementLevelAstProvided):
 
-    def test_capableOfNumberAssignment(self, ast):
+    def test_capableOfNumberAssignmentIntoVariables(self, ast):
         variables = evaluate_and_return_state_variables(ast, "kato = 10")
         assert 10 == variables["kato"]
 
-    def test_capableOfExpressionAssignment(self, ast):
+    def test_capableOfExpressionAssignmentIntoVariables(self, ast):
         state = evaluate_and_return_state_variables(ast, "kato=2+4*10")
         assert 42 == state["kato"]
 
@@ -26,6 +26,10 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         new_state = evaluate_and_return_state_variables(ast, "nigra kato=7")
         assert 7 == new_state["nigra kato"]
         assert 'kato' not in new_state
+
+    def test_variablesAreCaseInsensitiveAndSavedAsLowerCase(self, ast):
+        new_state = evaluate_and_return_state_variables(ast, "Nigra Kato=7")
+        assert new_state["nigra kato"] == 7
 
     def test_reservedAdjectivesCanBeReclaimedForVariableNamesOutOfReservedContext(self, ast):
         new_state = evaluate_and_return_state_variables(ast, "asignu 7 al malgranda kato")

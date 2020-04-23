@@ -1,6 +1,29 @@
 from enum import Enum
 
 
+class DomsagxoPrograms(Enum):
+    """ The notation here is mostly verbal, though sometimes I'll use the
+    shorter notation to stay parallel to the english writing. These programs
+    are used in tests that expect 1:1 correlation between the english and
+    esperanto version of each script."""
+
+    mu_constant = '''Konstanti nombroj signifas Revenu 0 Finu'''
+
+    silly_name_generator = '''
+                sensencnomi signifas
+                    Anoncu citilo kio estas via
+                        bonsxanca nombro malcitilo
+                    poste atentu bonsxanca nombro
+                    poste anoncu citilo kio estas via
+                        sxatata koloro malcitilo
+                    poste atentu sxatata koloro
+                    poste asignu sxatata koloro +
+                        bonsxanca nombro al sensenca nomo
+                    poste anoncu citilo via sensenca nomo
+                        estas malcitilo
+                    poste anoncu sensenca nomo
+                finu '''
+
 class EngluentoPrograms(Enum):
     mu_constant = """
     To constantify numbers means:
@@ -128,7 +151,7 @@ class EngluentoPrograms(Enum):
         afterwards assign it to light color
         afterwards randomize number between 70 and 100
         afterwards assign it to light brightness
-        afterwards change the color of the light numberth light to light color 
+        afterwards change the color of the light numberth light to light color
             at the same time change the brightness of
                 the light numberth light to light brightness
     end
