@@ -476,7 +476,7 @@ def build(start=None):
                 shifted_tokens += symbol.value.total_number_of_tokens()
             elif isinstance(symbol, yacc.YaccSymbol) and isinstance(symbol.value, list):
                 shifted_tokens += sum([node.total_number_of_tokens() for node in symbol.value])
-                shifted_tokens += len(symbol.value) - 1
+                shifted_tokens += 0 if len(symbol.value) == 0 else len(symbol.value) - 1
                 symbol_stack_trace += str(symbol) + str(symbol.value)
             else:
                 symbol_stack_trace += str(symbol)

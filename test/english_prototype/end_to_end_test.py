@@ -51,11 +51,11 @@ class TestEndToEndExamplePrograms(EnglishLexerProvided):
         legal_interpretations_tree = esperantifier.try_interpreting(tokenized_program)
         assert legal_interpretations_tree.number_of_leaves() > 0
 
-    # def test_program_sillyNameExample(self, lexer, esperantifier):
-    #     lexer.input(EngluentoPrograms.silly_name_generator.value)
-    #     tokenized_program = [t for t in lexer]
-    #     legal_interpretations_tree = esperantifier.try_interpreting(tokenized_program)
-    #     assert legal_interpretations_tree.number_of_leaves() > 0
+    def test_program_sillyNameExample(self, lexer, esperantifier):
+        lexer.input(EngluentoPrograms.silly_name_generator.value)
+        tokenized_program = [t for t in lexer]
+        legal_interpretations_tree = esperantifier.try_interpreting(tokenized_program)
+        assert legal_interpretations_tree.number_of_leaves() > 0
 
     # def test_program_sequencedAnnouncements(self, lexer):
     #     lexer.input(example_programs.sequenced_announcements)
