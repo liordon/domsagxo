@@ -51,6 +51,8 @@ class NltkProtoLexer(object):
 
     @staticmethod
     def convert_tagged_token(text, tag):
+        if re.match(r"\d+", text):
+            return text, UnalphabeticTerminal.NUMBER
         if text in english_keywords_dictionary:
             return text, english_keywords_dictionary.get(text)
         else:

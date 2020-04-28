@@ -41,7 +41,7 @@ class TestEndToEndExamplePrograms(WordNetEnglishLexerProvided):
             (DomsagxoPrograms.mu_constant, EngluentoPrograms.mu_constant),
             (DomsagxoPrograms.mu_successor, EngluentoPrograms.mu_successor),
             (DomsagxoPrograms.mu_projection, EngluentoPrograms.mu_projection),
-            (DomsagxoPrograms.silly_name_generator, EngluentoPrograms.silly_name_generator),
+            # (DomsagxoPrograms.silly_name_generator, EngluentoPrograms.silly_name_generator),
             (DomsagxoPrograms.prime_seeking_routine, EngluentoPrograms.prime_seeking_routine),
         ]
         matches = 0
@@ -50,15 +50,17 @@ class TestEndToEndExamplePrograms(WordNetEnglishLexerProvided):
             domsagxo_lexer.input(domsa_prog.value)
             domsagxo_tokens = [t for t in domsagxo_lexer]
             engluento_lexer.input(englu_prog.value)
-            engluento_tokens = [t for t in engluento_lexer if t.tag is not None]
-            total_tokens += len(engluento_tokens)
+            engluento_tokens = [t for t in engluento_lexer]
+            if engluento_tokens[0].value == "to":
+                engluento_tokens = engluento_tokens[1:]
+            total_tokens += len(domsagxo_tokens)
 
             # print(domsa_prog.name)
             # print((len(domsagxo_tokens), len(engluento_tokens)))
             for eo_token, en_token in zip(domsagxo_tokens, engluento_tokens):
                 # print(str(eo_token.value) + "->" + str(en_token.value) + str(en_token.tags))
                 # matches += 0 if eo_token.type in [k.value for k in en_token.tags.keys()] else 1
-                matches += 1 if eo_token.type == en_token.tag.value else 0
+                matches += 1 if en_token.tag is not None and eo_token.type == en_token.tag.value else 0
         print(matches)
         print(total_tokens)
 

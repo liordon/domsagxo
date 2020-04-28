@@ -41,19 +41,17 @@ Finu
 Cxuprimi nombron signifas
    Asignu 2 al unuo
    poste kvadratu unuo
-   poste dum la temperaturo de la forno ne estas
-       pli granda ol nombro tiam
+   poste dum la temperaturo de la forno ne ≥ nombro tiam
      Asignu unuo al duo
-     poste dum unuo * duo ne estas
-         pli granda ol nombro tiam:
+     poste dum unuo * duo ne ≥ nombro tiam
        Se unuo * duo estas
            egala al nombro tiam
          Malsxaltu la ampolon
          poste revenu
        Finu
-       Poste asignu duo + unu al duo
+       Poste asignu duo + 1 al duo
      Finu
-     Poste asignu unuo + unu al unuo
+     Poste asignu unuo + 1 al unuo
      poste kvadratu unuo
    Finu
    Poste sxaltu la ampolon
@@ -80,7 +78,7 @@ class EngluentoPrograms(Enum):
 
     mu_successor = """
     To successor a number means:
-        return number+1.
+        return number + 1.
     End.
     """
 
@@ -244,7 +242,7 @@ To check a number means:
 		afterwards While first * second not ≥ number then:
 			If first * second is
 					equal to number then:
-				Turn off the light-bulb.
+				deactivate the light-bulb.
 				afterwards Return.
 			End.
 			afterwards Assign second + 1 to second.
@@ -252,7 +250,7 @@ To check a number means:
 		afterwards Assign first + 1 to first.
 		afterwards Square first.
 	End.
-	afterwards Turn on the light-bulb.
+	afterwards activate the light-bulb.
 End.
 """
 

@@ -149,6 +149,42 @@ class TestNltkLexerUnalphabeticTerminalRecognition(NltkEnglishLexerProvided):
         lexer.input(':')
         assert not lexer.has_next()
 
+    def test_canIdentifyNumberLiterals(self, lexer):
+        lexer.input("0")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.NUMBER, lexer)
+
+        lexer.input("42")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.NUMBER, lexer)
+
+
+class TestNltkEnglishParserPrototype(NltkEnglishLexerProvided):
+
+    def test_canIdentifyCatAsNoun(self, lexer):
+        lexer.input("cat")
+        self.assert_tag_of_next_token(PartOfSpeech.NOUN, lexer)
+
+    def test_canIdentifyCatsAsNounAndDisregardPluralism(self, lexer):
+        lexer.input("cats")
+        self.assert_tag_of_next_token(PartOfSpeech.NOUN, lexer)
+
+    def test_canIdentifyBigAsAdjective(self, lexer):
+        lexer.input("big")
+        self.assert_tag_of_next_token(PartOfSpeech.ADJECTIVE, lexer)
+
+    def test_canIdentifyCatHatAsTwoConsecutiveNouns(self, lexer):
+        lexer.input("cat hat")
+        self.assert_tag_of_next_token(PartOfSpeech.NOUN, lexer)
+        self.assert_tag_of_next_token(PartOfSpeech.NOUN, lexer)
+
+    def test_canIdentifyBigManAsConsecutiveAdjectiveAndANoun(self, lexer):
+        lexer.input("big man")
+        self.assert_tag_of_next_token(PartOfSpeech.ADJECTIVE, lexer)
+        self.assert_tag_of_next_token(PartOfSpeech.NOUN, lexer)
+
+    def test_canIdentifyGoAsAnImperativeVerb(self, lexer):
+        lexer.input("go")
+        self.assert_tag_of_next_token(PartOfSpeech.V_IMP, lexer)
+
 
 class TestWordnetLexerWordNetEnglishKeywordsRecognition(WordNetEnglishLexerProvided):
     def test_canIdentifyKeywordsForAssignment(self, lexer):
