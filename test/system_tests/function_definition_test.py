@@ -123,7 +123,7 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         new_state.method_dict['konstantu'](10)
         assert 0 == new_state.variables['gxi']
 
-    def test_canDefineMuSuccessorFunction(self, ast, smart_home):
+    def test_canDefineOldMuSuccessorFunction(self, ast, smart_home):
         """the Mu-recursive successor function recieves an argument and returns it's successor.
         Basically, it's just f(x) = x+1."""
         new_state = evaluate_and_return_state(
@@ -131,6 +131,14 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
                 asignu nombro pli unu al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['posteulu'](41)
         assert 42 == new_state.variables['sxambalulo'].properties["brilo"]
+
+    def test_canDefineUpdatedMuSuccessorFunction(self, ast, smart_home):
+        """the Mu-recursive successor function recieves an argument and returns it's successor.
+        Basically, it's just f(x) = x+1."""
+        new_state = evaluate_and_return_state(
+            ast, DomsagxoPrograms.mu_successor.value, smart_home)
+        new_state.method_dict['posteulu'](41)
+        assert 42 == new_state.variables['gxi']
 
     def test_canDefineTheMuProjectionFunction(self, ast, smart_home):
         """the Mu-recursive projection function (also called the identity function)
@@ -140,7 +148,16 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
             ast, '''elekti hundo kaj kato signifas 
             asignu hundo al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['elektu'](31, 42)
-        assert 31 == new_state.variables['sxambalulo'].properties["brilo"]
+        assert new_state.variables['sxambalulo'].properties["brilo"] == 31
+
+    def test_canDefineUpdatedMuProjectionFunction(self, ast, smart_home):
+        """the Mu-recursive projection function (also called the identity function)
+        is a function that receives k inputs and returns the ith input without change.
+        In this specific example, we accept 2 inputs and return the first one."""
+        new_state = evaluate_and_return_state(
+            ast, DomsagxoPrograms.mu_projection.value, smart_home)
+        new_state.method_dict['projekcu']([31, 42], 1) # in domsagxo we start accessing at 1
+        assert new_state.variables['gxi'] == 31
 
     def test_canDefineFunctionToTellIfANumberIsPrime(self, ast, smart_home):
         """yogi was sassy and said I could not tell the prime numbers apart even if I tried.

@@ -4,8 +4,8 @@ import nltk
 from nltk.corpus import wordnet
 
 from compilation.definitions import PartOfSpeech, ReservedWord, UnalphabeticTerminal
-from english_prototype.english_keyword_converter import identify_potential_keywords
-from english_prototype.data_structures import BeamToken
+from english_prototype.data_structures import BeamToken, Token
+from english_prototype.english_keyword_converter import english_keywords_dictionary
 
 
 def insensitive_starts_with(txt, insensitive_prefix):
@@ -35,12 +35,26 @@ class NltkProtoLexer(object):
     def __init__(self):
         self._stack = []
 
-    def input(self, txt):
-        self._stack += [(txt, convert_tag_to_part_of_speech(val)) for (txt, val) in
-            nltk.pos_tag(nltk.word_tokenize(txt))[::-1]]
+    def input(self, text):
+        self._stack += [self.convert_tagged_token(txt, val) for (txt, val) in
+            nltk.pos_tag(nltk.word_tokenize(text.lower()))[::-1] if txt not in 'a:.']
+
+    def token(self):
+        return Token.from_tuple(self._stack.pop())
 
     def has_next(self):
         return len(self._stack) > 0
+
+    def __iter__(self):
+        while self.has_next():
+            yield self.token()
+
+    @staticmethod
+    def convert_tagged_token(text, tag):
+        if text in english_keywords_dictionary:
+            return text, english_keywords_dictionary.get(text)
+        else:
+            return text, convert_tag_to_part_of_speech(tag)
 
 
 def collect_probabilities_from_list(possible_vals):
@@ -51,17 +65,6 @@ def collect_probabilities_from_list(possible_vals):
     for val in tags.keys():
         tags[val] /= len(filtered_values)
     return tags
-
-
-def convert_word_to_stochastic_token_tuple(w):
-    w = w.lower()
-    if re.match(r"\d+", w):
-        return w, {UnalphabeticTerminal.NUMBER: 1.}
-    # if re.match(r"[a-zĉĝĥĵŝŭA-ZĈĜĤĴŜŬ]+", w):
-    else:
-        return (w, collect_probabilities_from_list(
-            [convert_tag_to_part_of_speech(syn.pos()) for syn in wordnet.synsets(w)]
-            + identify_potential_keywords(w)))
 
 
 class WordnetProtoLexer(object):
@@ -85,7 +88,7 @@ class WordnetProtoLexer(object):
                 current_word += ' "'
                 self._stack.insert(0, (current_word, {UnalphabeticTerminal.STRING: 1}))
             else:
-                token_tuple = convert_word_to_stochastic_token_tuple(current_word)
+                token_tuple = self.convert_word_to_stochastic_token_tuple(current_word)
                 if current_word.endswith("th") and len(token_tuple[1].keys()) == 0:
                     token_tuple[1][PartOfSpeech.ADJECTIVE] = 1
                 if UnalphabeticTerminal.COMMENT not in token_tuple[1] \
@@ -107,3 +110,20 @@ class WordnetProtoLexer(object):
     def __iter__(self):
         while self.has_next():
             yield self.token()
+
+    @staticmethod
+    def convert_word_to_stochastic_token_tuple(w):
+        w = w.lower()
+        if re.match(r"\d+", w):
+            return w, {UnalphabeticTerminal.NUMBER: 1.}
+        # if re.match(r"[a-zĉĝĥĵŝŭA-ZĈĜĤĴŜŬ]+", w):
+        if w == 'a':
+            return w, {UnalphabeticTerminal.COMMENT: 1}
+        else:
+            return (w, collect_probabilities_from_list(
+                [convert_tag_to_part_of_speech(syn.pos()) for syn in wordnet.synsets(w)]
+                + WordnetProtoLexer.identify_potential_keywords(w)))
+
+    @staticmethod
+    def identify_potential_keywords(word):
+        return [] if word not in english_keywords_dictionary else [english_keywords_dictionary.get(word)]

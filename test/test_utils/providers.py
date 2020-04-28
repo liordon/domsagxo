@@ -8,7 +8,7 @@ import compilation.esperanto_lexer as eo_lxr
 from compilation.definitions import PartOfSpeech
 from compilation.node import AstNode
 from english_prototype.data_structures import BeamToken
-from english_prototype.english_lexer import WordnetProtoLexer
+from english_prototype.english_lexer import WordnetProtoLexer, NltkProtoLexer
 from library import management_components as mgmt_cmp, atomic_types as atypes
 from library.management_components import Horaro, Domsagxo
 from test_utils import mocks
@@ -196,7 +196,7 @@ class ProvidedSmartHomeWithLightBulb(object):
         return smart_home
 
 
-class EnglishLexerProvided(object):
+class WordNetEnglishLexerProvided(object):
     @pytest.fixture
     def lexer(self):
         return WordnetProtoLexer()
@@ -204,3 +204,13 @@ class EnglishLexerProvided(object):
     @staticmethod
     def assert_possible_next_token(partOfSpeech, lexer):
         assert partOfSpeech in lexer.token().tags.keys()
+
+
+class NltkEnglishLexerProvided(object):
+    @pytest.fixture
+    def lexer(self):
+        return NltkProtoLexer()
+
+    @staticmethod
+    def assert_tag_of_next_token(partOfSpeech, lexer):
+        assert lexer.token().tag is partOfSpeech

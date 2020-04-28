@@ -1,5 +1,5 @@
 from english_prototype.english_lexer import *
-from test_utils.providers import EnglishLexerProvided
+from test_utils.providers import WordNetEnglishLexerProvided, NltkEnglishLexerProvided
 
 
 class TestBasicTokenConversionFromNlpToPos(object):
@@ -22,7 +22,135 @@ class TestBasicTokenConversionFromNlpToPos(object):
         assert convert_tag_to_part_of_speech("VB") == PartOfSpeech.V_IMP
 
 
-class TestEnglishKeywordsRecognition(EnglishLexerProvided):
+class TestNltkEnglishLexerKeywordsRecognition(NltkEnglishLexerProvided):
+    def test_canIdentifyKeywordsForAssignment(self, lexer):
+        lexer.input("assign")
+        self.assert_tag_of_next_token(ReservedWord.PUT, lexer)
+        lexer.input("to")
+        self.assert_tag_of_next_token(ReservedWord.TO, lexer)
+
+    def test_canIdentifyKeywordThe(self, lexer):
+        lexer.input("the")
+        self.assert_tag_of_next_token(ReservedWord.THE, lexer)
+
+    def test_canIdentifyKeywordMeans(self, lexer):
+        lexer.input("means")
+        self.assert_tag_of_next_token(ReservedWord.THIS_WAY, lexer)
+
+    def test_canIdentifyKeywordReturn(self, lexer):
+        lexer.input("return")
+        self.assert_tag_of_next_token(ReservedWord.RETURN, lexer)
+
+    def test_canIdentifyKeywordEnd(self, lexer):
+        lexer.input("End")
+        self.assert_tag_of_next_token(ReservedWord.END, lexer)
+
+    def test_canIdentifyKeywordsSeparatingCommands(self, lexer):
+        lexer.input("Afterwards")
+        self.assert_tag_of_next_token(ReservedWord.AND_THEN, lexer)
+        lexer.input("Simultaneously")
+        self.assert_tag_of_next_token(ReservedWord.SIMULTANEOUSLY, lexer)
+
+    def test_canIdentifyKeywordAnd(self, lexer):
+        lexer.input("And")
+        self.assert_tag_of_next_token(ReservedWord.AND, lexer)
+
+    def test_canIdentifyKeywordOf(self, lexer):
+        lexer.input("Of")
+        self.assert_tag_of_next_token(ReservedWord.OF, lexer)
+
+    def test_canIdentifyKeywordWhile(self, lexer):
+        lexer.input("While")
+        self.assert_tag_of_next_token(ReservedWord.DURING, lexer)
+
+    def test_canIdentifyKeywordsForIfStatement(self, lexer):
+        lexer.input("If")
+        self.assert_tag_of_next_token(ReservedWord.IF, lexer)
+        lexer.input("Then")
+        self.assert_tag_of_next_token(ReservedWord.THEN, lexer)
+        lexer.input("Else")
+        self.assert_tag_of_next_token(ReservedWord.ELSE, lexer)
+
+    def test_canIdentifyNotKeyword(self, lexer):
+        lexer.input("Not")
+        self.assert_tag_of_next_token(ReservedWord.NOT, lexer)
+
+    def test_canIdentifyKeywordsForTimedCommands(self, lexer):
+        lexer.input("at")
+        self.assert_tag_of_next_token(ReservedWord.AT, lexer)
+        lexer.input("every")
+        self.assert_tag_of_next_token(ReservedWord.EVERY, lexer)
+        lexer.input("once")
+        self.assert_tag_of_next_token(ReservedWord.ONCE, lexer)
+        lexer.input("whenever")
+        self.assert_tag_of_next_token(ReservedWord.WHENEVER, lexer)
+
+    def test_indefiniteArticleIsConsideredCommentAndFiltered(self, lexer):
+        lexer.input("a")
+        assert not lexer.has_next()
+
+
+class TestNltkLexerUnalphabeticTerminalRecognition(NltkEnglishLexerProvided):
+    def test_canIdentifyPlusSignAndWord(self, lexer):
+        lexer.input("+")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.PLUS, lexer)
+
+        lexer.input("plus")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.PLUS, lexer)
+
+    def test_canIdentifyMinusSignAndWord(self, lexer):
+        lexer.input("-")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.MINUS, lexer)
+
+        lexer.input("minus")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.MINUS, lexer)
+
+    def test_canIdentifyMultiplySignAndWord(self, lexer):
+        lexer.input("*")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.TIMES, lexer)
+
+        lexer.input("times")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.TIMES, lexer)
+
+    def test_canIdentifyDivisionSignAndWord(self, lexer):
+        lexer.input("/")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.DIVIDE, lexer)
+
+        lexer.input("parts")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.DIVIDE, lexer)
+
+    def test_words_rightLeftParenthesis_areReservedForMath(self, lexer):
+        lexer.input("(")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.L_PAREN, lexer)
+
+        lexer.input(")")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.R_PAREN, lexer)
+
+    def test_canIdentifySizeRelations(self, lexer):
+        lexer.input("<")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.LESSER_THAN, lexer)
+
+        lexer.input(">")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.GREATER_THAN, lexer)
+
+        lexer.input("≤")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.LESSER_EQUAL, lexer)
+
+        lexer.input("≥")
+        self.assert_tag_of_next_token(UnalphabeticTerminal.GREATER_EQUAL, lexer)
+
+    def test_canRecognizePunctuationMarks(self, lexer):
+        lexer.input(',')
+        self.assert_tag_of_next_token(UnalphabeticTerminal.COLON, lexer)
+
+    def test_irrelevantTokensAreNotKeptInLexer(self, lexer):
+        lexer.input('.')
+        assert not lexer.has_next()
+        lexer.input(':')
+        assert not lexer.has_next()
+
+
+class TestWordnetLexerWordNetEnglishKeywordsRecognition(WordNetEnglishLexerProvided):
     def test_canIdentifyKeywordsForAssignment(self, lexer):
         lexer.input("assign")
         self.assert_possible_next_token(ReservedWord.PUT, lexer)
@@ -59,6 +187,10 @@ class TestEnglishKeywordsRecognition(EnglishLexerProvided):
         lexer.input("Of")
         self.assert_possible_next_token(ReservedWord.OF, lexer)
 
+    def test_canIdentifyKeywordWhile(self, lexer):
+        lexer.input("While")
+        self.assert_possible_next_token(ReservedWord.DURING, lexer)
+
     def test_canIdentifyKeywordsForIfStatement(self, lexer):
         lexer.input("If")
         self.assert_possible_next_token(ReservedWord.IF, lexer)
@@ -81,8 +213,12 @@ class TestEnglishKeywordsRecognition(EnglishLexerProvided):
         lexer.input("whenever")
         self.assert_possible_next_token(ReservedWord.WHENEVER, lexer)
 
+    def test_indefiniteArticleIsConsideredCommentAndFiltered(self, lexer):
+        lexer.input("a")
+        assert not lexer.has_next()
 
-class TestUnalphabeticTerminalRecognition(EnglishLexerProvided):
+
+class TestWordnetLexerUnalphabeticTerminalRecognition(WordNetEnglishLexerProvided):
     def test_canIdentifyPlusSignAndWord(self, lexer):
         lexer.input("+")
         self.assert_possible_next_token(UnalphabeticTerminal.PLUS, lexer)
@@ -180,7 +316,7 @@ class TestUnalphabeticTerminalRecognition(EnglishLexerProvided):
         assert not lexer.has_next()
 
 
-class TestEnglishParserPrototype(EnglishLexerProvided):
+class TestWordNetEnglishParserPrototype(WordNetEnglishLexerProvided):
 
     def test_canIdentifyCatAsNoun(self, lexer):
         lexer.input("cat")
@@ -222,7 +358,7 @@ class TestEnglishParserPrototype(EnglishLexerProvided):
         self.assert_possible_next_token(ReservedWord.TO, lexer)
 
 
-class TestMultipleWordTokens(EnglishLexerProvided):
+class TestMultipleWordTokens(WordNetEnglishLexerProvided):
     def test_toDoSomethingIsParsedAsSingleInfinitiveVerb(self, lexer):
         infinitive_verb = "to love"
         lexer.input(infinitive_verb)
@@ -235,7 +371,7 @@ def extract_all_tokens(lexer):
     return [t for t in lexer]
 
 
-class TestEnglishLexerFindingCorrectTags(EnglishLexerProvided):
+class TestWordNetEnglishLexerFindingCorrectTags(WordNetEnglishLexerProvided):
 
     def test_turningOnTheLights(self, lexer):
         lexer.input("activate the lights")

@@ -7,9 +7,15 @@ class DomsagxoPrograms(Enum):
     are used in tests that expect 1:1 correlation between the english and
     esperanto version of each script."""
 
-    mu_constant = '''Konstanti nombroj signifas Revenu 0 Finu'''
+    mu_constant = """Konstanti nombroj signifas Revenu 0 Finu"""
 
-    silly_name_generator = '''
+    mu_successor = """posteuli nombro signifas
+                revenu nombro + 1 finu"""
+
+    mu_projection = """projekci nombroj kaj indekso signifas
+            revenu la indeksa de la nombroj finu"""
+
+    silly_name_generator = """
                 sensencnomi signifas
                     Anoncu citilo kio estas via
                         bonsxanca nombro malcitilo
@@ -22,7 +28,48 @@ class DomsagxoPrograms(Enum):
                     poste anoncu citilo via sensenca nomo
                         estas malcitilo
                     poste anoncu sensenca nomo
-                finu '''
+                finu """
+
+    square_function = """
+Kvadrati nombron signifas
+    Asignu nombro * nombro al
+        la temperaturo de la forno
+Finu
+"""
+
+    prime_seeking_routine = """
+Cxuprimi nombron signifas
+   Asignu 2 al unuo
+   poste kvadratu unuo
+   poste dum la temperaturo de la forno ne estas
+       pli granda ol nombro tiam
+     Asignu unuo al duo
+     poste dum unuo * duo ne estas
+         pli granda ol nombro tiam:
+       Se unuo * duo estas
+           egala al nombro tiam
+         Malsxaltu la ampolon
+         poste revenu
+       Finu
+       Poste asignu duo + unu al duo
+     Finu
+     Poste asignu unuo + unu al unuo
+     poste kvadratu unuo
+   Finu
+   Poste sxaltu la ampolon
+Finu"""
+
+    search_primes_forever = """
+Asignu du al indekso
+poste dum vero tiam
+   cxuprimu indekso
+   poste se la ampolo sxaltas tiam
+     Anoncu indekso
+   Finu
+   Poste asignu indekso pli unu al indekso
+Finu
+"""
+
 
 class EngluentoPrograms(Enum):
     mu_constant = """
@@ -38,8 +85,8 @@ class EngluentoPrograms(Enum):
     """
 
     mu_projection = """
-    To project numbers and i means:
-        return the first of the numbers.
+    To project numbers and index means:
+        return the indexth of the numbers.
     End.
     """
 
@@ -180,36 +227,39 @@ class EngluentoPrograms(Enum):
         end
     end
     """
-    prime_seeking_routine = """
+
+    square_function = """
 To square a number means:
 	Assign number * number to
 		the temperature of the oven.
 End.
+"""
 
-To check primality of a number means:
-	Assign two to first.
-	Square first.
-	While the oven's temperature is
-			not greater than number then:
+    prime_seeking_routine = """
+To check a number means:
+	Assign 2 to first.
+	afterwards square first.
+	afterwards While the temperature of the oven not ≥ number then:
 		Assign first to second.
-		While first * second is
-				not greater than number then:
+		afterwards While first * second not ≥ number then:
 			If first * second is
 					equal to number then:
 				Turn off the light-bulb.
-				Return.
+				afterwards Return.
 			End.
-			Add 1 to second.
+			afterwards Assign second + 1 to second.
 		End.
-		Add 1 to first.
-		Square first.
+		afterwards Assign first + 1 to first.
+		afterwards Square first.
 	End.
-	Turn on the light-bulb.
+	afterwards Turn on the light-bulb.
 End.
+"""
 
+    search_primes_forever = """
 Assign two to index.
 While true then
-	Check primality of index.
+	Check index.
 	If the light-bulb is on then
 		Announce index.
 	End.
