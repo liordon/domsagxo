@@ -242,7 +242,7 @@ To check a number means:
 		afterwards While first * second not ≥ number then:
 			If first * second is
 					equal to number then:
-				deactivate the light-bulb.
+				deactivate the light.
 				afterwards Return.
 			End.
 			afterwards Assign second + 1 to second.
@@ -250,7 +250,7 @@ To check a number means:
 		afterwards Assign first + 1 to first.
 		afterwards Square first.
 	End.
-	afterwards activate the light-bulb.
+	afterwards activate the light.
 End.
 """
 

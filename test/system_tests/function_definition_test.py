@@ -50,6 +50,18 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         new_state.method_dict['sxambalulu']()
         assert new_state.variables['gxi'] == 0
 
+    def test_canDefineRootSeekingRoutineAndGet42AsCeilingRootOf1682(self, ast):
+        new_state = evaluate_and_return_state(ast,
+            '''radiki nombro signifas
+            asignu du al radiko
+            poste dum radiko fojoj radiko estas pli malgranda ol nombro tiam
+                asignu unu pli radiko al radiko
+            finu
+            poste revenu radiko
+            finu''')
+        new_state.method_dict['radiku'](1682)
+        assert new_state.variables['gxi'] == 42
+
     def test_cannotPassMoreArgumentsThanPlannedToUserDefinedFunction(self, ast):
         new_state = evaluate_and_return_state(
             ast, '''memori sxambalulo signifas revenu finu''')

@@ -15,6 +15,14 @@ working_functions_list = [
     EngluentoPrograms.silly_name_generator,
 ]
 
+paired_programs = [
+    (DomsagxoPrograms.mu_constant, EngluentoPrograms.mu_constant),
+    (DomsagxoPrograms.mu_successor, EngluentoPrograms.mu_successor),
+    (DomsagxoPrograms.mu_projection, EngluentoPrograms.mu_projection),
+    (DomsagxoPrograms.silly_name_generator, EngluentoPrograms.silly_name_generator),
+    (DomsagxoPrograms.prime_seeking_routine, EngluentoPrograms.prime_seeking_routine),
+]
+
 
 class TestEndToEndExamplePrograms(WordNetEnglishLexerProvided):
     @pytest.fixture
@@ -37,16 +45,10 @@ class TestEndToEndExamplePrograms(WordNetEnglishLexerProvided):
         # engluento_lexer = en_lxr.WordnetProtoLexer()
         engluento_lexer = en_lxr.NltkProtoLexer()
 
-        pair_programs = [
-            (DomsagxoPrograms.mu_constant, EngluentoPrograms.mu_constant),
-            (DomsagxoPrograms.mu_successor, EngluentoPrograms.mu_successor),
-            (DomsagxoPrograms.mu_projection, EngluentoPrograms.mu_projection),
-            # (DomsagxoPrograms.silly_name_generator, EngluentoPrograms.silly_name_generator),
-            (DomsagxoPrograms.prime_seeking_routine, EngluentoPrograms.prime_seeking_routine),
-        ]
         matches = 0
         total_tokens = 0
-        for domsa_prog, englu_prog in pair_programs:
+        total_tags = 0
+        for domsa_prog, englu_prog in paired_programs:
             domsagxo_lexer.input(domsa_prog.value)
             domsagxo_tokens = [t for t in domsagxo_lexer]
             engluento_lexer.input(englu_prog.value)
@@ -59,10 +61,12 @@ class TestEndToEndExamplePrograms(WordNetEnglishLexerProvided):
             # print((len(domsagxo_tokens), len(engluento_tokens)))
             for eo_token, en_token in zip(domsagxo_tokens, engluento_tokens):
                 # print(str(eo_token.value) + "->" + str(en_token.value) + str(en_token.tags))
-                # matches += 0 if eo_token.type in [k.value for k in en_token.tags.keys()] else 1
+                # matches += 1 if eo_token.type in [k.value for k in en_token.tags.keys()] else 0
                 matches += 1 if en_token.tag is not None and eo_token.type == en_token.tag.value else 0
+                # total_tags += len(en_token.tags.keys())
         print(matches)
         print(total_tokens)
+        # print(total_tags)
 
     @pytest.mark.parametrize("function", working_functions_list)
     def test_exampleFunctions(self, lexer, esperantifier, function):
