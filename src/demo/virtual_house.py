@@ -30,10 +30,6 @@ def announce_in_multimedia(*args):
         # os.system('espeak -v eo+m3 "' + str(output) + '"')
 
 
-house_type = HouseType.HOUSE
-clock_type = ClockType.REAL
-
-
 def all_true(argument_list):
     for arg in argument_list:
         if not arg:
@@ -47,16 +43,18 @@ def is_prime(number):
     return all_true([number % i for i in range(2, int(math.sqrt(number)) + 1)])
 
 
-def press(button_or_key):
+def execute_speech(button_or_key):
     global app, smart_home, ast
-    if button_or_key == "Cancel" or button_or_key == "<Escape>":
-        smart_home.stop_scheduler()
-        app.stop()
-    else:
-        speech = app.getTextArea("Speech")
-        print("parsing command:" + speech + "\n")
-        smart_home, value = ast.parse(speech).evaluate(smart_home)
-        app.clearTextArea("Speech")
+    speech = app.getTextArea("Speech")
+    print("parsing command:" + speech + "\n")
+    smart_home, value = ast.parse(speech).evaluate(smart_home)
+    app.clearTextArea("Speech")
+
+
+def exit_gui(button_or_key):
+    global app, smart_home, ast
+    smart_home.stop_scheduler()
+    app.stop()
 
 
 def create_door(name, row=0, col=0):
@@ -167,68 +165,72 @@ def create_clock(name, row=0, col=0):
     app.registerEvent(update_gui)
 
 
-lxr.build()
-ast = ast_bld.build(start=ast_bld.GrammarVariable.PROGRAM.value)
-if clock_type == ClockType.REAL:
-    smart_home = Domsagxo()
-    smart_home.start_scheduler()
-else:
-    simulative_time = MockClock()
-    scheduler = Horaro(time_function=simulative_time.get_current_time,
-        delay_function=simulative_time.increase_time)
-    smart_home = Domsagxo(scheduler)
-smart_home.method_dict["haltu"] = smart_home.scheduler.runSetTime
-smart_home.method_dict['anoncu'] = announce_in_multimedia
-smart_home.variables['saluto'] = "saluton mondo!"
-smart_home.variables['mia nomo'] = "Lioro!"
+house_type = HouseType.HOUSE
+clock_type = ClockType.REAL
 
-with gui("virtuala domo", showIcon=False) as app:
-    app.addLabel("title", "Welcome to Domsagxo", colspan=2)
-    app.setLabelBg("title", "green")
-    create_clock("horaro", 0, 2)
+if __name__ == "__main__":
 
-    if house_type == HouseType.HOUSE:
-        with app.labelFrame("Enirejo", 1, 2, 1):
-            create_door("antauxa pordo", 0, 0)
-            create_efficient_bulb("enirlumo", 1, 0)
-        with app.labelFrame("Koridoro", 1, 0, 2):
-            create_efficient_bulb("koridora lumo")
-            create_speaker("parolilo", 0, 1)
-        with app.labelFrame("Oficejo", 2, 2, 1, 1):
-            create_efficient_bulb("laborlampo")
-            create_air_conditioner("ofica klimatizilo", 1, 0)
-        with app.labelFrame("Necesejo", 2):
-            create_efficient_bulb("necesa lumo")
-            create_boiler("doma kaldrono", 1, 0)
-        with app.labelFrame("dormcxambro", 2, 1):
-            create_efficient_bulb("dormlumo")
+    lxr.build()
+    ast = ast_bld.build()
+    if clock_type is ClockType.REAL:
+        smart_home = Domsagxo()
+        smart_home.start_scheduler()
     else:
-        with app.labelFrame("Koridoro", colspan=2):
-            light_bulbs = []
-            for i in range(100):
-                light_bulbs += [
-                    create_efficient_bulb(f"{i + 1:03d}", row=int(i / 10), col=(i % 10))]
-            smart_home.variables["ampoloj"] = light_bulbs
-        with app.labelFrame("salono", row=2, colspan=2):
-            smart_home.variables["sxambalulo"] = create_efficient_bulb("sxambalulo")
+        simulative_time = MockClock()
+        scheduler = Horaro(time_function=simulative_time.get_current_time,
+            delay_function=simulative_time.increase_time)
+        smart_home = Domsagxo(scheduler)
+    smart_home.method_dict['haltu'] = smart_home.scheduler.runSetTime
+    smart_home.method_dict['anoncu'] = announce_in_multimedia
+
+    with gui("virtuala domo", showIcon=False) as app:
+        app.addLabel("title", "Welcome to Domsagxo", colspan=2)
+        app.setLabelBg("title", "green")
+        create_clock("horaro", 0, 2)
+
+        if house_type is HouseType.HOUSE:
+            with app.labelFrame("Enirejo", 1, 2, 1):
+                create_door("antauxa pordo", 0, 0)
+                create_efficient_bulb("enirlumo", 1, 0)
+            with app.labelFrame("Koridoro", 1, 0, 2):
+                create_efficient_bulb("koridora lumo")
+                create_speaker("parolilo", 0, 1)
+            with app.labelFrame("Oficejo", 2, 2, 1, 1):
+                create_efficient_bulb("laborlampo")
+                create_air_conditioner("ofica klimatizilo", 1, 0)
+            with app.labelFrame("Necesejo", 2):
+                create_efficient_bulb("necesa lumo")
+                create_boiler("doma kaldrono", 1, 0)
+            with app.labelFrame("dormcxambro", 2, 1):
+                create_efficient_bulb("dormlumo")
+        else:
+            with app.labelFrame("Koridoro", colspan=2):
+                light_bulbs = []
+                for i in range(100):
+                    light_bulbs += [
+                        create_efficient_bulb(f"{i + 1:03d}", row=int(i / 10), col=(i % 10))]
+                smart_home.variables["ampoloj"] = light_bulbs
+            with app.labelFrame("salono", row=2, colspan=2):
+                smart_home.variables["sxambalulo"] = create_efficient_bulb("sxambalulo")
 
 
-        def turn_light_on_if_prime(number):
-            if is_prime(number):
-                smart_home.variables['sxambalulo'].turnOn()
-            else:
-                smart_home.variables['sxambalulo'].turnOff()
+            def turn_light_on_if_prime(number):
+                if is_prime(number):
+                    smart_home.variables['sxambalulo'].turnOn()
+                else:
+                    smart_home.variables['sxambalulo'].turnOff()
 
 
-        smart_home.method_dict['cxuprimu'] = turn_light_on_if_prime
+            smart_home.method_dict['cxuprimu'] = turn_light_on_if_prime
 
-    app.addLabel("l9", "speech:")
-    app.addTextArea("Speech", row=3, column=1, colspan=2)
+        app.addLabel("l9", "speech:")
+        app.addTextArea("Speech", row=3, column=1, colspan=2)
 
-    app.addLabel("20", "reply:")
-    app.addLabel("Reply", "Speech", row=4, column=1, colspan=2)
+        app.addLabel("20", "reply:")
+        app.addLabel("Reply", "Speech", row=4, column=1, colspan=2)
 
-    app.addButtons(["Submit", "Cancel"], press, row=5, colspan=3)
-    app.enableEnter(press)
-    app.bindKey("<Escape>", press)
-    app.setIcon("../../resources/logo.gif")
+        app.addButton("Submit", execute_speech, row=5, column=1)
+        app.addButton("Cancel", exit_gui, row=5, column=2)
+        app.enableEnter(execute_speech)
+        app.bindKey("<Escape>", exit_gui)
+        app.setIcon("../../resources/logo.gif")

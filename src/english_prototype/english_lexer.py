@@ -4,7 +4,8 @@ import nltk
 from nltk.corpus import wordnet
 
 from compilation.definitions import PartOfSpeech, ReservedWord, UnalphabeticTerminal
-from english_prototype.english_keyword_converter import identify_potential_keywords
+from english_prototype.data_structures import BeamToken, Token
+from english_prototype.english_keyword_converter import english_keywords_dictionary
 
 
 def insensitive_starts_with(txt, insensitive_prefix):
@@ -14,26 +15,19 @@ def insensitive_starts_with(txt, insensitive_prefix):
 def convert_tag_to_part_of_speech(tag):
     if insensitive_starts_with(tag, 'a') or insensitive_starts_with(tag, 'j') or insensitive_starts_with(tag,
             's'):  # adjective or satellite
-        return PartOfSpeech.ADJECTIVE.value
+        return PartOfSpeech.ADJECTIVE
     elif insensitive_starts_with(tag, 'd'):
-        return ReservedWord.THE.value
+        return ReservedWord.THE
     elif insensitive_starts_with(tag, 'i'):
-        return PartOfSpeech.PREPOSITION.value
+        return PartOfSpeech.PREPOSITION
     elif insensitive_starts_with(tag, 'n'):
-        return PartOfSpeech.NOUN.value
-    elif insensitive_starts_with(tag, 'r'):
-        return PartOfSpeech.ADVERB.value
+        return PartOfSpeech.NOUN
+    # elif insensitive_starts_with(tag, 'r'):
+    #     return PartOfSpeech.ADVERB # not using adverbs
     elif insensitive_starts_with(tag, 'v'):
-        return PartOfSpeech.V_IMP.value
+        return PartOfSpeech.V_IMP
     else:
-        return ''
-
-
-class Token(object):
-    def __init__(self, token_tuple):
-        (word, part_of_speech) = token_tuple
-        self.value = word
-        self.type = part_of_speech
+        return None
 
 
 class NltkProtoLexer(object):
@@ -41,66 +35,38 @@ class NltkProtoLexer(object):
     def __init__(self):
         self._stack = []
 
-    def input(self, txt):
-        self._stack += [(txt, convert_tag_to_part_of_speech(val)) for (txt, val) in
-            nltk.pos_tag(nltk.word_tokenize(txt))[::-1]]
+    def input(self, text):
+        self._stack += [self.convert_tagged_token(txt, val) for (txt, val) in
+            nltk.pos_tag(nltk.word_tokenize(text.lower()))[::-1] if txt not in 'a:.']
+
+    def token(self):
+        return Token.from_tuple(self._stack.pop())
 
     def has_next(self):
         return len(self._stack) > 0
-
-
-def collect_probabilities_from_list(possible_vals):
-    types = {}
-    for val in possible_vals:
-        types[val] = types.get(val, 0) + 1
-    for val in types.keys():
-        types[val] /= len(possible_vals)
-    return types
-
-
-def convert_word_to_stochastic_token_tuple(w):
-    if re.match(r"\d+", w):
-        return w, {UnalphabeticTerminal.NUMBER.value: 1.}
-    # if re.match(r"[a-zĉĝĥĵŝŭA-ZĈĜĤĴŜŬ]+", w):
-    else:
-        return (w, collect_probabilities_from_list(
-            [convert_tag_to_part_of_speech(syn.pos()) for syn in wordnet.synsets(w)]
-            + identify_potential_keywords(w)))
-
-
-class BeamToken(object):
-    def __init__(self, token_tuple):
-        (str, possible_vals) = token_tuple
-        self.value = str
-        self.types = possible_vals
-
-    def token(self):
-        return Token(self._stack.pop())
 
     def __iter__(self):
         while self.has_next():
             yield self.token()
 
-    def pretty_format(self):
-        token_representation_lines = self.create_tag_string_list() + [self.value]
-        longest_line = max(len(line) for line in token_representation_lines)
-        return '\n'.join(line.center(longest_line) for line in token_representation_lines)
-
-    def create_tag_string_list(self):
-        return [convert_item_to_dict_representation(t) for t in self.types.items()]
-
     @staticmethod
-    def list_pretty_format(token_list: list):
-        formatted_token_list = [token.pretty_format() for token in token_list]
-        maximum_lines = max(len(formatted_token.splitlines()) for formatted_token in formatted_token_list)
-        formatted_tokens_with_equal_lines = [
-            (' ' * len(formatted_token.splitlines()[0]) + '\n') * (
-                    maximum_lines - len(formatted_token.splitlines())) + formatted_token for
-            formatted_token in formatted_token_list]
-        output = [' + '.join(
-            [formatted_token.splitlines()[line_number] for formatted_token in formatted_tokens_with_equal_lines]) for
-            line_number in range(len(formatted_tokens_with_equal_lines[0].splitlines()))]
-        return '\n'.join(output)
+    def convert_tagged_token(text, tag):
+        if re.match(r"\d+", text):
+            return text, UnalphabeticTerminal.NUMBER
+        if text in english_keywords_dictionary:
+            return text, english_keywords_dictionary.get(text)
+        else:
+            return text, convert_tag_to_part_of_speech(tag)
+
+
+def collect_probabilities_from_list(possible_vals):
+    filtered_values = [v for v in possible_vals if v is not None]
+    tags = {}
+    for val in filtered_values:
+        tags[val] = tags.get(val, 0) + 1
+    for val in tags.keys():
+        tags[val] /= len(filtered_values)
+    return tags
 
 
 class WordnetProtoLexer(object):
@@ -109,18 +75,57 @@ class WordnetProtoLexer(object):
         self._stack = []
 
     def input(self, text):
-        self._stack += [convert_word_to_stochastic_token_tuple(w) for w in text.split(" ")][::-1]
+        split_words = self.split_input(text)
+        i = 0
+        while i < len(split_words):
+            current_word = split_words[i]
+            if i == 0 and len(split_words) >= 2 and current_word.lower() == "to":
+                self._stack.insert(0, (" ".join(split_words[i:i + 2]), {PartOfSpeech.V_INF: 1}))
+                i += 1
+            elif current_word == '"':
+                i += 1
+                while '"' not in split_words[i]:
+                    current_word += ' ' + split_words[i]
+                    i += 1
+                current_word += ' "'
+                self._stack.insert(0, (current_word, {UnalphabeticTerminal.STRING: 1}))
+            else:
+                token_tuple = self.convert_word_to_stochastic_token_tuple(current_word)
+                if current_word.endswith("th") and len(token_tuple[1].keys()) == 0:
+                    token_tuple[1][PartOfSpeech.ADJECTIVE] = 1
+                if UnalphabeticTerminal.COMMENT not in token_tuple[1] \
+                        or token_tuple[1][UnalphabeticTerminal.COMMENT] < 1:
+                    self._stack.insert(0, token_tuple)
+            i += 1
+
+    def split_input(self, text):
+        # return [w for w in re.split(r"\s+", text) if w != '']
+
+        return [w for w in re.split(r"\b|\s+", text) if not re.fullmatch(r"\s*", w)]
 
     def has_next(self):
         return len(self._stack) > 0
 
     def token(self):
-        return BeamToken(self._stack.pop())
+        return BeamToken.from_tuple(self._stack.pop())
 
     def __iter__(self):
         while self.has_next():
             yield self.token()
 
+    @staticmethod
+    def convert_word_to_stochastic_token_tuple(w):
+        w = w.lower()
+        if re.match(r"\d+", w):
+            return w, {UnalphabeticTerminal.NUMBER: 1.}
+        # if re.match(r"[a-zĉĝĥĵŝŭA-ZĈĜĤĴŜŬ]+", w):
+        if w == 'a':
+            return w, {UnalphabeticTerminal.COMMENT: 1}
+        else:
+            return (w, collect_probabilities_from_list(
+                [convert_tag_to_part_of_speech(syn.pos()) for syn in wordnet.synsets(w)]
+                + WordnetProtoLexer.identify_potential_keywords(w)))
 
-def convert_item_to_dict_representation(dict_item: tuple):
-    return '{' + dict_item.__repr__().replace(',', ':')[1:-1] + '}'
+    @staticmethod
+    def identify_potential_keywords(word):
+        return [] if word not in english_keywords_dictionary else [english_keywords_dictionary.get(word)]

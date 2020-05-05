@@ -3,48 +3,9 @@ import math
 import ply.yacc as yacc
 
 from compilation import node
+from compilation.definitions import EsperantoSyntaxError, EsperantoLocatedSyntaxError, GrammarVariable
 from compilation.esperanto_lexer import UnalphabeticTerminal as UaTer, PartOfSpeech as PoS, \
     ReservedWord as ResWord, tokens
-from library.atomic_types import *
-
-
-class EsperantoSyntaxError(Exception):
-    pass
-
-
-class GrammarVariable(Enum):
-    PROGRAM = 'V_program'
-    BLOCK = 'V_block'
-    STATEMENT = 'V_statement'
-    IF_STATEMENT = 'V_if'
-    WHILE_LOOP = 'V_while_loop'
-    DELAYED_STATEMENT = 'V_delayed_statement'
-    DELIMITER = 'V_separator'
-    SCHEDULED_STATEMENT = 'V_scheduled_statement'
-    REPEATING_STATEMENT = 'V_repeating_statement'
-    RETURN_STATEMENT = 'V_return'
-    ASSIGN_STATEMENT = 'V_assign'
-    EXPRESSION = 'V_expression'
-    TIME_SPAN = 'V_time_span'
-    TIME_POINT = 'V_time_point'
-    NAME = 'V_name'
-    VARIABLE = 'V_variable'
-    PARTIAL_NAME = 'V_partial_name'
-    ADJECTIVE = 'V_adjective'
-    TERM = 'V_term'
-    FACTOR = 'V_factor'
-    ROUTINE_INVOCATION = 'V_routine_invocation'
-    NUMBER_LITERAL = 'V_number_literal'
-    HOUR_ORDINAL = 'V_hour_ordinal'
-    PARTIAL_TIME_SPAN = 'V_partial_time_span'
-    ROUTINE_ARGUMENTS = 'V_arguments'
-    ROUTINE_ARGUMENT = 'V_single_argument'
-    PARAMETERS = 'V_parameters'
-    ROUTINE_DEFINITION = 'V_routine_definition'
-    RELATION = 'V_relation'
-    LARGE_ORDINAL = 'V_large_ordinal'
-    ONCE_STATEMENT = 'V_once_statement'
-    WHENEVER_STATEMENT = 'V_whenever_statement'
 
 
 def RULE(product, rule_list):
@@ -153,7 +114,7 @@ def build(start=None):
                 ResWord.ELSE, GrammarVariable.BLOCK, ResWord.END], ])
     def p_ifStatement_ifCondition(p):
         if len(p) == 6:
-            p[0] = node.ConditionalStatement(p[2], p[4], None)
+            p[0] = node.ConditionalStatement(p[2], p[4])
         else:
             p[0] = node.ConditionalStatement(p[2], p[4], p[6])
 
@@ -179,7 +140,8 @@ def build(start=None):
     def p_onceStatement_actionAndTrigger(p):
         p[0] = node.OnceStatement(p[1], p[3])
 
-    @RULE(GrammarVariable.WHENEVER_STATEMENT, [[GrammarVariable.STATEMENT, ResWord.WHENEVER, GrammarVariable.EXPRESSION], ])
+    @RULE(GrammarVariable.WHENEVER_STATEMENT,
+        [[GrammarVariable.STATEMENT, ResWord.WHENEVER, GrammarVariable.EXPRESSION], ])
     def p_wheneverStatement_actionAndTrigger(p):
         p[0] = node.WheneverStatement(p[1], p[3])
 
@@ -315,7 +277,7 @@ def build(start=None):
 
     @RULE(GrammarVariable.FACTOR, [[UaTer.L_PAREN, GrammarVariable.EXPRESSION, UaTer.R_PAREN], ])
     def p_factor_expr(p):
-        p[0] = p[2]
+        p[0] = node.Parentheses(p[2])
 
     # ----------------------------   boolean calculations    ------------------------- #
     @RULE(GrammarVariable.RELATION, [[ResWord.IS, ResWord.EQUAL, ResWord.TO], ])
@@ -323,22 +285,26 @@ def build(start=None):
         p[0] = node.Comparison.Relation.EQUAL
 
     @RULE(GrammarVariable.RELATION, [[ResWord.IS, ResWord.MORE, ResWord.GREATER, ResWord.THAN],
-        [ResWord.IS, ResWord.MORE, ResWord.GREATER,
-            ResWord.OR, ResWord.EQUAL, ResWord.TO], ])
-    def p_relation_greatnessAndEquality(p):
-        if len(p) == 5:
-            p[0] = node.Comparison.Relation.GREATER
-        else:
-            p[0] = node.Comparison.Relation.GREATER_OR_EQUAL
+        [UaTer.GREATER_THAN], ])
+    def p_relation_greatness(p):
+        p[0] = node.Comparison.Relation.GREATER
+
+    @RULE(GrammarVariable.RELATION, [[ResWord.IS, ResWord.MORE, ResWord.GREATER,
+        ResWord.OR, ResWord.EQUAL, ResWord.TO],
+        [UaTer.GREATER_EQUAL], ])
+    def p_relation_greatnessOrEquality(p):
+        p[0] = node.Comparison.Relation.GREATER_OR_EQUAL
+
+    @RULE(GrammarVariable.RELATION, [[ResWord.IS, ResWord.MORE, ResWord.SMALLER, ResWord.THAN],
+        [UaTer.LESSER_THAN], ])
+    def p_relation_smallness(p):
+        p[0] = node.Comparison.Relation.LESSER
 
     @RULE(GrammarVariable.RELATION, [[ResWord.IS, ResWord.MORE, ResWord.SMALLER,
         ResWord.OR, ResWord.EQUAL, ResWord.TO],
-        [ResWord.IS, ResWord.MORE, ResWord.SMALLER, ResWord.THAN], ])
-    def p_relation_smallnessAndEquality(p):
-        if len(p) == 5:
-            p[0] = node.Comparison.Relation.LESSER
-        else:
-            p[0] = node.Comparison.Relation.LESSER_OR_EQUAL
+        [UaTer.LESSER_EQUAL], ])
+    def p_relation_smallnessOrEquality(p):
+        p[0] = node.Comparison.Relation.LESSER_OR_EQUAL
 
     @RULE(GrammarVariable.EXPRESSION,
         [[GrammarVariable.EXPRESSION, GrammarVariable.RELATION, GrammarVariable.EXPRESSION],
@@ -501,16 +467,23 @@ def build(start=None):
     # noinspection PyUnusedLocal
     def p_error(p):
         symbol_stack_trace = ""
+        shifted_tokens = 0
         for symbol in ast_builder.symstack[1:]:
             # noinspection PyUnresolvedReferences
             if isinstance(symbol, yacc.YaccSymbol) and isinstance(symbol.value, node.AstNode):
                 # noinspection PyUnresolvedReferences
                 symbol_stack_trace += symbol.value.pretty_print()
+                shifted_tokens += symbol.value.total_number_of_tokens()
+            elif isinstance(symbol, yacc.YaccSymbol) and isinstance(symbol.value, list):
+                shifted_tokens += sum([node.total_number_of_tokens() for node in symbol.value])
+                shifted_tokens += 0 if len(symbol.value) == 0 else len(symbol.value) - 1
+                symbol_stack_trace += str(symbol) + str(symbol.value)
             else:
                 symbol_stack_trace += str(symbol)
+                shifted_tokens += 1
             symbol_stack_trace += "\n"
-        raise EsperantoSyntaxError("Syntax error in input: " + str(p) +
-                                   "\nOn parse tree:\n" + symbol_stack_trace)
+        raise EsperantoLocatedSyntaxError(shifted_tokens,
+            "Syntax error in input: " + str(p) + "\nOn parse tree:\n" + symbol_stack_trace)
 
     ast_builder = yacc.yacc(tabmodule="my_parsetab", start=start, errorlog=yacc.NullLogger())
     return ast_builder

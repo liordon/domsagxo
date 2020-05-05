@@ -1,9 +1,12 @@
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
+import compilation.definitions
 from compilation import node
+from compilation.definitions import EsperantoLocatedSyntaxError
 from test_utils import mocks
-from test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided
+from test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided, \
+    MockSmartHomeStateVariablesProvided, TopLevelAstProvided
 
 
 def parsed_value_of(ast, expr, state=None):
@@ -18,10 +21,6 @@ class CanAssertNodeType(object):
 
 
 class TestVerbalNumbers(ExpressionLevelAstProvided):
-    @staticmethod
-    def assertVerbalNumberValue(numerical_value, token):
-        # assert ReservedWord.VERBAL_DIGIT.value == token.type
-        assert numerical_value == token.value
 
     def test_canParseDigit0(self, ast):
         assert parsed_value_of(ast, "nul") == 0
@@ -114,6 +113,10 @@ class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType)
         self.assertThatExpressionIsOfNodeType(ast, "1-1", node.Subtract)
         self.assertThatExpressionIsOfNodeType(ast, "unu malpli unu", node.Subtract)
 
+    def test_calculationInParenthesesReturnParenthesesNode(self, ast):
+        self.assertThatExpressionIsOfNodeType(ast, "(1-1)", node.Parentheses)
+        self.assertThatExpressionIsOfNodeType(ast, "krampo unu malpli unu malkrampo", node.Parentheses)
+
     def test_nounReturnsVariableNode(self, ast):
         self.assertThatExpressionIsOfNodeType(ast, "sxambalulo", node.VariableName)
 
@@ -139,10 +142,7 @@ class TestBasicAstExpressionNodes(ExpressionLevelAstProvided, CanAssertNodeType)
         self.assertThatExpressionIsOfNodeType(ast, "ĝin", node.VariableName)
 
 
-class TestReferenceSemantics(ExpressionLevelAstProvided):
-    @pytest.fixture
-    def state(self):
-        return mocks.Bunch(variables={})
+class TestReferenceSemantics(ExpressionLevelAstProvided, MockSmartHomeStateVariablesProvided):
 
     def test_nounVariableValueCanBeAssessedAsExpression(self, ast, state):
         variable_name = "sxambalulo"
@@ -286,7 +286,7 @@ class TestAstMathExpressions(ExpressionLevelAstProvided):
         assert 9 == parsed_value_of(ast, "krampo unu pli du malkrampo fojoj tri")
 
     def test_sameDigitCannotBeSpecifiedTwice(self, ast):
-        with pytest.raises(ast_bld.EsperantoSyntaxError):
+        with pytest.raises(compilation.definitions.EsperantoSyntaxError):
             ast.parse("naux ses")
 
 
@@ -318,7 +318,7 @@ class TestAstBooleanExpressions(ExpressionLevelAstProvided):
 class TestAstRelationalExpressions(ExpressionLevelAstProvided):
     @pytest.fixture
     def relation_ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.RELATION.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.RELATION.value)
 
     def test_existsAnEqualityRelation(self, relation_ast):
         ast_node = relation_ast.parse("estas egala al")
@@ -339,6 +339,14 @@ class TestAstRelationalExpressions(ExpressionLevelAstProvided):
     def test_existsAnEqualOrSmallnessRelation(self, relation_ast):
         ast_node = relation_ast.parse("estas pli malgranda aux egala al")
         assert ast_node is not None
+
+    def test_unalphabeticComparisonOperatorsAreEquivalentToSpokenOperators(self, relation_ast):
+        assert relation_ast.parse("estas pli granda ol") == relation_ast.parse(">")
+        assert relation_ast.parse("estas pli malgranda ol") == relation_ast.parse("<")
+        assert relation_ast.parse("estas pli granda aux egala al") == relation_ast.parse(">=")
+        assert relation_ast.parse("estas pli malgranda aux egala al") == relation_ast.parse("<=")
+        assert relation_ast.parse("estas pli granda aux egala al") == relation_ast.parse("≥")
+        assert relation_ast.parse("estas pli malgranda aux egala al") == relation_ast.parse("≤")
 
     def test_canEvaluateEqualityBetweenNumberAndItself(self, ast):
         assert parsed_value_of(ast, "unu estas egala al unu")
@@ -389,3 +397,25 @@ class TestAstRelationalExpressions(ExpressionLevelAstProvided):
         assert not parsed_value_of(ast, "unu ne estas pli malgranda aux egala al unu")
         assert not parsed_value_of(ast, "unu ne estas pli malgranda aux egala al du")
         assert parsed_value_of(ast, "du ne estas pli malgranda aux egala al unu")
+
+
+class TestPinPointingOffendingTokenOnSyntaxErrors(TopLevelAstProvided):
+    def test_canIndicateProblemInVeryFirstToken(self, ast):
+        with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
+            ast.parse("finu")
+        assert exception_info.value.index == 0
+
+    def test_canIdentifyProblemAfterArithmeticNode(self, ast):
+        with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
+            ast.parse("asignu 1 + 1 + finu")
+        assert exception_info.value.index == 5
+
+    def test_canIdentifyProblemAfterMethodParameters(self, ast):
+        with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
+            ast.parse("sxambaluli unuo kaj duo kaj trio signifas finu")
+        assert exception_info.value.index == 7
+
+    def test_canIdentifyProblemAfterEntireMethodDefinition(self, ast):
+        with pytest.raises(EsperantoLocatedSyntaxError) as exception_info:
+            ast.parse("sxambaluli unuo kaj duo kaj trio signifas revenu finu finu")
+        assert exception_info.value.index == 9

@@ -1,6 +1,7 @@
 import sys
 
-from compilation.abstract_syntax_tree import build, GrammarVariable
+from compilation.abstract_syntax_tree import build
+from compilation.definitions import GrammarVariable
 
 
 def convert_name_to_token(token_name):

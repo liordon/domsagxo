@@ -3,29 +3,56 @@ import datetime
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
+import compilation.definitions
 import compilation.esperanto_lexer as eo_lxr
-from english_prototype.english_lexer import BeamToken
+from compilation.definitions import PartOfSpeech
+from compilation.node import AstNode
+from english_prototype.data_structures import BeamToken
+from english_prototype.english_lexer import WordnetProtoLexer, NltkProtoLexer
+from library import management_components as mgmt_cmp, atomic_types as atypes
 from library.management_components import Horaro, Domsagxo
+from test_utils import mocks
 from test_utils.mocks import MockClock
 
 
-class PartOfSpeechVerifier(object):
+class SyntaxNodesProvided(object):
+    class FakeNode(AstNode):
+        def __init__(self, number_of_tokens=0):
+            self.num_tokens = number_of_tokens
+
+        def total_number_of_tokens(self):
+            return self.num_tokens
+
     @staticmethod
-    def assertPartOfSpeechForGivenToken(partOfSpeech, token):
+    def node_with_x_tokens(x):
+        return SyntaxNodesProvided.FakeNode(number_of_tokens=x)
+
+    @pytest.fixture
+    def tokenless_node(self):
+        return self.node_with_x_tokens(0)
+
+    @pytest.fixture
+    def single_token_node(self):
+        return self.node_with_x_tokens(1)
+
+    @pytest.fixture
+    def double_token_node(self):
+        return self.node_with_x_tokens(2)
+
+
+class PartOfSpeechValueVerifier(object):
+    @staticmethod
+    def assert_part_of_speech_for_token(partOfSpeech, token):
         assert partOfSpeech.value == token.type
 
     @staticmethod
-    def assertPartOfSpeechForNextTokenOfLexer(partOfSpeech, lexer):
+    def assert_part_of_speech_for_next_token_of_lexer(partOfSpeech, lexer):
         assert partOfSpeech.value == lexer.token().type
-
-    @staticmethod
-    def assertOnePossiblePartOfSpeechForNextTokenOfLexer(partOfSpeech, lexer):
-        assert partOfSpeech.value in lexer.token().types.keys()
 
 
 def evaluate_and_return_state(ast, statement, initial_state=None):
     if initial_state is None:
-        initial_state = Domsagxo()  # so as not to put a mutable default
+        initial_state = mocks.Bunch(variables={}, method_dict={})  # so as not to put a mutable default
     state, nothing = ast.parse(statement).evaluate(initial_state)
     return state
 
@@ -34,7 +61,7 @@ def evaluate_and_return_state_variables(ast, statement, initial_state=None):
     return evaluate_and_return_state(ast, statement, initial_state).variables
 
 
-class EsperantoLexerProvided(PartOfSpeechVerifier):
+class EsperantoLexerProvided(PartOfSpeechValueVerifier):
     @pytest.fixture
     def lexer(self):
         return eo_lxr.build()
@@ -43,25 +70,37 @@ class EsperantoLexerProvided(PartOfSpeechVerifier):
 class PartialNameLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.PARTIAL_NAME.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.PARTIAL_NAME.value)
 
 
 class ExpressionLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.EXPRESSION.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.EXPRESSION.value)
 
 
 class FunctionDefinitionLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.ROUTINE_DEFINITION.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.ROUTINE_DEFINITION.value)
 
 
 class StatementLevelAstProvided(object):
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.STATEMENT.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.STATEMENT.value)
+
+
+class TopLevelAstProvided(object):
+    @pytest.fixture
+    def ast(self):
+        return ast_bld.build()
+
+
+class MockSmartHomeStateVariablesProvided(object):
+    @pytest.fixture
+    def state(self):
+        return mocks.Bunch(variables={}, method_dict={})
 
 
 class TimeManagerWithSimulativeClockProvided(object):
@@ -140,9 +179,38 @@ class RealTimeSmartHomeManagerProvided_CarefulVolatile(object):
 
 class BeamTokensProvided(object):
     @pytest.fixture
-    def single_tag_token(self):
-        return BeamToken(("kite", {"noun": 1}))
+    def kite_noun_token(self):
+        return BeamToken("kite", {PartOfSpeech.NOUN: 1})
 
     @pytest.fixture
-    def multiple_tag_token(self):
-        return BeamToken(("love", {"noun": 0.5, "verb": 0.125}))
+    def love_noun_or_verb_token(self):
+        return BeamToken("love", {PartOfSpeech.NOUN: 0.5, PartOfSpeech.V_IMP: 0.125})
+
+
+class ProvidedSmartHomeWithLightBulb(object):
+    @pytest.fixture
+    def smart_home(self):
+        smart_home = mgmt_cmp.Domsagxo()
+        light_bulb = atypes.Appliance(atypes.ApplianceTypes.LIGHT, "sxambalulo")
+        smart_home.addAppliance(light_bulb)
+        return smart_home
+
+
+class WordNetEnglishLexerProvided(object):
+    @pytest.fixture
+    def lexer(self):
+        return WordnetProtoLexer()
+
+    @staticmethod
+    def assert_possible_next_token(partOfSpeech, lexer):
+        assert partOfSpeech in lexer.token().tags.keys()
+
+
+class NltkEnglishLexerProvided(object):
+    @pytest.fixture
+    def lexer(self):
+        return NltkProtoLexer()
+
+    @staticmethod
+    def assert_tag_of_next_token(partOfSpeech, lexer):
+        assert lexer.token().tag is partOfSpeech

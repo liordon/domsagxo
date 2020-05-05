@@ -28,6 +28,10 @@ t_TLPAREN = r'\('
 t_TRPAREN = r'\)'
 t_TPERIOD = r'\.'
 t_TDELIM = r','
+t_TGT = r'\>'
+t_TGE = r'(\>=)|≥'
+t_TLT = r'\<'
+t_TLE = r'(\<=)|≤'
 t_ignore_TCOMMENT = r'\#.*'
 
 
@@ -45,7 +49,7 @@ timeUnitRe = re.compile(r"(jaro|monato|semajno|tago|horo|minuto|sekundo)j?\b")
 
 def t_string(t):
     r"""('.*?')|(".*?")|(\bmaldekstra\scitilo\b.*?\bdekstra\scitilo\b)|(
-    \bcitilo\b.*?\bmalcitilo\b)"""
+    \bcitilo\b(.|\n)*?\bmalcitilo\b)"""
     if t.value.startswith("maldekstra citilo"):
         t.value = t.value[18:-15]
     if t.value.startswith("citilo"):
@@ -58,6 +62,7 @@ def t_string(t):
 
 def t_TWORD(t):
     r"""[a-zĉĝĥĵŝŭA-ZĈĜĤĴŜŬ]+"""
+    t.value = t.value.lower()
     if reserved_words.keys().__contains__(t.value):
         determine_type_and_value_of_reserved_words(t)
     elif digitRe.fullmatch(t.value):

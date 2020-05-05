@@ -4,7 +4,10 @@ import pytest
 
 import library.atomic_types as atypes
 import library.management_components as mgmt_cmp
-from test_utils.providers import FunctionDefinitionLevelAstProvided, evaluate_and_return_state
+from demo import example_programs
+from demo.example_programs import DomsagxoPrograms
+from test_utils.providers import FunctionDefinitionLevelAstProvided, evaluate_and_return_state, \
+    ProvidedSmartHomeWithLightBulb
 
 
 def all_true(argument_list):
@@ -20,30 +23,25 @@ def is_prime(number):
     return all_true([number % i for i in range(2, int(math.sqrt(number)) + 1)])
 
 
-class ProvidedSmartHomeWithLightBulb(object):
-    @pytest.fixture
-    def smart_home(self):
-        smart_home = mgmt_cmp.Domsagxo()
-        light_bulb = atypes.Appliance(atypes.ApplianceTypes.LIGHT, "sxambalulo")
-        smart_home.addAppliance(light_bulb)
-        return smart_home
-
-
 class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
     ProvidedSmartHomeWithLightBulb):
 
-    def test_canDefineSimpleReturningRoutine(self, ast):
-        number_of_predefined_functions = len(mgmt_cmp.Domsagxo().method_dict)
+    def test_canDefiningSimpleReturningRoutineAddsItToMethodDict(self, ast):
         new_state = evaluate_and_return_state(ast,
             '''sxambaluli signifas revenu finu''')
-        assert number_of_predefined_functions + 1 == len(new_state.method_dict)
+        assert 1 == len(new_state.method_dict)
         assert 'sxambalulu' in new_state.method_dict.keys()
 
-    def test_canDefineRoutineReturningValue(self, ast):
-        number_of_predefined_functions = len(mgmt_cmp.Domsagxo().method_dict)
+    def test_functionNamesAreCaseInsensitiveAndAreAlwaysSavedAsLowercase(self, ast):
+        new_state = evaluate_and_return_state(ast,
+            '''SxamBaluLi signifas revenu finu''')
+        assert 1 == len(new_state.method_dict)
+        assert 'sxambalulu' in new_state.method_dict.keys()
+
+    def test_canDefiningRoutineReturningValueAddsItToMethodDict(self, ast):
         new_state = evaluate_and_return_state(ast,
             '''sxambaluli signifas revenu nul finu''')
-        assert number_of_predefined_functions + 1 == len(new_state.method_dict)
+        assert 1 == len(new_state.method_dict)
         assert 'sxambalulu' in new_state.method_dict.keys()
 
     def test_returnValueIsSavedInVariableItAfterFunctionCall(self, ast):
@@ -51,6 +49,18 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
             '''sxambaluli signifas revenu nul finu''')
         new_state.method_dict['sxambalulu']()
         assert new_state.variables['gxi'] == 0
+
+    def test_canDefineRootSeekingRoutineAndGet42AsCeilingRootOf1682(self, ast):
+        new_state = evaluate_and_return_state(ast,
+            '''radiki nombro signifas
+            asignu du al radiko
+            poste dum radiko fojoj radiko estas pli malgranda ol nombro tiam
+                asignu unu pli radiko al radiko
+            finu
+            poste revenu radiko
+            finu''')
+        new_state.method_dict['radiku'](1682)
+        assert new_state.variables['gxi'] == 42
 
     def test_cannotPassMoreArgumentsThanPlannedToUserDefinedFunction(self, ast):
         new_state = evaluate_and_return_state(
@@ -108,8 +118,7 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         for i in range(len(new_state.variables["sxambaluloj"])):
             assert 10 * (i + 1) == new_state.variables["sxambaluloj"][i].properties["brilo"]
 
-
-    def test_canDefineMuConstantFunction(self, ast, smart_home):
+    def test_canDefineOldMuConstantFunction(self, ast, smart_home):
         """the Mu-recursive constant function has a predefined constant n which it always returns.
         The function is simply: f(x) = n."""
         new_state = evaluate_and_return_state(
@@ -118,7 +127,15 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         new_state.method_dict['konstantu'](10, 809, 341)
         assert 7 == new_state.variables['sxambalulo'].properties["brilo"]
 
-    def test_canDefineMuSuccessorFunction(self, ast, smart_home):
+    def test_canDefineUpdatedMuConstantFunction(self, ast, smart_home):
+        """the Mu-recursive constant function has a predefined constant n which it always returns.
+        The function is simply: f(x) = n."""
+        new_state = evaluate_and_return_state(
+            ast, DomsagxoPrograms.mu_constant.value, smart_home)
+        new_state.method_dict['konstantu'](10)
+        assert 0 == new_state.variables['gxi']
+
+    def test_canDefineOldMuSuccessorFunction(self, ast, smart_home):
         """the Mu-recursive successor function recieves an argument and returns it's successor.
         Basically, it's just f(x) = x+1."""
         new_state = evaluate_and_return_state(
@@ -126,6 +143,14 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
                 asignu nombro pli unu al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['posteulu'](41)
         assert 42 == new_state.variables['sxambalulo'].properties["brilo"]
+
+    def test_canDefineUpdatedMuSuccessorFunction(self, ast, smart_home):
+        """the Mu-recursive successor function recieves an argument and returns it's successor.
+        Basically, it's just f(x) = x+1."""
+        new_state = evaluate_and_return_state(
+            ast, DomsagxoPrograms.mu_successor.value, smart_home)
+        new_state.method_dict['posteulu'](41)
+        assert 42 == new_state.variables['gxi']
 
     def test_canDefineTheMuProjectionFunction(self, ast, smart_home):
         """the Mu-recursive projection function (also called the identity function)
@@ -135,7 +160,16 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
             ast, '''elekti hundo kaj kato signifas 
             asignu hundo al brilo de sxambalulo finu''', smart_home)
         new_state.method_dict['elektu'](31, 42)
-        assert 31 == new_state.variables['sxambalulo'].properties["brilo"]
+        assert new_state.variables['sxambalulo'].properties["brilo"] == 31
+
+    def test_canDefineUpdatedMuProjectionFunction(self, ast, smart_home):
+        """the Mu-recursive projection function (also called the identity function)
+        is a function that receives k inputs and returns the ith input without change.
+        In this specific example, we accept 2 inputs and return the first one."""
+        new_state = evaluate_and_return_state(
+            ast, DomsagxoPrograms.mu_projection.value, smart_home)
+        new_state.method_dict['projekcu']([31, 42], 1) # in domsagxo we start accessing at 1
+        assert new_state.variables['gxi'] == 31
 
     def test_canDefineFunctionToTellIfANumberIsPrime(self, ast, smart_home):
         """yogi was sassy and said I could not tell the prime numbers apart even if I tried.
@@ -206,3 +240,7 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         for i in range(2, 100):
             assert is_prime(i) == new_state.variables['sxambaluloj'][i - 1].isTurnedOn()
             assert is_prime(i) == (i in self.prime_list)
+
+    def test_canDefineSillyNameFunction(self, ast, smart_home):
+        new_state = evaluate_and_return_state(ast, DomsagxoPrograms.silly_name_generator.value)
+        assert new_state.method_dict['sensencnomu'] is not None

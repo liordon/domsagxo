@@ -4,6 +4,7 @@ import time
 import pytest
 
 import compilation.abstract_syntax_tree as ast_bld
+import compilation.definitions
 import library.management_components as mng_co
 from library.atomic_types import Appliance
 from library.predefined_values import ApplianceTypes, ApplianceProperties, Color
@@ -13,11 +14,11 @@ from test_utils.providers import StatementLevelAstProvided, SmartHomeManagerProv
 
 class TestUntimedAstStatements(StatementLevelAstProvided):
 
-    def test_capableOfNumberAssignment(self, ast):
+    def test_capableOfNumberAssignmentIntoVariables(self, ast):
         variables = evaluate_and_return_state_variables(ast, "kato = 10")
         assert 10 == variables["kato"]
 
-    def test_capableOfExpressionAssignment(self, ast):
+    def test_capableOfExpressionAssignmentIntoVariables(self, ast):
         state = evaluate_and_return_state_variables(ast, "kato=2+4*10")
         assert 42 == state["kato"]
 
@@ -25,6 +26,10 @@ class TestUntimedAstStatements(StatementLevelAstProvided):
         new_state = evaluate_and_return_state_variables(ast, "nigra kato=7")
         assert 7 == new_state["nigra kato"]
         assert 'kato' not in new_state
+
+    def test_variablesAreCaseInsensitiveAndSavedAsLowerCase(self, ast):
+        new_state = evaluate_and_return_state_variables(ast, "Nigra Kato=7")
+        assert new_state["nigra kato"] == 7
 
     def test_reservedAdjectivesCanBeReclaimedForVariableNamesOutOfReservedContext(self, ast):
         new_state = evaluate_and_return_state_variables(ast, "asignu 7 al malgranda kato")
@@ -164,7 +169,9 @@ class TestTimedAstStatements(StatementLevelAstProvided, SmartHomeManagerProvided
         light_bulb2 = Appliance(ApplianceTypes.LIGHT, "cxarmandero")
         smart_home.addAppliance(light_bulb)
         smart_home.addAppliance(light_bulb2)
-        smart_home, value = ast.parse("asignu kvardek du al brilo de bulbazoro unufoje la koloro de cxarmandero estas egala al rugxo").evaluate(smart_home)
+        smart_home, value = ast.parse(
+            "asignu kvardek du al brilo de bulbazoro unufoje la koloro de cxarmandero estas egala al rugxo").evaluate(
+            smart_home)
 
         self.fastForwardBy(smart_home, seconds=2)
         assert smart_home.variables["bulbazoro"].properties[ApplianceProperties.BRIGHTNESS.value] != 42
@@ -221,14 +228,14 @@ class TestAstPrograms(object):
 
     @pytest.fixture
     def ast(self):
-        return ast_bld.build(start=ast_bld.GrammarVariable.PROGRAM.value)
+        return ast_bld.build(start=compilation.definitions.GrammarVariable.PROGRAM.value)
 
     @pytest.fixture
     def initial_state(self):
         return mng_co.Domsagxo()
 
     def test_unterminatedCommandIsNotAProgram(self, ast):
-        with pytest.raises(ast_bld.EsperantoSyntaxError):
+        with pytest.raises(compilation.definitions.EsperantoSyntaxError):
             ast.parse("12")
 
     def test_canParseASingleCommandAsProgram(self, ast):
@@ -296,7 +303,7 @@ class TestAstPrograms(object):
         poste se unua lumo sxaltas tiam
             asignu tri al hundo
         finu
-        ''')
+        ''', initial_state)
         with pytest.raises(KeyError):
             assert variables["muso"] is None
 
@@ -304,6 +311,16 @@ class TestAstPrograms(object):
 
         with pytest.raises(KeyError):
             assert variables["hundo"] is None
+
+    def test_languageShouldBeCompleteCaseInsensitive(self, ast, initial_state):
+        from random import randint
+        script = '''sxambaluli signifas revenu nul finu
+            poste sxambalulu
+            poste asignu gxi al kato'''
+        script = ''.join(c.lower() if randint(0, 1) else c.upper() for c in script)
+        variables = evaluate_and_return_state_variables(ast,
+            script)
+        assert variables['kato'] == 0
 
 
 @pytest.mark.timeout(10)
