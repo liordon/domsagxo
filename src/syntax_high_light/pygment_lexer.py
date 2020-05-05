@@ -75,6 +75,7 @@ class EngluentoLexer(RegexLexer):
             (r'(week|day|hour|minute|second)s?', Generic.TypeIndicator),
             (r'\band\b|,|\.|:', Generic.Separator),
             (regexFromWordList(engluento.prepositions), Generic.Separator),
+            (regexFromWordList(engluento.separators), Generic.Separator),
             (regexFromWordList(engluento.verbs), Name.Function),
             (r'[\+\-\=\*\\/]', Operator),
         ],

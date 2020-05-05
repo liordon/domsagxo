@@ -30,9 +30,12 @@ verbs = [
 ]
 
 keywords = [
-    "after", "afterwards", "assign", "simultaneously", "at", "do", "else", "end", "equal", "every", "false", "for", "greater",
+    "after", "assign", "at", "do", "else", "end", "equal", "every", "false", "for", "greater",
     "if", "in", "into", "is", "it", "like", "means", "new", "not", "of", "on", "once",
     "return", "so", "than", "them", "then", "true", "up",
     "whenever", "which", "while",
 ]
+
+separators = ["and", "afterwards", "simultaneously"]
+
 prepositions = ["between", "to", "with"]
