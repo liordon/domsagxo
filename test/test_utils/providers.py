@@ -9,10 +9,9 @@ from compilation.definitions import PartOfSpeech
 from compilation.node import AstNode
 from english_prototype.data_structures import BeamToken
 from english_prototype.english_lexer import WordnetProtoLexer, NltkProtoLexer
-from library import management_components as mgmt_cmp, atomic_types as atypes
+from library import management_components as mgmt_cmp, atomic_types as atypes, mocks
 from library.management_components import Horaro, Domsagxo
-from test_utils import mocks
-from test_utils.mocks import MockClock
+from library.mocks import MockClock
 
 
 class SyntaxNodesProvided(object):

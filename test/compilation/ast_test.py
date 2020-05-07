@@ -4,7 +4,7 @@ import compilation.abstract_syntax_tree as ast_bld
 import compilation.definitions
 from compilation import node
 from compilation.definitions import EsperantoLocatedSyntaxError
-from test_utils import mocks
+from library import mocks
 from test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided, \
     MockSmartHomeStateVariablesProvided, TopLevelAstProvided
 

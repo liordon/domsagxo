@@ -1,5 +1,4 @@
 import math
-import os
 from enum import Enum
 
 from appJar import gui
@@ -10,7 +9,7 @@ from demo.gui_wrappers import GuiBulb
 from library.atomic_types import Appliance, ApplianceTypes
 from library.management_components import Domsagxo, Horaro
 from library.predefined_values import ApplianceProperties
-from test_utils.mocks import MockClock
+from library.mocks import MockClock
 
 
 class HouseType(Enum):
