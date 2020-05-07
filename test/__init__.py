@@ -1,3 +1,3 @@
-import compilation.esperanto_lexer as lxr
+import domsagxo.compilation.esperanto_lexer as lxr
 
 lxr.build()

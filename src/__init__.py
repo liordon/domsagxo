@@ -1,1 +1,1 @@
-all = ['DomsagxoLexer']
+all = []
