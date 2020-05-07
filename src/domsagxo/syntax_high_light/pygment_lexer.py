@@ -19,7 +19,7 @@ alphabet = r'[^\W\d_]'
 class DomsagxoLexer(RegexLexer):
     """All your lexer code goes here!"""
     name = "Domsagxo Keyword Lexer"
-    aliases = ['domsagxo_test']
+    aliases = ['domsagxo']
     filenames = ['*.domsa']
     tokens = {
         'root': [
