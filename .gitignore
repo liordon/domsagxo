@@ -1,1 +1,13 @@
+*.backup
+.cache/
 .idea/
+*.idx
+*.swp
+*.pyc
+*.pyg
+*~
+my_*.*
+my_*/
+.pytest_cache/
+__pycache__/
+*.egg-info/
