@@ -4,6 +4,7 @@ setup(
     name="domsagxo_syntax_highlighter",
     packages=find_packages(),
 
+    install_requires=["pygments"],
     entry_points="""
          [pygments.lexers]
          domsagxo = domsagxo.syntax_high_light.pygment_lexer:DomsagxoLexer

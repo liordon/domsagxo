@@ -2,6 +2,7 @@
 .cache/
 .idea/
 *.idx
+*.out
 *.swp
 *.pyc
 *.pyg
