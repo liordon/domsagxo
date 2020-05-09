@@ -164,11 +164,8 @@ def create_clock(name, row=0, col=0):
     app.registerEvent(update_gui)
 
 
-house_type = HouseType.HOUSE
-clock_type = ClockType.REAL
-
-if __name__ == "__main__":
-
+def build_house(clock_type, house_type):
+    global ast, smart_home, app
     lxr.build()
     ast = ast_bld.build()
     if clock_type is ClockType.REAL:
@@ -181,7 +178,6 @@ if __name__ == "__main__":
         smart_home = Domsagxo(scheduler)
     smart_home.method_dict['haltu'] = smart_home.scheduler.runSetTime
     smart_home.method_dict['anoncu'] = announce_in_multimedia
-
     with gui("virtuala domo", showIcon=False) as app:
         app.addLabel("title", "Welcome to Domsagxo", colspan=2)
         app.setLabelBg("title", "green")
@@ -212,13 +208,11 @@ if __name__ == "__main__":
             with app.labelFrame("salono", row=2, colspan=2):
                 smart_home.variables["sxambalulo"] = create_efficient_bulb("sxambalulo")
 
-
             def turn_light_on_if_prime(number):
                 if is_prime(number):
                     smart_home.variables['sxambalulo'].turnOn()
                 else:
                     smart_home.variables['sxambalulo'].turnOff()
-
 
             smart_home.method_dict['cxuprimu'] = turn_light_on_if_prime
 
@@ -233,3 +227,7 @@ if __name__ == "__main__":
         app.enableEnter(execute_speech)
         app.bindKey("<Escape>", exit_gui)
         app.setIcon("../../../resources/logo.gif")
+
+
+if __name__ == "__main__":
+    build_house(ClockType.REAL, HouseType.HOUSE)
