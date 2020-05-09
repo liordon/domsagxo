@@ -15,7 +15,7 @@ setuptools.setup(
     long_description=description,
     long_description_content_type="text/markdown",
     url="http://github.com/liordon/domsagxo",
-    packages=setuptools.find_packages(where="src", exclude=("src/domsagxo/syntax_high_light", )),
+    packages=setuptools.find_packages(where="src/*", exclude=("src/domsagxo/syntax_high_light", )),
     include_package_data=True,
     setup_requires=['wheel'],
     install_requires=requirements,
