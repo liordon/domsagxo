@@ -226,7 +226,7 @@ def build_house(clock_type, house_type):
         app.addButton("Cancel", exit_gui, row=5, column=2)
         app.enableEnter(execute_speech)
         app.bindKey("<Escape>", exit_gui)
-        app.setIcon("../../../resources/logo.gif")
+        app.setIcon("../../resources/logo.gif")
 
 
 if __name__ == "__main__":
