@@ -158,7 +158,7 @@ def create_clock(name, row=0, col=0):
     app.registerEvent(update_gui)
 
 
-def build_house(clock_type, house_type):
+def build_house(clock_type=ClockType.REAL, house_type=HouseType.HOUSE):
     global ast, smart_home, app
     lxr.build()
     ast = ast_bld.build()
