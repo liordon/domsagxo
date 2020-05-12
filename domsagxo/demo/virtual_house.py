@@ -7,9 +7,9 @@ import domsagxo.compilation.abstract_syntax_tree as ast_bld
 import domsagxo.compilation.esperanto_lexer as lxr
 from domsagxo.demo.gui_wrappers import GuiBulb
 from domsagxo.library.atomic_types import Appliance, ApplianceTypes
-from domsagxo.library.predefined_values import ApplianceProperties
 from domsagxo.library.management_components import Domsagxo, Horaro
 from domsagxo.library.mocks import MockClock
+from domsagxo.library.predefined_values import ApplianceProperties
 
 
 class HouseType(Enum):
@@ -45,15 +45,9 @@ def is_prime(number):
 def execute_speech(button_or_key):
     global app, smart_home, ast
     speech = app.getTextArea("Speech")
-    print("parsing command:" + speech + "\n")
+    print("\nparsing command:" + speech)
     smart_home, value = ast.parse(speech).evaluate(smart_home)
     app.clearTextArea("Speech")
-
-
-def exit_gui(button_or_key):
-    global app, smart_home, ast
-    smart_home.stop_scheduler()
-    app.stop()
 
 
 def create_door(name, row=0, col=0):
@@ -223,10 +217,12 @@ def build_house(clock_type, house_type):
         app.addLabel("Reply", "Speech", row=4, column=1, colspan=2)
 
         app.addButton("Submit", execute_speech, row=5, column=1)
-        app.addButton("Cancel", exit_gui, row=5, column=2)
+        app.addButton("Cancel", app.stop, row=5, column=2)
         app.enableEnter(execute_speech)
-        app.bindKey("<Escape>", exit_gui)
-        app.setIcon("../../resources/logo.gif")
+        app.bindKey("<Escape>", app.stop)
+        app.setStopFunction(lambda: True if smart_home.stop_scheduler() else True)
+        # app.setImageLocation("resources")
+        # app.setIcon("logo.gif")
 
 
 if __name__ == "__main__":
