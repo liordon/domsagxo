@@ -3,6 +3,7 @@ from pygments import highlight
 from pygments.formatters.latex import LatexFormatter
 from pygments.lexer import RegexLexer
 from pygments.token import *
+from regex import IGNORECASE
 
 from domsagxo.compilation.esperanto_lexer import reserved_words, prepositions, digitRe, timeUnitRe
 from domsagxo.syntax_high_light import engluento, talon_keywords as talon
@@ -21,6 +22,7 @@ class DomsagxoLexer(RegexLexer):
     name = "Domsagxo Keyword Lexer"
     aliases = ['domsagxo']
     filenames = ['*.domsa']
+    flags = IGNORECASE
     tokens = {
         'root': [
             (r'\s+', Whitespace),
@@ -58,6 +60,7 @@ class EngluentoLexer(RegexLexer):
     name = "Engluento Keyword Lexer"
     aliases = ['engluento']
     filenames = ['*.englu']
+    flags = IGNORECASE
     tokens = {
         'root': [
             (alphabet + r'+-?((ation)|(ate)|(ify)|(ing))\b', Name.Function),
