@@ -72,3 +72,7 @@ class TestReserveWords(SyntaxLexerProvided):
         self.assertAllTokensOfSameType(tokens, Literal.Number)
         tokens = lexer.get_tokens("dekstra citilo")
         self.assertAllTokensOfSameType(tokens, Token.Keyword)
+        tokens = lexer.get_tokens("maldekstra krampo dekstra krampo")
+        self.assertAllTokensOfSameType(tokens, Token.Keyword)
+        tokens = lexer.get_tokens("tagoj")
+        self.assertAllTokensOfSameType(tokens, Generic.TypeIndicator)
