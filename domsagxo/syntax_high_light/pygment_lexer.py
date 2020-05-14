@@ -29,6 +29,7 @@ class DomsagxoLexer(RegexLexer):
             (r'\.|:', Comment),
             (digitRe.pattern, Number),
             (r'(maldekstra )?citilo', Keyword, 'string'),
+            (r'dekstra citilo', Keyword), # just for that one time I want to define it in the thesis.
             (r'"', Keyword, 'string'),
             (timeUnitRe.pattern, Generic.TypeIndicator),
             (r'\b(kaj|poste|samtempe)\b', Generic.Separator),

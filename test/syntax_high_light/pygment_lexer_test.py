@@ -66,3 +66,9 @@ class TestReserveWords(SyntaxLexerProvided):
     def test_separators(self, lexer):
         tokens = lexer.get_tokens("gxis kaj ekster trans,")
         self.assertAllTokensOfSameType(tokens, Generic.Separator)
+
+    def test_incorrectlyHighlightedWordsFromThesis(self, lexer):
+        tokens = lexer.get_tokens("du")
+        self.assertAllTokensOfSameType(tokens, Literal.Number)
+        tokens = lexer.get_tokens("dekstra citilo")
+        self.assertAllTokensOfSameType(tokens, Token.Keyword)
