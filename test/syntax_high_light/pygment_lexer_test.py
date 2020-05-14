@@ -43,7 +43,7 @@ class TestLiterals(SyntaxLexerProvided):
 
     def test_timePoints_timeSpans(self, lexer):
         tokens = lexer.get_tokens("horo minutoj jaro sekundoj")
-        self.assertAllTokensOfSameType(tokens, Generic.TypeIndicator)
+        self.assertAllTokensOfSameType(tokens, Keyword)
 
 
 class TestRegularWords(SyntaxLexerProvided):
@@ -74,5 +74,3 @@ class TestReserveWords(SyntaxLexerProvided):
         self.assertAllTokensOfSameType(tokens, Token.Keyword)
         tokens = lexer.get_tokens("maldekstra krampo dekstra krampo")
         self.assertAllTokensOfSameType(tokens, Token.Keyword)
-        tokens = lexer.get_tokens("tagoj")
-        self.assertAllTokensOfSameType(tokens, Generic.TypeIndicator)

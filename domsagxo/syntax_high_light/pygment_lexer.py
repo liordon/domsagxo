@@ -35,7 +35,7 @@ class DomsagxoLexer(RegexLexer):
             (r'malcitilo', Keyword),  # just for that one time I want to define it in the thesis.
             (r'(mal)?dekstra krampo', Keyword),  # just for that one time I want to define it in the thesis.
             (r'"', Keyword, 'string'),
-            (timeUnitRe.pattern, Generic.TypeIndicator),
+            (timeUnitRe.pattern, Keyword),
             (r'\b(kaj|poste|samtempe)\b', Generic.Separator),
             (r',', Generic.Separator),
             (regexFromWordList(reserved_words), Keyword),
