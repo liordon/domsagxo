@@ -23,10 +23,19 @@ class ClockType(Enum):
 
 
 def announce_in_multimedia(*args):
+    global app
     for output in args:
         print(output)
         app.setLabel("Reply", output)
         # os.system('espeak -v eo+m3 "' + str(output) + '"')
+
+
+def receive_input():
+    global app, smart_home
+    expression_ast = ast_bld.build(start=lxr.GrammarVariable.EXPRESSION.value)
+    user_input = app.stringBox('Atentu', 'Mi atentas')
+    _, parsed_input = expression_ast.parse(user_input).evaluate(smart_home)
+    smart_home.set_return_value(parsed_input if parsed_input is not None else user_input)
 
 
 def all_true(argument_list):
@@ -172,6 +181,7 @@ def build_house(clock_type=ClockType.REAL, house_type=HouseType.HOUSE):
         smart_home = Domsagxo(scheduler)
     smart_home.method_dict['haltu'] = smart_home.scheduler.runSetTime
     smart_home.method_dict['anoncu'] = announce_in_multimedia
+    smart_home.method_dict['atentu'] = receive_input
     with gui("virtuala domo", showIcon=False) as app:
         app.addLabel("title", "Welcome to Domsagxo", colspan=2)
         app.setLabelBg("title", "green")

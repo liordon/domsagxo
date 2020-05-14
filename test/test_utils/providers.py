@@ -51,7 +51,7 @@ class PartOfSpeechValueVerifier(object):
 
 def evaluate_and_return_state(ast, statement, initial_state=None):
     if initial_state is None:
-        initial_state = mocks.Bunch(variables={}, method_dict={})  # so as not to put a mutable default
+        initial_state = mocks.MockHouse()  # so as not to put a mutable default
     state, nothing = ast.parse(statement).evaluate(initial_state)
     return state
 

@@ -6,6 +6,7 @@ from domsagxo.compilation import node
 from domsagxo.compilation.definitions import EsperantoSyntaxError, EsperantoLocatedSyntaxError, GrammarVariable
 from domsagxo.compilation.esperanto_lexer import UnalphabeticTerminal as UaTer, PartOfSpeech as PoS, \
     ReservedWord as ResWord, tokens
+from domsagxo.library.mocks import Bunch
 
 
 def RULE(product, rule_list):
@@ -489,10 +490,6 @@ def build(start=None):
     return ast_builder
 
 
-class Object(object):
-    pass
-
-
 if __name__ == "__main__":
     import domsagxo.compilation.esperanto_lexer as lxr
     import sys
@@ -503,14 +500,13 @@ if __name__ == "__main__":
         ast = build(start=GrammarVariable.PROGRAM.value)
     else:
         ast = build(start=GrammarVariable.STATEMENT.value)
-        demo_state = Object()
-        demo_state.variables = {}
-        print("This is a limited AST demo.\n",
-            "it can only deal with simple arithmetic and variable usage")
+    demo_state = Bunch(variables={})
+    print("This is a limited AST demo.\n",
+        "it can only deal with simple arithmetic and variable usage")
 
-        while True:
-            txt = input(">")
-            if txt == "":
-                break
-            demo_state, result = ast.parse(txt).evaluate(demo_state)
-            print(result)
+    while True:
+        txt = input(">")
+        if txt == "":
+            break
+        demo_state, result = ast.parse(txt).evaluate(demo_state)
+        print(result)

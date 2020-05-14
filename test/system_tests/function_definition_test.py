@@ -58,7 +58,7 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
             poste revenu radiko
             finu''')
         new_state.method_dict['radiku'](1682)
-        assert new_state.variables['gxi'] == 42
+        assert new_state.get_return_value() == 42
 
     def test_cannotPassMoreArgumentsThanPlannedToUserDefinedFunction(self, ast):
         new_state = evaluate_and_return_state(

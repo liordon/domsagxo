@@ -27,6 +27,7 @@ class Domsagxo(object):
             "malsxaltu": self.requestDeviceDeActivation,
             "aldonu": self.requestDeviceAddition,
             "anoncu": print,
+            "atentu": lambda: input('mi atentas vin: '),
         }
         self.variables = {}
         for enum in [cls for cls in all_categories]:
@@ -146,6 +147,15 @@ class Domsagxo(object):
         appliance.name = new_name
         self.variables[new_name] = appliance
         self.variables.pop(old_name)
+
+    def set_return_value(self, value):
+        self.variables['gxi'] = value
+
+    def get_return_value(self):
+        return self.variables['gxi']
+
+    def has_return_value(self):
+        return 'gxi' in self.variables
 
 
 class Horaro(object):

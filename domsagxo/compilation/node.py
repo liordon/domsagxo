@@ -387,7 +387,7 @@ class ReturnValue(AstNode):
     def _method(self, state, return_value):
         if return_value is not None:
             state, evaluated_return_value = return_value.evaluate(state)
-            state.variables['gxi'] = evaluated_return_value
+            state.set_return_value(evaluated_return_value)
         return state, NextAction.RETURN
 
 
@@ -409,8 +409,8 @@ class RoutineDefinition(AstNode):
             for i in range(len(argument_list)):
                 closure.variables[argument_names[i].getContainedName()] = argument_list[i]
             closure, action = abstract_syntax_tree.evaluate(closure)
-            if action == NextAction.RETURN and 'gxi' in closure.variables.keys():
-                state.variables['gxi'] = closure.variables['gxi']
+            if action == NextAction.RETURN and closure.has_return_value():
+                state.set_return_value(closure.get_return_value())
             return NextAction.GO_ON
 
         return subtree_function

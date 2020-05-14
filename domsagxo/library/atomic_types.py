@@ -37,3 +37,6 @@ class Appliance(object):
 
     def isTurnedOn(self):
         return self.stateQueries[ApplianceQueries.IS_ON.value]
+
+    def __str__(self):
+        return self.name
