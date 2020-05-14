@@ -5,7 +5,7 @@ import pytest
 from domsagxo.library.atomic_types import Appliance
 from domsagxo.library.predefined_functions import generateRandom
 from domsagxo.library.predefined_values import PossibleRandomType, ApplianceTypes, ApplianceProperties
-from domsagxo_test.test_utils.providers import SmartHomeManagerProvided
+from test.test_utils.providers import SmartHomeManagerProvided
 
 app_nm1 = "sxambalulo"
 app_nm2 = "bambasxusxo"

@@ -1,5 +1,5 @@
 from domsagxo.compilation.node import *
-from domsagxo_test.test_utils.providers import SyntaxNodesProvided
+from test.test_utils.providers import SyntaxNodesProvided
 
 
 class TestNodeRepresentation(object):

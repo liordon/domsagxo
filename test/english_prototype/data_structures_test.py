@@ -2,7 +2,7 @@ import pytest
 
 from domsagxo.compilation.definitions import PartOfSpeech
 from domsagxo.english_prototype.data_structures import BeamToken, BeamTree, Token
-from domsagxo_test.test_utils.providers import BeamTokensProvided
+from test.test_utils.providers import BeamTokensProvided
 
 
 class TestBeamTokenPrettyPrint(BeamTokensProvided):

@@ -3,7 +3,7 @@ import pytest
 from domsagxo.english_prototype.data_structures import BeamToken
 from domsagxo.english_prototype.esperantifier import *
 from domsagxo.english_prototype.esperantifier import esperantify_tuples
-from domsagxo_test.test_utils.providers import StatementLevelAstProvided, evaluate_and_return_state_variables, \
+from test.test_utils.providers import StatementLevelAstProvided, evaluate_and_return_state_variables, \
     MockSmartHomeStateVariablesProvided, BeamTokensProvided
 
 

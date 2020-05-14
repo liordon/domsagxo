@@ -6,7 +6,7 @@ import domsagxo.english_prototype.english_lexer as en_lxr
 from domsagxo.demo.example_programs import *
 from domsagxo.english_prototype.esperantifier import Esperantifier
 from domsagxo.library.management_components import Domsagxo
-from domsagxo_test.test_utils.providers import WordNetEnglishLexerProvided
+from test.test_utils.providers import WordNetEnglishLexerProvided
 
 working_functions_list = [
     EngluentoPrograms.mu_constant,

@@ -4,7 +4,7 @@ import domsagxo.compilation.abstract_syntax_tree as ast_bld
 from domsagxo.compilation import node
 from domsagxo.compilation.definitions import EsperantoLocatedSyntaxError, EsperantoSyntaxError, GrammarVariable
 from domsagxo.library import mocks
-from domsagxo_test.test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided, \
+from test.test_utils.providers import PartialNameLevelAstProvided, ExpressionLevelAstProvided, \
     MockSmartHomeStateVariablesProvided, TopLevelAstProvided
 
 

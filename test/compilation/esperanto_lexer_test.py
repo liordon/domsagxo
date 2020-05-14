@@ -1,7 +1,7 @@
 import pytest
 
 from domsagxo.compilation.definitions import PartOfSpeech, UnalphabeticTerminal, ReservedWord
-from domsagxo_test.test_utils.providers import EsperantoLexerProvided
+from test.test_utils.providers import EsperantoLexerProvided
 
 
 class TestPartsOfSpeech(EsperantoLexerProvided):

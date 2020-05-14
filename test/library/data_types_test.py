@@ -8,7 +8,7 @@ from domsagxo.compilation.definitions import GrammarVariable
 from domsagxo.library.atomic_types import Appliance
 from domsagxo.library.management_components import Domsagxo
 from domsagxo.library.predefined_values import ApplianceTypes, ApplianceQueries, Color
-from domsagxo_test.test_utils.providers import evaluate_and_return_state
+from test.test_utils.providers import evaluate_and_return_state
 
 
 def parsed_value_of(ast, expr, state=None):

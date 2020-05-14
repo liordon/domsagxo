@@ -1,5 +1,5 @@
 from domsagxo.english_prototype.english_lexer import *
-from domsagxo_test.test_utils.providers import WordNetEnglishLexerProvided, NltkEnglishLexerProvided
+from test.test_utils.providers import WordNetEnglishLexerProvided, NltkEnglishLexerProvided
 
 
 class TestBasicTokenConversionFromNlpToPos(object):

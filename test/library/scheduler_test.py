@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from domsagxo_test.test_utils.providers import TimeManagerWithSimulativeClockProvided
+from test.test_utils.providers import TimeManagerWithSimulativeClockProvided
 
 
 class TestTimedActions(TimeManagerWithSimulativeClockProvided):

@@ -4,7 +4,7 @@ import pytest
 
 from domsagxo.demo.example_programs import DomsagxoPrograms
 from domsagxo.library import atomic_types as atypes, management_components as mgmt_cmp
-from domsagxo_test.test_utils.providers import FunctionDefinitionLevelAstProvided, evaluate_and_return_state, \
+from test.test_utils.providers import FunctionDefinitionLevelAstProvided, evaluate_and_return_state, \
     ProvidedSmartHomeWithLightBulb
 
 
@@ -166,7 +166,7 @@ class TestDefinitionAndActivationOfRoutines(FunctionDefinitionLevelAstProvided,
         In this specific example, we accept 2 inputs and return the first one."""
         new_state = evaluate_and_return_state(
             ast, DomsagxoPrograms.mu_projection.value, smart_home)
-        new_state.method_dict['projekcu']([31, 42], 1)  # in domsagxo_test we start accessing at 1
+        new_state.method_dict['projekcu']([31, 42], 1)  # in test we start accessing at 1
         assert new_state.variables['gxi'] == 31
 
     def test_canDefineFunctionToTellIfANumberIsPrime(self, ast, smart_home):

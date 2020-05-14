@@ -8,7 +8,7 @@ import domsagxo.compilation.definitions
 from domsagxo.library import management_components as mng_co
 from domsagxo.library.atomic_types import Appliance
 from domsagxo.library.predefined_values import ApplianceTypes, ApplianceProperties, Color
-from domsagxo_test.test_utils.providers import StatementLevelAstProvided, SmartHomeManagerProvided, \
+from test.test_utils.providers import StatementLevelAstProvided, SmartHomeManagerProvided, \
     RealTimeSmartHomeManagerProvided_CarefulVolatile, evaluate_and_return_state, evaluate_and_return_state_variables
 
 
