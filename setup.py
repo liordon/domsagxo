@@ -1,6 +1,6 @@
 import setuptools
 
-with open("README.md", "r") as reamde:
+with open("resources/plain-readme.txt", "r") as reamde:
     description = reamde.read()
 
 with open('requirements.txt') as f:
